@@ -48,6 +48,11 @@ public:
   /// Set the \a entryPoint associated with the module
   void setModuleEntryPoint(const QString& entryPoint);
 
+  /// Convenient function allowing to translate text within the context of the module.
+  QString translate(const char* text);
+  QString translate(const std::string& text);
+  QString translate(const QString& text);
+
 public slots:
   ///
   /// Set the current \a commandLineModuleNode

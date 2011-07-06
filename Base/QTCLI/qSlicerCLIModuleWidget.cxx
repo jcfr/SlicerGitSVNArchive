@@ -377,6 +377,29 @@ void qSlicerCLIModuleWidget::setCurrentCommandLineModuleNode(
 CTK_SET_CPP(qSlicerCLIModuleWidget, const QString&, setModuleEntryPoint, ModuleEntryPoint);
 
 //-----------------------------------------------------------------------------
+QString qSlicerCLIModuleWidget::translate(const char* text)
+{
+  Q_D(qSlicerCLIModuleWidget);
+  std::string context = d->ModuleDescriptionObject.GetTitle();
+  Q_ASSERT(context.size() > 0);
+  return QCoreApplication::translate(context.c_str(), text);
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCLIModuleWidget::translate(const std::string& text)
+{
+  return this->translate(text.c_str());
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCLIModuleWidget::translate(const QString& text)
+{
+  // By specifying 'data()', we ensure 'translate(const char* text)' is used
+  // and avoid ambiguity.
+  return this->translate(text.toLatin1().data());
+}
+
+//-----------------------------------------------------------------------------
 void qSlicerCLIModuleWidget::apply()
 {
   Q_D(qSlicerCLIModuleWidget);
