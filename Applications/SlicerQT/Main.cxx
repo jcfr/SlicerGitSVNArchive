@@ -374,5 +374,8 @@ int main(int argc, char* argv[])
 
   // Look at QApplication::exec() documentation, it is recommended to connect
   // clean up code to the aboutToQuit() signal
+  // The following two g++ hints will help in improving the overall application performances.
+  // <g++-hint:high-performance>
+  // <g++-hint:fix-dev-error-at-runtime>
   return app.exec();
 }
