@@ -19,6 +19,7 @@
 // VTK includes
 #include <vtkCallbackCommand.h>
 #include <vtkCollection.h>
+#include <vtkIntArray.h>
 #include <vtkObjectFactory.h>
 #include <vtkTimerLog.h>
 
@@ -106,7 +107,7 @@ vtkEventBroker::vtkEventBroker()
 vtkEventBroker::~vtkEventBroker()
 {
   this->DetachObservations();
-  
+
   // close the event log if needed
   if ( this->LogFile.is_open() )
     {
@@ -140,6 +141,20 @@ void vtkEventBroker::DetachObservations()
 }
 
 //----------------------------------------------------------------------------
+void vtkEventBroker::AddObservations (
+  vtkObject *subject, vtkIntArray *events, vtkObject *observer, vtkCallbackCommand *notify, float priority)
+{
+  if (!events)
+    {
+    return;
+    }
+  for (int eventIdx = 0; eventIdx < events->GetNumberOfTuples(); ++eventIdx)
+    {
+    this->AddObservation(subject, events->GetValue(eventIdx), observer, notify, priority);
+    }
+}
+
+//----------------------------------------------------------------------------
 vtkObservation *vtkEventBroker::AddObservation (
   vtkObject *subject, unsigned long event, vtkObject *observer, vtkCallbackCommand *notify, float priority)
 {
@@ -164,8 +179,8 @@ vtkObservation *vtkEventBroker::AddObservation (
     this->LogFile << "# AddObservation: (subject) " \
           << observation->GetSubject()->GetClassName() << observation->GetSubject()
           << " -> (observer) "
-          << observation->GetObserver()->GetClassName() 
-          << " [ tag " 
+          << observation->GetObserver()->GetClassName()
+          << " [ tag "
           << observation->GetEventTag()
           << "];\n" ;
     this->LogFile.flush();
@@ -177,7 +192,7 @@ vtkObservation *vtkEventBroker::AddObservation (
 //----------------------------------------------------------------------------
 vtkObservation *vtkEventBroker::AddObservation (
   vtkObject *subject, const char *event, const char *script)
-{       
+{
   vtkObservation *observation = vtkObservation::New();
   observation->SetEventBroker( this );
   KeyType subjectKey = reinterpret_cast<KeyType>(subject);
@@ -202,7 +217,7 @@ vtkObservation *vtkEventBroker::AddObservation (
           << observation->GetSubject()->GetClassName() << observation->GetSubject()
           << " -> (script) "
           << observation->GetScript()
-          << " [ tag " 
+          << " [ tag "
           << observation->GetEventTag()
           << "];\n" ;
     this->LogFile.flush();
@@ -288,15 +303,15 @@ void vtkEventBroker::RemoveObservations (std::vector< vtkObservation *>observati
   //   a new vector that doesn't include the passed observation
   // then do the same for the observer (if there is one)
   ObservationVector newObservations;
-  ObservationVector::iterator obsIter, inObsIter; 
+  ObservationVector::iterator obsIter, inObsIter;
 
-  for(inObsIter=observations.begin(); inObsIter != observations.end(); inObsIter++)  
+  for(inObsIter=observations.begin(); inObsIter != observations.end(); inObsIter++)
     {
     vtkObservation *inObs = (*inObsIter);
     newObservations.clear();
     KeyType subjectKey = reinterpret_cast<KeyType>((*inObsIter)->GetSubject());
     ObservationVector *subjectObservations = &(this->SubjectMap[subjectKey]);
-    for(obsIter=(*subjectObservations).begin(); obsIter != (*subjectObservations).end(); obsIter++)  
+    for(obsIter=(*subjectObservations).begin(); obsIter != (*subjectObservations).end(); obsIter++)
       {
       vtkObservation *obs = (*obsIter);
       if (inObs != obs)
@@ -307,7 +322,7 @@ void vtkEventBroker::RemoveObservations (std::vector< vtkObservation *>observati
     this->SubjectMap[subjectKey] = newObservations;
     }
 
-  for(inObsIter=observations.begin(); inObsIter != observations.end(); inObsIter++)  
+  for(inObsIter=observations.begin(); inObsIter != observations.end(); inObsIter++)
     {
     vtkObservation *inObs = (*inObsIter);
     newObservations.clear();
@@ -315,7 +330,7 @@ void vtkEventBroker::RemoveObservations (std::vector< vtkObservation *>observati
       {
       KeyType observerKey = reinterpret_cast<KeyType>(inObs->GetObserver());
       ObservationVector *observerObservations = &(this->ObserverMap[observerKey]);
-      for(obsIter=(*observerObservations).begin(); obsIter != (*observerObservations).end(); obsIter++)  
+      for(obsIter=(*observerObservations).begin(); obsIter != (*observerObservations).end(); obsIter++)
         {
         vtkObservation *obs = (*obsIter);
         if (obs != inObs)
@@ -329,13 +344,13 @@ void vtkEventBroker::RemoveObservations (std::vector< vtkObservation *>observati
 
   // remove from event queue
   std::deque< vtkObservation *> newEventQueue;
-  std::deque< vtkObservation *>::iterator queueIter; 
-  for(queueIter=this->EventQueue.begin(); queueIter != this->EventQueue.end(); queueIter++)  
-    { 
+  std::deque< vtkObservation *>::iterator queueIter;
+  for(queueIter=this->EventQueue.begin(); queueIter != this->EventQueue.end(); queueIter++)
+    {
     // foreach of the broker's observations see if it is in the list of items to be removed
     std::vector< vtkObservation *>::iterator searchIter;
     bool inRemoveList = false;
-    for(searchIter=observations.begin(); searchIter != observations.end(); searchIter++)  
+    for(searchIter=observations.begin(); searchIter != observations.end(); searchIter++)
       {
       if (*queueIter == *searchIter)
         {
@@ -352,7 +367,7 @@ void vtkEventBroker::RemoveObservations (std::vector< vtkObservation *>observati
 
   // detach and delete each of the observations
   std::vector< vtkObservation *>::iterator removeIter;
-  for(removeIter=observations.begin(); removeIter != observations.end(); removeIter++)  
+  for(removeIter=observations.begin(); removeIter != observations.end(); removeIter++)
     {
 
     (*removeIter)->SetInEventQueue( 0 );
@@ -375,9 +390,35 @@ void vtkEventBroker::RemoveObservations (vtkObject *subject, vtkObject *observer
 }
 
 //----------------------------------------------------------------------------
+void vtkEventBroker::RemoveObservations (vtkObject *subject, vtkIntArray* events, vtkObject *observer)
+{
+  if (!events)
+    {
+    return;
+    }
+  for (int eventIdx = 0; eventIdx < events->GetNumberOfTuples(); ++eventIdx)
+    {
+    this->RemoveObservations(this->GetObservations( subject, events->GetValue(eventIdx), observer ));
+    }
+}
+
+//----------------------------------------------------------------------------
 void vtkEventBroker::RemoveObservations (vtkObject *subject, unsigned long event, vtkObject *observer)
 {
   this->RemoveObservations( this->GetObservations( subject, event, observer ) );
+}
+
+//----------------------------------------------------------------------------
+void vtkEventBroker::RemoveObservations (vtkObject *subject, vtkIntArray* events, vtkObject *observer, vtkCallbackCommand *notify)
+{
+  if (!events)
+    {
+    return;
+    }
+  for (int eventIdx = 0; eventIdx < events->GetNumberOfTuples(); ++eventIdx)
+    {
+    this->RemoveObservations( this->GetObservations( subject, events->GetValue(eventIdx), observer, notify ) );
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -416,7 +457,7 @@ std::vector< vtkObservation *> vtkEventBroker::GetObservations (
     }
   // find matching observations to remove
   std::vector< vtkObservation *> observationList;
-  std::vector< vtkObservation *>::iterator obsIter; 
+  std::vector< vtkObservation *>::iterator obsIter;
   KeyType subjectKey = reinterpret_cast<KeyType>(subject);
   for(obsIter=this->SubjectMap[subjectKey].begin();
       obsIter != this->SubjectMap[subjectKey].end();
@@ -424,7 +465,7 @@ std::vector< vtkObservation *> vtkEventBroker::GetObservations (
     {
     if ( ((*obsIter)->GetObserver() == observer || observer == 0) &&
          //((*obsIter)->GetSubject() == subject || subject == 0) &&
-         ((*obsIter)->GetEvent() == event || event == 0) && 
+         ((*obsIter)->GetEvent() == event || event == 0) &&
          ((*obsIter)->GetCallbackCommand() == notify || notify == 0))
       {
       observationList.push_back( *obsIter );
@@ -440,11 +481,11 @@ std::vector< vtkObservation *> vtkEventBroker::GetObservationsForSubjectByTag (v
   // - all tags match 0
   std::vector< vtkObservation *> observationList;
   std::vector< vtkObservation *> subjectList;
-  std::vector< vtkObservation *>::iterator obsIter; 
+  std::vector< vtkObservation *>::iterator obsIter;
   KeyType subjectKey = reinterpret_cast<KeyType>(subject);
   subjectList = this->SubjectMap[subjectKey];
   vtkObservation *obs;
-  for(obsIter=subjectList.begin(); obsIter != subjectList.end(); obsIter++)  
+  for(obsIter=subjectList.begin(); obsIter != subjectList.end(); obsIter++)
     {
     obs = *obsIter;
     if ( ( obs->GetSubject() == subject ) &&
@@ -460,10 +501,10 @@ std::vector< vtkObservation *> vtkEventBroker::GetObservationsForSubjectByTag (v
 vtkCollection *vtkEventBroker::GetObservationsForSubject ( vtkObject *subject )
 {
   vtkCollection *collection = vtkCollection::New();
-  std::vector< vtkObservation *>::iterator iter; 
+  std::vector< vtkObservation *>::iterator iter;
   KeyType subjectKey = reinterpret_cast<KeyType>(subject);
-  for(iter=this->SubjectMap[subjectKey].begin(); iter != this->SubjectMap[subjectKey].end(); iter++)  
-    { 
+  for(iter=this->SubjectMap[subjectKey].begin(); iter != this->SubjectMap[subjectKey].end(); iter++)
+    {
     if ( (*iter)->GetSubject() == subject )
       {
       collection->AddItem( *iter );
@@ -476,10 +517,10 @@ vtkCollection *vtkEventBroker::GetObservationsForSubject ( vtkObject *subject )
 vtkCollection *vtkEventBroker::GetObservationsForObserver ( vtkObject *observer )
 {
   vtkCollection *collection = vtkCollection::New();
-  std::vector< vtkObservation *>::iterator iter; 
+  std::vector< vtkObservation *>::iterator iter;
   KeyType observerKey = reinterpret_cast<KeyType>(observer);
-  for(iter=this->ObserverMap[observerKey].begin(); iter != this->ObserverMap[observerKey].end(); iter++)  
-    { 
+  for(iter=this->ObserverMap[observerKey].begin(); iter != this->ObserverMap[observerKey].end(); iter++)
+    {
     if ( (*iter)->GetObserver() == observer )
       {
       collection->AddItem( *iter );
@@ -492,8 +533,8 @@ vtkCollection *vtkEventBroker::GetObservationsForObserver ( vtkObject *observer 
 int vtkEventBroker::GetNumberOfObservations ( )
 {
   size_t count = 0;
-  ObjectToObservationVectorMap::iterator iter; 
-  for(iter=this->SubjectMap.begin(); iter != this->SubjectMap.end(); iter++)  
+  ObjectToObservationVectorMap::iterator iter;
+  for(iter=this->SubjectMap.begin(); iter != this->SubjectMap.end(); iter++)
     {
     count += iter->second.size();
     }
@@ -509,8 +550,8 @@ vtkObservation *vtkEventBroker::GetNthObservation ( int n )
     }
 
   size_t count = 0;
-  ObjectToObservationVectorMap::iterator iter; 
-  for(iter=this->SubjectMap.begin(); iter != this->SubjectMap.end(); iter++)  
+  ObjectToObservationVectorMap::iterator iter;
+  for(iter=this->SubjectMap.begin(); iter != this->SubjectMap.end(); iter++)
     {
     if ( static_cast<size_t>(n) < count + iter->second.size())
       {
@@ -550,18 +591,18 @@ int vtkEventBroker::GenerateGraphFile ( const char *graphFile )
       file << " " \
           << "\"" << observation->GetScript() << "\""
           << " -> "
-          << observation->GetSubject()->GetClassName() 
-          << " [ label = \"" 
+          << observation->GetSubject()->GetClassName()
+          << " [ label = \""
           << vtkCommand::GetStringFromEventId( observation->GetEvent() )
           << "\" ];\n" ;
       }
     else
       {
       file << " " \
-          << observation->GetObserver()->GetClassName() 
+          << observation->GetObserver()->GetClassName()
           << " -> "
-          << observation->GetSubject()->GetClassName() 
-          << " [ label = \"" 
+          << observation->GetSubject()->GetClassName()
+          << " [ label = \""
           << vtkCommand::GetStringFromEventId( observation->GetEvent() )
           << "\" ];\n" ;
       }
@@ -635,10 +676,10 @@ void vtkEventBroker::LogEvent ( vtkObservation *observation )
     if ( observation->GetScript() != NULL )
       {
       this->LogFile << " " \
-          << observation->GetSubject()->GetClassName() 
+          << observation->GetSubject()->GetClassName()
           << " -> "
           << "\"" << observation->GetScript() << "\""
-          << " [ label = \"" 
+          << " [ label = \""
           << eventStringPointer
           << "\" ];\n" ;
       }
@@ -651,10 +692,10 @@ void vtkEventBroker::LogEvent ( vtkObservation *observation )
         }
 
       this->LogFile << " " \
-          << observation->GetSubject()->GetClassName() 
+          << observation->GetSubject()->GetClassName()
           << " -> "
           << observerClass
-          << " [ label = \"" 
+          << " [ label = \""
           << eventStringPointer
           << "\" ];\n" ;
       }
@@ -697,7 +738,7 @@ void vtkEventBroker::ProcessEvent ( vtkObservation *observation, vtkObject *call
       }
     }
 
-  // 
+  //
   // for delete events, clean up and get out
   // - first invoke any observations that have the object being
   //   deleted as the subject
@@ -708,9 +749,9 @@ void vtkEventBroker::ProcessEvent ( vtkObservation *observation, vtkObject *call
   if ( eid == vtkCommand::DeleteEvent )
     {
     // iterate list of observations for the deleted object (caller) as subject
-    std::vector< vtkObservation *>::iterator obsIter; 
+    std::vector< vtkObservation *>::iterator obsIter;
     KeyType subjectKey = reinterpret_cast<KeyType>(caller);
-    for(obsIter=this->SubjectMap[subjectKey].begin(); obsIter != this->SubjectMap[subjectKey].end(); obsIter++)  
+    for(obsIter=this->SubjectMap[subjectKey].begin(); obsIter != this->SubjectMap[subjectKey].end(); obsIter++)
       {
       if ( (*obsIter)->GetEvent() == vtkCommand::DeleteEvent )
         {
@@ -742,7 +783,7 @@ void vtkEventBroker::QueueObservation ( vtkObservation *observation, void *callD
 {
 
   //
-  // two modes - 
+  // two modes -
   //  - CompressCallDataOn: only keep the most recent call data.  this means that if the
   //    observation is in the queue, replace the call data with the current value
   //  - CompressCallDataOff: maintain the list of all call data values, but only
@@ -758,8 +799,8 @@ void vtkEventBroker::QueueObservation ( vtkObservation *observation, void *callD
     }
   else
     {
-    std::deque< void *>::iterator dataIter; 
-    for(dataIter=observation->GetCallDataList()->begin(); dataIter != observation->GetCallDataList()->end(); dataIter++)  
+    std::deque< void *>::iterator dataIter;
+    for(dataIter=observation->GetCallDataList()->begin(); dataIter != observation->GetCallDataList()->end(); dataIter++)
       {
       if ( *dataIter == callData )
         {
@@ -822,7 +863,7 @@ void vtkEventBroker::InvokeObservation ( vtkObservation *observation, void *call
     {
     if ( this->ScriptHandler )
       {
-      (*(this->ScriptHandler)) ( 
+      (*(this->ScriptHandler)) (
           observation->GetScript(), this->ScriptHandlerClientData );
       }
     }
@@ -849,9 +890,9 @@ void vtkEventBroker::InvokeObservation ( vtkObservation *observation, void *call
 void vtkEventBroker::ProcessEventQueue ()
 {
   //
-  // for each observation on the event queue, 
+  // for each observation on the event queue,
   // invoke it with each of the stored callData pointers
-  // - register your pointer to the observation in case it 
+  // - register your pointer to the observation in case it
   //   gets deleted during handling of the event
   // - if the observation is no longer in the queue, stop processing events
   // - unregister before after dequeing in case the observation should go away
@@ -883,7 +924,7 @@ void vtkEventBroker::ProcessEventQueue ()
 void vtkEventBroker::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->vtkObject::PrintSelf(os, indent);
-  
+
   os << indent << "NumberOfObservations: " << this->GetNumberOfObservations() << "\n";
   os << indent << "NumberOfQueueObservations: " << this->GetNumberOfQueuedObservations() << "\n";
   os << indent << "EventMode: " << this->GetEventModeAsString() << "\n";
@@ -895,10 +936,10 @@ void vtkEventBroker::PrintSelf(ostream& os, vtkIndent indent)
 
 //----------------------------------------------------------------------------
 // Description:
-// the Callback is a static function to relay events 
+// the Callback is a static function to relay events
 //
-void 
-vtkEventBroker::Callback(vtkObject *caller, 
+void
+vtkEventBroker::Callback(vtkObject *caller,
             unsigned long eid, void *clientData, void *callData)
 {
   vtkObservation *observation = reinterpret_cast<vtkObservation *>(clientData);
@@ -920,5 +961,5 @@ void vtkEventBroker::classInitialize()
 void vtkEventBroker::classFinalize()
 {
   vtkEventBrokerInstance->Delete();
-  vtkEventBrokerInstance = 0; 
+  vtkEventBrokerInstance = 0;
 }
