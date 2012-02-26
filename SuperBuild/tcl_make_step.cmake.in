@@ -1,5 +1,5 @@
 
 execute_process(
   COMMAND make
-  WORKING_DIRECTORY @tcl_base@/tcl/unix
+  WORKING_DIRECTORY "@tcl_base@/tcl/unix"
   )
