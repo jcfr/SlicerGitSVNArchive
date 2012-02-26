@@ -21,6 +21,7 @@
 // Qt includes
 #include <QDebug>
 #include <QDir>
+#include <QMessageBox>
 #include <QTimer>
 
 // CTK includes
@@ -118,6 +119,13 @@ qSlicerCoreApplicationPrivate::~qSlicerCoreApplicationPrivate()
 void qSlicerCoreApplicationPrivate::init()
 {
   Q_Q(qSlicerCoreApplication);
+
+  if(qApp->arguments().contains("--attach-process"))
+    {
+    QString msg("This message box is here to give you time to attach "
+                "your debugger to process [PID %1]");
+    QMessageBox::information(0, "Attach process", msg.arg(QCoreApplication::applicationPid()));
+    }
 
   // Minimize the number of call to 'systemEnvironment()' by keeping
   // a reference to 'Environment'. Indeed, re-creating QProcessEnvironment is a non-trivial
@@ -930,6 +938,35 @@ QString qSlicerCoreApplication::temporaryPath() const
 }
 
 //-----------------------------------------------------------------------------
+QString qSlicerCoreApplication::launcherExecutableFilePath()const
+{
+#ifdef Q_OS_MAC
+  if (this->isInstalled())
+    {
+    return QString();
+    }
+#endif
+  return this->slicerHome() + "/Slicer" + qSlicerUtils::executableExtension();
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCoreApplication::launcherSettingsFilePath()const
+{
+  if (this->isInstalled())
+    {
+#ifdef Q_OS_MAC
+    return QString();
+#else
+    return this->slicerHome() + "/" Slicer_BIN_DIR "/SlicerLauncherSettings.ini";
+#endif
+    }
+  else
+    {
+    return this->slicerHome() + "/SlicerLauncherSettings.ini";
+    }
+}
+
+//-----------------------------------------------------------------------------
 void qSlicerCoreApplication::setTemporaryPath(const QString& path)
 {
   QSettings* appSettings = this->settings();
@@ -938,7 +975,7 @@ void qSlicerCoreApplication::setTemporaryPath(const QString& path)
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerCoreApplication::defaultExtensionsPath() const
+QString qSlicerCoreApplication::defaultExtensionsInstallPath() const
 {
   QSettings* appSettings = this->settings();
   Q_ASSERT(appSettings);
@@ -946,22 +983,22 @@ QString qSlicerCoreApplication::defaultExtensionsPath() const
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerCoreApplication::extensionsPath() const
+QString qSlicerCoreApplication::extensionsInstallPath() const
 {
   Q_D(const qSlicerCoreApplication);
   QSettings* appSettings = this->settings();
   Q_ASSERT(appSettings);
-  QString extensionsPath = appSettings->value("ExtensionsPath", this->defaultExtensionsPath()).toString();
-  d->createDirectory(extensionsPath, "extensions"); // Make sure the path exists
-  return extensionsPath;
+  QString extensionsInstallPath = appSettings->value("Extensions/InstallPath", this->defaultExtensionsInstallPath()).toString();
+  d->createDirectory(extensionsInstallPath, "extensions"); // Make sure the path exists
+  return extensionsInstallPath;
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerCoreApplication::setExtensionsPath(const QString& path)
+void qSlicerCoreApplication::setExtensionsInstallPath(const QString& path)
 {
   QSettings* appSettings = this->settings();
   Q_ASSERT(appSettings);
-  appSettings->setValue("ExtensionsPath", path);
+  appSettings->setValue("Extensions/InstallPath", path);
   // TODO: rescan for new extensions
 }
 
@@ -1110,10 +1147,32 @@ QString qSlicerCoreApplication::platform()const
 }
 
 //-----------------------------------------------------------------------------
+QString qSlicerCoreApplication::arch()const
+{
+  Q_D(const qSlicerCoreApplication);
+  return d->Platform.split("-").at(1);
+}
+
+//-----------------------------------------------------------------------------
+QString qSlicerCoreApplication::os()const
+{
+  Q_D(const qSlicerCoreApplication);
+  return d->Platform.split("-").at(0);
+}
+
+//-----------------------------------------------------------------------------
 void qSlicerCoreApplication::restart()
 {
-  QStringList args = qSlicerCoreApplication::instance()->arguments();
-  QProcess::startDetached(qSlicerCoreApplication::instance()->applicationFilePath(), args);
+  qSlicerCoreApplication * coreApp = qSlicerCoreApplication::application();
+  bool launcherAvailable = QFile::exists(coreApp->launcherExecutableFilePath());
+  if (launcherAvailable)
+    {
+    QProcess::startDetached(coreApp->launcherExecutableFilePath(), coreApp->arguments());
+    }
+  else
+    {
+    QProcess::startDetached(coreApp->applicationFilePath(), coreApp->arguments());
+    }
   QCoreApplication::quit();
 }
 

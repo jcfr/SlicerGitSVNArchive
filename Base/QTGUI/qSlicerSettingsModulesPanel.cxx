@@ -69,6 +69,7 @@ void qSlicerSettingsModulesPanelPrivate::init()
   this->setupUi(q);
 
   qSlicerCoreApplication * coreApp = qSlicerCoreApplication::application();
+  qSlicerAbstractModuleFactoryManager* factoryManager = coreApp->moduleManager()->factoryManager();
 
   // Show Hidden
   QObject::connect(this->ShowHiddenModulesCheckBox, SIGNAL(toggled(bool)),
@@ -119,10 +120,9 @@ void qSlicerSettingsModulesPanelPrivate::init()
 
 
   // Default values
-  this->ExtensionInstallDirectoryButton->setDirectory(coreApp->defaultExtensionsPath());
+  this->ModulesMenu->setCurrentModule("Welcome");
   this->TemporaryDirectoryButton->setDirectory(coreApp->defaultTemporaryPath());
-  qSlicerAbstractModuleFactoryManager* factoryManager =
-    coreApp->moduleManager()->factoryManager();
+  this->DisableModulesListView->setFactoryManager(factoryManager);
   this->FavoritesModulesListView->setFactoryManager( factoryManager );
   this->DisableModulesListView->setFactoryManager( factoryManager );
   this->ModulesMenu->setCurrentModule("Welcome");
@@ -145,16 +145,12 @@ void qSlicerSettingsModulesPanelPrivate::init()
                       "directory", SIGNAL(directoryChanged(QString)));
   q->registerProperty("Modules/ShowHiddenModules", this->ShowHiddenModulesCheckBox,
                       "checked", SIGNAL(toggled(bool)));
-  q->registerProperty("Modules/ExtensionsInstallDirectory", this->ExtensionInstallDirectoryButton,
-                      "directory", SIGNAL(directoryChanged(QString)));
   q->registerProperty("Modules/AdditionalPaths", this->AdditionalModulePathsView,
                       "directoryList", SIGNAL(directoryListChanged()));
   q->registerProperty("Modules/IgnoreModules", factoryManager,
                       "modulesToIgnore", SIGNAL(modulesToIgnoreChanged(QStringList)));
 
   // Actions to propagate to the application when settings are changed
-  QObject::connect(this->ExtensionInstallDirectoryButton, SIGNAL(directoryChanged(QString)),
-                   q, SLOT(onExensionsPathChanged(QString)));
   QObject::connect(this->TemporaryDirectoryButton, SIGNAL(directoryChanged(QString)),
                    q, SLOT(onTemporaryPathChanged(QString)));
   QObject::connect(this->AdditionalModulePathsView, SIGNAL(directoryListChanged()),
@@ -239,12 +235,6 @@ void qSlicerSettingsModulesPanel::onHomeModuleChanged(const QString& moduleName)
 }
 
 // --------------------------------------------------------------------------
-void qSlicerSettingsModulesPanel::onExensionsPathChanged(const QString& path)
-{
-  qSlicerCoreApplication::application()->setExtensionsPath(path);
-}
-
-// --------------------------------------------------------------------------
 void qSlicerSettingsModulesPanel::onTemporaryPathChanged(const QString& path)
 {
   qSlicerCoreApplication::application()->setTemporaryPath(path);
@@ -290,7 +280,7 @@ void qSlicerSettingsModulesPanel::onAddModulesAdditionalPathClicked()
   Q_D(qSlicerSettingsModulesPanel);
   QString path = QFileDialog::getExistingDirectory(
         this, tr("Select folder"),
-        QSettings().value("Modules/ExtensionsInstallDirectory").toString());
+        QSettings().value("Extensions/InstallPath").toString());
   // An empty directory means that the user cancelled the dialog.
   if (path.isEmpty())
     {

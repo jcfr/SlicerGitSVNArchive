@@ -233,7 +233,7 @@ mark_as_advanced(CLEAR Slicer_BUILD_OpenIGTLinkIF)
 if("${ITK_VERSION_MAJOR}" STREQUAL "4")
   CMAKE_DEPENDENT_OPTION(
     Slicer_BUILD_SkullStripper "Build SkullStripper." ON
-    "Slicer_BUILD_CLI_SUPPORT AND Slicer_BUILD_CLI" OFF)
+    "Slicer_BUILD_CLI" OFF)
   mark_as_advanced(Slicer_BUILD_SkullStripper)
 else()
   set(Slicer_BUILD_SkullStripper OFF CACHE INTERNAL "SkullStripper disabled with ITKv3" FORCE)

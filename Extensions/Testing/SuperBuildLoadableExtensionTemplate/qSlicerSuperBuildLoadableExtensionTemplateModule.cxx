@@ -76,7 +76,7 @@ QString qSlicerSuperBuildLoadableExtensionTemplateModule::acknowledgementText()c
 QStringList qSlicerSuperBuildLoadableExtensionTemplateModule::contributors()const
 {
   QStringList moduleContributors;
-  moduleContributors << QString("Jean-Christophe Fillion-Robin (Kitware Inc.)");
+  moduleContributors << QString("Jean-Christophe Fillion-Robin (Kitware)");
   return moduleContributors;
 }
 
@@ -95,7 +95,7 @@ QStringList qSlicerSuperBuildLoadableExtensionTemplateModule::categories() const
 //-----------------------------------------------------------------------------
 QStringList qSlicerSuperBuildLoadableExtensionTemplateModule::dependencies() const
 {
-  return QStringList() << "";
+  return QStringList();
 }
 
 //-----------------------------------------------------------------------------

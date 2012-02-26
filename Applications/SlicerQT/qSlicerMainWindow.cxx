@@ -46,12 +46,6 @@
 #include "qSlicerMainWindowCore.h"
 #include "qSlicerModuleSelectorToolBar.h"
 #include "qSlicerIOManager.h"
-#include "qSlicerSettingsModulesPanel.h"
-#include "qSlicerSettingsGeneralPanel.h"
-
-#ifdef Slicer_USE_PYTHONQT
-# include "qSlicerSettingsPythonPanel.h"
-#endif
 
 // qMRML includes
 #include <qMRMLSliceWidget.h>
@@ -292,7 +286,7 @@ void qSlicerMainWindowPrivate::setupUi(QMainWindow * mainWindow)
   QObject::connect(this->ViewToolBar,
                    SIGNAL(toolButtonStyleChanged(Qt::ToolButtonStyle)),
                    layoutButton, SLOT(setToolButtonStyle(Qt::ToolButtonStyle)));
-  
+
   //----------------------------------------------------------------------------
   // Viewers Toolbar
   //----------------------------------------------------------------------------
@@ -589,7 +583,7 @@ void qSlicerMainWindow::setupMenuActions()
 
   // Main ToolBar actions (where are actions for load data and save?
   connect(d->actionLoadDICOM, SIGNAL(triggered()),
-          this, SLOT(loadDICOMActionTriggered()));  
+          this, SLOT(loadDICOMActionTriggered()));
   // Module ToolBar actions
   connect(d->actionModuleHome, SIGNAL(triggered()),
           this, SLOT(setHomeModuleCurrent()));
@@ -623,7 +617,7 @@ void qSlicerMainWindow::loadDICOMActionTriggered()
 
 }
 
-  
+
 //---------------------------------------------------------------------------
 void qSlicerMainWindow::onEditApplicationSettingsActionTriggered()
 {

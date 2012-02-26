@@ -45,7 +45,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Sanity checks
-set(expected_defined_vars EXTENSION_NAME EXTENSION_CATEGORY EXTENSION_SOURCE_DIR EXTENSION_SUPERBUILD_BINARY_DIR EXTENSION_BUILD_SUBDIRECTORY CTEST_BUILD_CONFIGURATION CTEST_CMAKE_GENERATOR Slicer_CMAKE_DIR Slicer_DIR Slicer_WC_REVISION  EXTENSION_BUILD_OPTIONS_STRING RUN_CTEST_SUBMIT RUN_CTEST_UPLOAD)
+set(expected_defined_vars EXTENSION_NAME EXTENSION_CATEGORY EXTENSION_DESCRIPTION EXTENSION_HOMEPAGE EXTENSION_SOURCE_DIR EXTENSION_SUPERBUILD_BINARY_DIR EXTENSION_BUILD_SUBDIRECTORY EXTENSION_ENABLED CTEST_BUILD_CONFIGURATION CTEST_CMAKE_GENERATOR Slicer_CMAKE_DIR Slicer_DIR Slicer_WC_REVISION EXTENSION_BUILD_OPTIONS_STRING RUN_CTEST_CONFIGURE RUN_CTEST_BUILD RUN_CTEST_TEST RUN_CTEST_PACKAGES RUN_CTEST_SUBMIT RUN_CTEST_UPLOAD BUILD_TESTING)
 if(RUN_CTEST_UPLOAD)
   list(APPEND expected_defined_vars
     MIDAS_PACKAGE_URL MIDAS_PACKAGE_EMAIL MIDAS_PACKAGE_API_KEY
@@ -78,14 +78,6 @@ string(TOLOWER "${CTEST_SITE}" CTEST_SITE)
 
 # Set build name
 set(CTEST_BUILD_NAME "${Slicer_WC_REVISION}-${EXTENSION_NAME}-${EXTENSION_COMPILER}-${EXTENSION_BUILD_OPTIONS_STRING}-${CTEST_BUILD_CONFIGURATION}")
-
-
-# The following variable can be used while testing the script
-set(run_ctest_with_configure TRUE)
-set(run_ctest_with_build TRUE)
-set(run_ctest_with_test FALSE)
-set(run_ctest_with_packages TRUE)
-# See also RUN_CTEST_SUBMIT in SlicerBlockUploadExtension.cmake
 
 setIfNotDefined(CTEST_PARALLEL_LEVEL 8)
 setIfNotDefined(CTEST_MODEL "Experimental")
@@ -141,7 +133,7 @@ set(CTEST_BINARY_DIRECTORY ${EXTENSION_SUPERBUILD_BINARY_DIR})
 
 #-----------------------------------------------------------------------------
 # Configure extension
-if(run_ctest_with_configure)
+if(RUN_CTEST_CONFIGURE)
   #message("----------- [ Configuring extension ${EXTENSION_NAME} ] -----------")
   ctest_configure(
     BUILD ${EXTENSION_SUPERBUILD_BINARY_DIR}
@@ -155,7 +147,7 @@ endif()
 #-----------------------------------------------------------------------------
 # Build extension
 set(build_errors)
-if(run_ctest_with_build)
+if(RUN_CTEST_BUILD)
   #message("----------- [ Building extension ${EXTENSION_NAME} ] -----------")
   ctest_build(BUILD ${EXTENSION_SUPERBUILD_BINARY_DIR} NUMBER_ERRORS build_errors APPEND)
   if(RUN_CTEST_SUBMIT)
@@ -165,7 +157,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Test extension
-if(run_ctest_with_test)
+if(BUILD_TESTING AND RUN_CTEST_TEST)
   #message("----------- [ Testing extension ${EXTENSION_NAME} ] -----------")
   # Check if there are tests to run
   execute_process(COMMAND ${CMAKE_CTEST_COMMAND} -N
@@ -186,7 +178,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Package extension
-if(run_ctest_with_packages)
+if(RUN_CTEST_PACKAGES)
   if(build_errors GREATER "0")
     message(WARNING "Skip extension packaging: ${build_errors} build error(s) occured !")
   else()
@@ -216,8 +208,12 @@ if(run_ctest_with_packages)
           SLICER_REVISION ${Slicer_WC_REVISION}
           EXTENSION_NAME ${EXTENSION_NAME}
           EXTENSION_CATEGORY ${EXTENSION_CATEGORY}
+          EXTENSION_DESCRIPTION ${EXTENSION_DESCRIPTION}
+          EXTENSION_HOMEPAGE ${EXTENSION_HOMEPAGE}
+          EXTENSION_REPOSITORY_TYPE ${EXTENSION_WC_TYPE}
           EXTENSION_REPOSITORY_URL ${EXTENSION_WC_URL}
           EXTENSION_SOURCE_REVISION ${EXTENSION_WC_REVISION}
+          EXTENSION_ENABLED ${EXTENSION_ENABLED}
           OPERATING_SYSTEM ${EXTENSION_OPERATING_SYSTEM}
           ARCHITECTURE ${EXTENSION_ARCHITECTURE}
           PACKAGE_FILEPATH ${p}

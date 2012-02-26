@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerSettingsModulesPanel_h
-#define __qSlicerSettingsModulesPanel_h
+#ifndef __qSlicerSettingsExtensionsPanel_h
+#define __qSlicerSettingsExtensionsPanel_h
 
 // Qt includes
 #include <QWidget>
@@ -31,9 +31,9 @@
 #include "qSlicerBaseQTGUIExport.h"
 
 class QSettings;
-class qSlicerSettingsModulesPanelPrivate;
+class qSlicerSettingsExtensionsPanelPrivate;
 
-class Q_SLICER_BASE_QTGUI_EXPORT qSlicerSettingsModulesPanel
+class Q_SLICER_BASE_QTGUI_EXPORT qSlicerSettingsExtensionsPanel
   : public ctkSettingsPanel
 {
   Q_OBJECT
@@ -43,10 +43,10 @@ public:
   typedef ctkSettingsPanel Superclass;
 
   /// Constructor
-  explicit qSlicerSettingsModulesPanel(QWidget* parent = 0);
+  explicit qSlicerSettingsExtensionsPanel(QWidget* parent = 0);
 
   /// Destructor
-  virtual ~qSlicerSettingsModulesPanel();
+  virtual ~qSlicerSettingsExtensionsPanel();
 
   /// Return True if the application is expected to be restarted.
   bool restartRequested()const;
@@ -60,21 +60,15 @@ public slots:
   virtual void restoreDefaultSettings();
 
 protected slots:
-  void onHomeModuleChanged(const QString& moduleName);
-  void onTemporaryPathChanged(const QString& path);
-  void onShowHiddenModulesChanged(bool);
-
-  void onAdditionalModulePathsChanged();
-  void onAddModulesAdditionalPathClicked();
-  void onRemoveModulesAdditionalPathClicked();
-  void onModulesToIgnoreChanged();
+  void onExensionsServerUrlChanged(const QString& url);
+  void onExensionsPathChanged(const QString& path);
 
 protected:
-  QScopedPointer<qSlicerSettingsModulesPanelPrivate> d_ptr;
+  QScopedPointer<qSlicerSettingsExtensionsPanelPrivate> d_ptr;
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerSettingsModulesPanel);
-  Q_DISABLE_COPY(qSlicerSettingsModulesPanel);
+  Q_DECLARE_PRIVATE(qSlicerSettingsExtensionsPanel);
+  Q_DISABLE_COPY(qSlicerSettingsExtensionsPanel);
 };
 
 #endif

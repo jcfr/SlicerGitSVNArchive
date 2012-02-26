@@ -81,6 +81,12 @@ set(KIT_SRCS
 
 if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
   list(APPEND KIT_SRCS
+    qSlicerExtensionsInstallWidget.cxx
+    qSlicerExtensionsInstallWidget.h
+    qSlicerExtensionsManager.cxx
+    qSlicerExtensionsManager.h
+    qSlicerExtensionsManageWidget.cxx
+    qSlicerExtensionsManageWidget.h
     qSlicerExtensionsWizard.cxx
     qSlicerExtensionsWizard.h
     qSlicerExtensionsWizardOverviewPage.cxx
@@ -89,6 +95,8 @@ if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
     qSlicerExtensionsWizardRestartPage.h
     qSlicerExtensionsWizardWelcomePage.cxx
     qSlicerExtensionsWizardWelcomePage.h
+    qSlicerSettingsExtensionsPanel.cxx
+    qSlicerSettingsExtensionsPanel.h
     )
 endif()
 
@@ -159,10 +167,14 @@ set(KIT_MOC_SRCS
 
 if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
   list(APPEND KIT_MOC_SRCS
+    qSlicerExtensionsInstallWidget.h
+    qSlicerExtensionsManager.h
+    qSlicerExtensionsManageWidget.h
     qSlicerExtensionsWizard.h
     qSlicerExtensionsWizardOverviewPage.h
     qSlicerExtensionsWizardRestartPage.h
     qSlicerExtensionsWizardWelcomePage.h
+    qSlicerSettingsExtensionsPanel.h
     )
 endif()
 
@@ -192,16 +204,21 @@ set(KIT_UI_SRCS
 )
 if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
   list(APPEND KIT_UI_SRCS
+    Resources/UI/qSlicerExtensionsButtonBox.ui
+    Resources/UI/qSlicerExtensionsInstallWidget.ui
+    Resources/UI/qSlicerExtensionsManager.ui
+    Resources/UI/qSlicerExtensionsManageWidget.ui
     Resources/UI/qSlicerExtensionsWizardWelcomePage.ui
     Resources/UI/qSlicerExtensionsWizardOverviewPage.ui
     Resources/UI/qSlicerExtensionsWizardRestartPage.ui
+    Resources/UI/qSlicerSettingsExtensionsPanel.ui
     )
 endif()
 
 # PythonQt decorator
 if(Slicer_USE_PYTHONQT)
   list(APPEND KIT_UI_SRCS
-  Resources/UI/qSlicerSettingsPythonPanel.ui
+    Resources/UI/qSlicerSettingsPythonPanel.ui
   )
 endif()
 
@@ -210,12 +227,6 @@ set(KIT_target_libraries
   qSlicerBaseQTCore
   qMRMLWidgets
   )
-
-if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
-  list(APPEND KIT_target_libraries
-    qMidasAPI
-    )
-endif()
 
 # Python wrap
 if(Slicer_USE_PYTHONQT)

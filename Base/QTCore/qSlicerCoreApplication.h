@@ -53,7 +53,9 @@ class Q_SLICER_BASE_QTCORE_EXPORT qSlicerCoreApplication : public QApplication
 
   Q_PROPERTY(QString slicerHome READ slicerHome CONSTANT)
   Q_PROPERTY(QString temporaryPath READ temporaryPath WRITE setTemporaryPath)
-  Q_PROPERTY(QString extensionsPath READ extensionsPath WRITE setExtensionsPath)
+  Q_PROPERTY(QString launcherExecutableFilePath READ launcherExecutableFilePath CONSTANT)
+  Q_PROPERTY(QString launcherSettingsFilePath READ launcherSettingsFilePath CONSTANT)
+  Q_PROPERTY(QString extensionsInstallPath READ extensionsInstallPath WRITE setExtensionsInstallPath)
   Q_PROPERTY(QString intDir READ intDir CONSTANT)
   Q_PROPERTY(bool isInstalled READ isInstalled CONSTANT)
   Q_PROPERTY(QString repositoryUrl READ repositoryUrl CONSTANT)
@@ -62,6 +64,8 @@ class Q_SLICER_BASE_QTCORE_EXPORT qSlicerCoreApplication : public QApplication
   Q_PROPERTY(int majorVersion READ majorVersion CONSTANT)
   Q_PROPERTY(int minorVersion READ minorVersion CONSTANT)
   Q_PROPERTY(QString platform READ platform CONSTANT)
+  Q_PROPERTY(QString arch READ arch CONSTANT)
+  Q_PROPERTY(QString os READ os CONSTANT)
 public:
 
   typedef QApplication Superclass;
@@ -138,14 +142,20 @@ public:
   /// Set slicer temporary directory
   void setTemporaryPath(const QString& path);
 
+  /// If any, return slicer launcher executable file path.
+  QString launcherExecutableFilePath()const;
+
+  /// If any, return slicer launcher settings file path.
+  QString launcherSettingsFilePath()const;
+
   /// Get slicer default extensions path
-  QString defaultExtensionsPath() const;
+  QString defaultExtensionsInstallPath() const;
 
   /// Get slicer extension directory
-  QString extensionsPath() const;
+  QString extensionsInstallPath() const;
 
   /// Set slicer extension directory
-  void setExtensionsPath(const QString& path);
+  void setExtensionsInstallPath(const QString& path);
 
   /// If any, this method return the build intermediate directory
   /// See $(IntDir) on http://msdn.microsoft.com/en-us/library/c02as0cs%28VS.71%29.aspx
@@ -205,15 +215,15 @@ public:
   virtual QString libraries()const;
 
   /// Return the source repository URL associated to this build
-  /// \sa discoverRepository
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryUrl()const;
 
   /// Return the source repository Branch associated to this build
-  /// \sa discoverRepository
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryBranch()const;
 
   /// Return the source repository Revision associated to this build
-  /// \sa discoverRepository
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString repositoryRevision()const;
 
   /// Return the Slicer major version number
@@ -222,9 +232,17 @@ public:
   /// Return the Slicer minor version number
   int minorVersion() const;
 
-  /// Return the source repository Platform associated to this build
-  /// \sa discoverRepository
+  /// Return the \a platform associated to this build
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
   QString platform()const;
+
+  /// Return the \a arch associated to this build
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
+  QString arch()const;
+
+  /// Return the \a os associated to this build
+  /// \sa qSlicerCoreApplicationPrivate::discoverRepository
+  QString os()const;
 
 public slots:
 
