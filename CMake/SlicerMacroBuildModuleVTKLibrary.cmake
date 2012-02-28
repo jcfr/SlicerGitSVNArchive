@@ -43,6 +43,10 @@ macro(SlicerMacroBuildModuleVTKLibrary)
   # Define library name
   # --------------------------------------------------------------------------
   set(lib_name ${MODULEVTKLIBRARY_NAME})
+  
+  if(${lib_name} STREQUAL "vtkSlicerAtlasCreatorModuleLogic")
+    message(WARNING ">>>>>>>>> This is where the target vtkSlicerAtlasCreatorModuleLogic is defined ! <<<<<<")
+  endif()
 
   # --------------------------------------------------------------------------
   # Include dirs
