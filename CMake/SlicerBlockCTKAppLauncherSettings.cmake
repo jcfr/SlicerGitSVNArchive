@@ -74,6 +74,8 @@ endif()
 set(SLICER_LIBRARY_PATHS_BUILD
   ${VTK_DIR}/bin/<CMAKE_CFG_INTDIR>
   ${CTK_DIR}/CTK-build/bin/<CMAKE_CFG_INTDIR>
+  ${CTK_DIR}/CMakeExternals/Install/bin
+  ${CTK_DIR}/CMakeExternals/Install/lib
   ${QT_LIBRARY_DIR}
   ${ITK_DIR}/bin/<CMAKE_CFG_INTDIR>
   ${Teem_DIR}/bin/<CMAKE_CFG_INTDIR>
@@ -139,7 +141,6 @@ if(Slicer_USE_PYTHONQT)
   set(SLICER_PYTHONHOME ${Slicer_SUPERBUILD_DIR}/python-build)
   get_filename_component(SLICER_PYTHON_LIB_DIR ${PYTHON_LIBRARY} PATH)
   list(APPEND SLICER_LIBRARY_PATHS_BUILD
-    ${CTK_DIR}/PythonQt-build/<CMAKE_CFG_INTDIR>
     ${SLICER_PYTHON_LIB_DIR}
     )
 endif()
