@@ -14,7 +14,7 @@ QT4_GENERATE_MOCS(
 include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(${KIT}CxxTests ${Tests} ${Tests_MOC_CXX} ${Tests_UtilityFiles})
-target_link_libraries(${KIT}CxxTests ${KIT})
+target_link_libraries(${KIT}CxxTests ${KIT} ${PYTHON_LIBRARIES})
 
 SIMPLE_TEST( qMRMLNodeAttributeTableViewTest )
 SIMPLE_TEST( qMRMLNodeAttributeTableWidgetTest )
