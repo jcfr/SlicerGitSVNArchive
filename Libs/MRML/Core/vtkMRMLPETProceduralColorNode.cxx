@@ -111,11 +111,11 @@ const char *vtkMRMLPETProceduralColorNode::GetTypeAsIDString()
 {
    if (this->Type == this->PETheat)
     {
-    return "vtkMRMLPETProceduralColorNodeHeat";
+    return "vtkMRMLPETProceduralColorNode-Heat";
     }
   else if (this->Type == this->PETrainbow)
     {
-    return "vtkMRMLPETProceduralColorNodeRainbow";
+    return "vtkMRMLPETProceduralColorNode-Rainbow";
     }
    return "(unknown)";
 }
