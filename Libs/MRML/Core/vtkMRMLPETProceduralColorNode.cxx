@@ -117,7 +117,11 @@ const char *vtkMRMLPETProceduralColorNode::GetTypeAsIDString()
     {
     return "vtkMRMLPETProceduralColorNode-Rainbow";
     }
-   return "(unknown)";
+  else if (this->Type == this->PETMIP)
+    {
+    return "vtkMRMLPETProceduralColorNode-MaximumIntensityProjection";
+    }
+  return "(unknown)";
 }
 
 //---------------------------------------------------------------------------
