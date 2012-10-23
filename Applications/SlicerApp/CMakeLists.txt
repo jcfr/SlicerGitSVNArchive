@@ -281,12 +281,13 @@ if(${PROJECT_NAME} STREQUAL ${Slicer_MAIN_PROJECT})
     endforeach()
 
     include(SlicerBlockCTKAppLauncherSettings)
-    set(splash_image_path ${Slicer_SOURCE_DIR}/Applications/${PROJECT_NAME}/Resources/Images/${SlicerApp_APPLICATION_NAME}SplashScreen.png)
+    set(splash_image_path ${Slicer_SOURCE_DIR}/Applications/${PROJECT_NAME}/Resources/Images)
+    set(splash_image_filepath ${splash_image_path}/${SlicerApp_APPLICATION_NAME}SplashScreen.png)
     ctkAppLauncherConfigure(
       TARGET ${PROJECT_NAME}${SlicerApp_EXE_SUFFIX}
       APPLICATION_INSTALL_SUBDIR ${Slicer_INSTALL_BIN_DIR}
       APPLICATION_NAME ${SlicerApp_APPLICATION_NAME}
-      SPLASH_IMAGE_PATH ${splash_image_path}
+      SPLASH_IMAGE_PATH ${splash_image_filepath}
       SPLASH_IMAGE_INSTALL_SUBDIR ${Slicer_INSTALL_BIN_DIR}
       SPLASHSCREEN_HIDE_DELAY_MS 3000
       HELP_SHORT_ARG "-h"
@@ -321,10 +322,29 @@ if(${PROJECT_NAME} STREQUAL ${Slicer_MAIN_PROJECT})
           DESTINATION "."
           RENAME "${SlicerApp_APPLICATION_NAME}${CMAKE_EXECUTABLE_SUFFIX}"
           )
+
+        # Install the "WithOutput" launcher
+        set(launcher_with_console_io_suffix "WithOutput")
+        install(
+          PROGRAMS "${CTKAPPLAUNCHER_DIR}/bin/CTKAppLauncher${CMAKE_EXECUTABLE_SUFFIX}"
+          DESTINATION "."
+          RENAME "${SlicerApp_APPLICATION_NAME}${launcher_with_console_io_suffix}${CMAKE_EXECUTABLE_SUFFIX}"
+          )
+        install(
+          FILES ${splash_image_filepath}
+          DESTINATION ${Slicer_INSTALL_BIN_DIR}
+          RENAME ${splash_image_path}/${SlicerApp_APPLICATION_NAME}${launcher_with_console_io_suffix}SplashScreen.png
+          )
+        install(
+          FILES "${Slicer_BINARY_DIR}/${SlicerApp_APPLICATION_NAME}LauncherSettingsToInstall.ini"
+          DESTINATION ${Slicer_INSTALL_BIN_DIR}
+          RENAME ${SlicerApp_APPLICATION_NAME}${launcher_with_console_io_suffix}LauncherSettings.ini
+          )
       endif()
 
+      # Install regular launcher support files
       install(
-        FILES ${splash_image_path}
+        FILES ${splash_image_filepath}
         DESTINATION ${Slicer_INSTALL_BIN_DIR}
         )
       install(
