@@ -131,18 +131,41 @@ qSlicerAbstractCoreModule* qSlicerCLIExecutableModuleFactoryItem::instanciator()
 }
 
 //-----------------------------------------------------------------------------
-// qSlicerCLIExecutableModuleFactory
+// qSlicerCLIExecutableModuleFactoryPrivate
 
 //-----------------------------------------------------------------------------
-qSlicerCLIExecutableModuleFactory::qSlicerCLIExecutableModuleFactory()
+class qSlicerCLIExecutableModuleFactoryPrivate
+{
+  Q_DECLARE_PUBLIC(qSlicerCLIExecutableModuleFactory);
+protected:
+  qSlicerCLIExecutableModuleFactory* const q_ptr;
+public:
+  typedef qSlicerCLIExecutableModuleFactoryPrivate Self;
+  qSlicerCLIExecutableModuleFactoryPrivate(qSlicerCLIExecutableModuleFactory& object);
+
+private:
+  QString TempDirectory;
+};
+
+//-----------------------------------------------------------------------------
+qSlicerCLIExecutableModuleFactoryPrivate::qSlicerCLIExecutableModuleFactoryPrivate(qSlicerCLIExecutableModuleFactory& object)
+:q_ptr(&object)
 {
   this->TempDirectory = QDir::tempPath();
 }
 
 //-----------------------------------------------------------------------------
-qSlicerCLIExecutableModuleFactory::qSlicerCLIExecutableModuleFactory(const QString& tempDir)
+// qSlicerCLIExecutableModuleFactory
+
+//-----------------------------------------------------------------------------
+qSlicerCLIExecutableModuleFactory::qSlicerCLIExecutableModuleFactory()
+  : d_ptr(new qSlicerCLIExecutableModuleFactoryPrivate(*this))
 {
-  this->setTempDirectory(tempDir);
+}
+
+//-----------------------------------------------------------------------------
+qSlicerCLIExecutableModuleFactory::~qSlicerCLIExecutableModuleFactory()
+{
 }
 
 //-----------------------------------------------------------------------------
@@ -178,7 +201,8 @@ bool qSlicerCLIExecutableModuleFactory::isValidFile(const QFileInfo& file)const
 ctkAbstractFactoryItem<qSlicerAbstractCoreModule>* qSlicerCLIExecutableModuleFactory
 ::createFactoryFileBasedItem()
 {
-  return new qSlicerCLIExecutableModuleFactoryItem(this->TempDirectory);
+  Q_D(qSlicerCLIExecutableModuleFactory);
+  return new qSlicerCLIExecutableModuleFactoryItem(d->TempDirectory);
 }
 
 //-----------------------------------------------------------------------------
@@ -190,5 +214,6 @@ QString qSlicerCLIExecutableModuleFactory::fileNameToKey(const QString& executab
 //-----------------------------------------------------------------------------
 void qSlicerCLIExecutableModuleFactory::setTempDirectory(const QString& newTempDirectory)
 {
-  this->TempDirectory = newTempDirectory;
+  Q_D(qSlicerCLIExecutableModuleFactory);
+  d->TempDirectory = newTempDirectory;
 }

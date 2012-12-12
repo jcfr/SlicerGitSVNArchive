@@ -42,6 +42,8 @@ private:
   QString TempDirectory;
 };
 
+class qSlicerCLIExecutableModuleFactoryPrivate;
+
 //-----------------------------------------------------------------------------
 class Q_SLICER_BASE_QTCLI_EXPORT qSlicerCLIExecutableModuleFactory :
   public ctkAbstractFileBasedFactory<qSlicerAbstractCoreModule>
@@ -50,6 +52,7 @@ public:
   typedef ctkAbstractFileBasedFactory<qSlicerAbstractCoreModule> Superclass;
   qSlicerCLIExecutableModuleFactory();
   qSlicerCLIExecutableModuleFactory(const QString& tempDir);
+  virtual ~qSlicerCLIExecutableModuleFactory();
 
   virtual void registerItems();
 
@@ -67,8 +70,13 @@ protected:
   virtual ctkAbstractFactoryItem<qSlicerAbstractCoreModule>*
     createFactoryFileBasedItem();
 
+protected:
+
+  QScopedPointer<qSlicerCLIExecutableModuleFactoryPrivate> d_ptr;
+
 private:
-  QString TempDirectory;
+  Q_DECLARE_PRIVATE(qSlicerCLIExecutableModuleFactory);
+  Q_DISABLE_COPY(qSlicerCLIExecutableModuleFactory);
 };
 
 #endif

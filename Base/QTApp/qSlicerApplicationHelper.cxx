@@ -102,15 +102,22 @@ void qSlicerApplicationHelper::setupModuleFactoryManager(qSlicerModuleFactoryMan
 #ifdef Slicer_BUILD_CLI_SUPPORT
   if (!options->disableCLIModules() && !options->runPythonAndExit())
     {
+
     QString tempDirectory =
       qSlicerCoreApplication::application()->coreCommandOptions()->tempDirectory();
+
+    // Option to prefer executable CLIs to limit memory consumption.
     bool preferExecutableCLIs =
       app->userSettings()->value("Modules/PreferExecutableCLI", false).toBool();
-    moduleFactoryManager->registerFactory(
-      new qSlicerCLILoadableModuleFactory(tempDirectory), preferExecutableCLIs ? 0 : 1);
-    // Option to prefer executable CLIs to limit memory consumption.
-    moduleFactoryManager->registerFactory(
-      new qSlicerCLIExecutableModuleFactory(tempDirectory), preferExecutableCLIs ? 1 : 0);
+
+    qSlicerCLILoadableModuleFactory* cliLoadableFactory = new qSlicerCLILoadableModuleFactory();
+    cliLoadableFactory->setTempDirectory(tempDirectory);
+    moduleFactoryManager->registerFactory(cliLoadableFactory, preferExecutableCLIs ? 0 : 1);
+
+    qSlicerCLIExecutableModuleFactory* cliExecutableFactory = new qSlicerCLIExecutableModuleFactory();
+        cliExecutableFactory->setTempDirectory(tempDirectory);
+    moduleFactoryManager->registerFactory(cliExecutableFactory, preferExecutableCLIs ? 1 : 0);
+
     QString cliPath = app->slicerHome() + "/" + Slicer_CLIMODULES_LIB_DIR + "/";
     moduleFactoryManager->addSearchPath(cliPath);
     // On Win32, *both* paths have to be there, since scripts are installed
