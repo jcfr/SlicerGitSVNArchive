@@ -29,16 +29,20 @@
 #include <ctkPimpl.h>
 #include <ctkAbstractPluginFactory.h>
 
+class ctkCmdLineModuleManager;
+
 //-----------------------------------------------------------------------------
 class qSlicerCLIExecutableModuleFactoryItem
   : public ctkAbstractFactoryFileBasedItem<qSlicerAbstractCoreModule>
 {
 public:
-  qSlicerCLIExecutableModuleFactoryItem(const QString& newTempDirectory);
+  qSlicerCLIExecutableModuleFactoryItem(ctkCmdLineModuleManager * cmdLineModuleManager,
+                                        const QString& newTempDirectory);
   virtual bool load();
 protected:
   virtual qSlicerAbstractCoreModule* instanciator();
 private:
+  ctkCmdLineModuleManager* CmdLineModuleManager;
   QString TempDirectory;
 };
 
@@ -50,8 +54,8 @@ class Q_SLICER_BASE_QTCLI_EXPORT qSlicerCLIExecutableModuleFactory :
 {
 public:
   typedef ctkAbstractFileBasedFactory<qSlicerAbstractCoreModule> Superclass;
-  qSlicerCLIExecutableModuleFactory();
-  qSlicerCLIExecutableModuleFactory(const QString& tempDir);
+  qSlicerCLIExecutableModuleFactory(ctkCmdLineModuleManager * cmdLineModuleManager);
+  qSlicerCLIExecutableModuleFactory(ctkCmdLineModuleManager * cmdLineModuleManager, const QString& tempDir);
   virtual ~qSlicerCLIExecutableModuleFactory();
 
   virtual void registerItems();

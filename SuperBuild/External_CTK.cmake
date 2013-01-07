@@ -88,6 +88,9 @@ if(NOT DEFINED CTK_DIR)
       -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
       -DVTK_DIR:PATH=${VTK_DIR}
       -DITK_DIR:PATH=${ITK_DIR}
+      -DCTK_LIB_CommandLineModules/Backend/LocalProcess:BOOL=ON
+      -DCTK_LIB_CommandLineModules/Core:BOOL=ON
+      -DCTK_LIB_CommandLineModules/Frontend/QtGui:BOOL=ON
       -DCTK_LIB_Widgets:BOOL=ON
       -DCTK_LIB_Visualization/VTK/Widgets:BOOL=ON
       -DCTK_LIB_Visualization/VTK/Widgets_USE_TRANSFER_FUNCTION_CHARTS:BOOL=ON

@@ -20,6 +20,9 @@
 
 // QT includes
 
+// CTK includes
+#include <ctkCmdLineModuleManager.h>
+
 // SlicerQt includes
 #include <qSlicerCLILoadableModuleFactory.h>
 
@@ -37,7 +40,8 @@ int qSlicerCLILoadableModuleFactoryTest1(int, char * [] )
                << "libThreshold.dylib";
              
   QString expectedModuleName = "Threshold";
-  qSlicerCLILoadableModuleFactory factory;
+  ctkCmdLineModuleManager cmdLineModuleManager(ctkCmdLineModuleManager::WEAK_VALIDATION);
+  qSlicerCLILoadableModuleFactory factory(&cmdLineModuleManager);
   foreach (const QString& libraryName, libraryNames)
     {
     QString moduleName = factory.fileNameToKey(libraryName);

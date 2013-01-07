@@ -24,6 +24,8 @@
 #include <QDebug>
 
 // CTK includes
+#include <ctkCmdLineModuleDescription.h>
+#include <ctkCmdLineModuleReference.h>
 #include <ctkWidgetsUtils.h>
 
 // Slicer includes
@@ -58,6 +60,8 @@ public:
 
   ModuleDescription                 Desc;
   ModuleProcessInformation*         ProcessInformation;
+
+  ctkCmdLineModuleReference CmdLineModuleReference;
 };
 
 //-----------------------------------------------------------------------------
@@ -100,7 +104,10 @@ void qSlicerCLIModule::setup()
 //-----------------------------------------------------------------------------
 qSlicerAbstractModuleRepresentation * qSlicerCLIModule::createWidgetRepresentation()
 {
-  return new qSlicerCLIModuleWidget;
+  Q_D(qSlicerCLIModule);
+  qSlicerCLIModuleWidget * widget = new qSlicerCLIModuleWidget;
+  widget->setCmdLineModuleReference(d->CmdLineModuleReference);
+  return widget;
 }
 
 //-----------------------------------------------------------------------------
@@ -128,56 +135,61 @@ CTK_SET_CPP(qSlicerCLIModule, const QString&, setModuleType, ModuleType);
 CTK_GET_CPP(qSlicerCLIModule, QString, moduleType, ModuleType);
 
 //-----------------------------------------------------------------------------
-void qSlicerCLIModule::setXmlModuleDescription(const QString& xmlModuleDescription)
+void qSlicerCLIModule::setCmdLineModuleReference(const ctkCmdLineModuleReference& ref)
 {
   Q_D(qSlicerCLIModule);
+  d->CmdLineModuleReference = ref;
+
   //qDebug() << "xmlModuleDescription:" << xmlModuleDescription;
   Q_ASSERT(!this->entryPoint().isEmpty());
 
-  // Parse module description
-  ModuleDescription desc;
-  ModuleDescriptionParser parser;
-  if (parser.Parse(xmlModuleDescription.toStdString(), desc) != 0)
-    {
-    qWarning() << "Failed to parse xml module description:\n"
-               << xmlModuleDescription;
-    return;
-    }
-
   // Set properties
-  d->Title = QString::fromStdString(desc.GetTitle());
-  d->Acknowledgement = QString::fromStdString(desc.GetAcknowledgements());
-  d->Contributors = QStringList() << QString::fromStdString(desc.GetContributor());
-  d->Logo = this->moduleLogoToImage(desc.GetLogo());
-  bool ok = false;
-  d->Index = QString::fromStdString(desc.GetIndex()).toInt(&ok);
-  if (!ok)
-    {
-    d->Index = -1;
-    }
-  d->Categories = QStringList() << QString::fromStdString(desc.GetCategory()).split(';');
-
-  d->ProcessInformation = desc.GetProcessInformation();
+  ctkCmdLineModuleDescription desc = d->CmdLineModuleReference.description();
+  d->Categories = QStringList() << desc.category();
+  d->Index = desc.index();
+  d->Title = desc.title();
+  d->Acknowledgement = desc.acknowledgements();
+  d->Contributors = QStringList() << desc.contributor();
 
   QString help =
     "%1<br>"
     "For more detailed documentation see the online documentation at"
     "<a href=\"%2\">%2</a>";
+  d->Help = help.arg(desc.description()).arg(desc.documentationURL());
 
-  d->Help = help.arg(
-    QString::fromStdString(desc.GetDescription())).arg(
-    QString::fromStdString(desc.GetDocumentationURL()));
+  // ****************************************************************
+  // *                  --=[ IMPORTANT ]=--                         *
+  // *                                                              *
+  // *   Waiting the CLI framework is fully redesigned to make use  *
+  // *   of ctkCommandLineModules library, the ModuleDescription    *
+  // *   structure is populated parsing the raw xml.                *
+  // *                                                              *
+  // ****************************************************************
+
+  // Parse module description
+  ModuleDescription cliDesc;
+  ModuleDescriptionParser parser;
+  if (parser.Parse(std::string(d->CmdLineModuleReference.rawXmlDescription()), cliDesc) != 0)
+    {
+    qWarning() << "Failed to parse xml module description:\n"
+               << d->CmdLineModuleReference.rawXmlDescription();
+    return;
+    }
+
+  d->ProcessInformation = cliDesc.GetProcessInformation();
+
+  d->Logo = this->moduleLogoToImage(cliDesc.GetLogo());
 
   // Set module type
-  desc.SetType(this->moduleType().toStdString());
-  
+  cliDesc.SetType(this->moduleType().toStdString());
+
   // Set module entry point
-  desc.SetTarget(this->entryPoint().toStdString());
+  cliDesc.SetTarget(this->entryPoint().toStdString());
 
   // Register the module description in the master list
-  vtkMRMLCommandLineModuleNode::RegisterModuleDescription(desc);
+  vtkMRMLCommandLineModuleNode::RegisterModuleDescription(cliDesc);
 
-  d->Desc = desc; 
+  d->Desc = cliDesc;
 }
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
   <qresource>
+    <file>qSlicerCLIModuleXmlToQtGui.xsd</file>
   </qresource>
 </RCC>

@@ -19,6 +19,11 @@
 ==============================================================================*/
 
 // Qt includes
+#include <QUrl>
+
+// CTK includes
+#include <ctkCmdLineModuleBackendSharedLibrary.h>
+#include <ctkCmdLineModuleManager.h>
 
 // SlicerQT includes
 #include "qSlicerCLILoadableModuleFactory.h"
@@ -31,7 +36,8 @@
 
 //-----------------------------------------------------------------------------
 qSlicerCLILoadableModuleFactoryItem::qSlicerCLILoadableModuleFactoryItem(
-  const QString& newTempDirectory) : TempDirectory(newTempDirectory)
+  ctkCmdLineModuleManager* cmdLineModuleManager, const QString& newTempDirectory)
+  : CmdLineModuleManager(cmdLineModuleManager), TempDirectory(newTempDirectory)
 {
 }
 
@@ -45,9 +51,6 @@ qSlicerAbstractCoreModule* qSlicerCLILoadableModuleFactoryItem::instanciator()
   // Resolves symbol
   const char* xmlDescription = const_cast<const char *>(reinterpret_cast<char*>(
     this->symbolAddress("XMLModuleDescription")));
-
-  // Retrieve
-  //if (!xmlDescription) { xmlDescription = xmlFunction ? (*xmlFunction)() : 0; }
 
   if (!xmlDescription)
     {
@@ -76,7 +79,9 @@ qSlicerAbstractCoreModule* qSlicerCLILoadableModuleFactoryItem::instanciator()
   module->setEntryPoint(QString(buffer));
   module->setModuleType("SharedObjectModule");
 
-  module->setXmlModuleDescription(QString(xmlDescription));
+  module->setCmdLineModuleReference(
+        this->CmdLineModuleManager->registerModule(QUrl(QString("sharedlibrary://%1").arg(this->path()))));
+
   module->setTempDirectory(this->TempDirectory);
   module->setPath(this->path());
   module->setInstalled(qSlicerCLIModuleFactoryHelper::isInstalled(this->path()));
@@ -168,6 +173,8 @@ public:
   void init();
 
 private:
+  ctkCmdLineModuleManager * CmdLineModuleManager;
+  ctkCmdLineModuleBackendSharedLibrary CmdLineModuleBackend;
   QString TempDirectory;
 };
 
@@ -175,6 +182,7 @@ private:
 qSlicerCLILoadableModuleFactoryPrivate::qSlicerCLILoadableModuleFactoryPrivate(qSlicerCLILoadableModuleFactory& object)
   : q_ptr(&object)
 {
+  this->TempDirectory = QDir::tempPath();
 }
 
 //-----------------------------------------------------------------------------
@@ -184,17 +192,20 @@ void qSlicerCLILoadableModuleFactoryPrivate::init()
   // Set the list of required symbols for CmdLineLoadableModule,
   // if one of these symbols can't be resolved, the library won't be registered.
   q->setSymbols(QStringList() << "XMLModuleDescription" << "ModuleEntryPoint");
-  this->TempDirectory = QDir::tempPath();
+
+  this->CmdLineModuleManager->registerBackend(&this->CmdLineModuleBackend);
 }
 
 //-----------------------------------------------------------------------------
 // qSlicerCLILoadableModuleFactory
 
 //-----------------------------------------------------------------------------
-qSlicerCLILoadableModuleFactory::qSlicerCLILoadableModuleFactory()
+qSlicerCLILoadableModuleFactory::qSlicerCLILoadableModuleFactory(
+    ctkCmdLineModuleManager * cmdLineModuleManager)
   : d_ptr(new qSlicerCLILoadableModuleFactoryPrivate(*this))
 {
   Q_D(qSlicerCLILoadableModuleFactory);
+  d->CmdLineModuleManager = cmdLineModuleManager;
   d->init();
 }
 
@@ -215,7 +226,7 @@ ctkAbstractFactoryItem<qSlicerAbstractCoreModule>* qSlicerCLILoadableModuleFacto
 createFactoryFileBasedItem()
 {
   Q_D(qSlicerCLILoadableModuleFactory);
-  return new qSlicerCLILoadableModuleFactoryItem(d->TempDirectory);
+  return new qSlicerCLILoadableModuleFactoryItem(d->CmdLineModuleManager, d->TempDirectory);
 }
 
 //-----------------------------------------------------------------------------

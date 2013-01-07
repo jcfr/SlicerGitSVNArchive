@@ -20,6 +20,11 @@
 
 // Qt includes
 #include <QProcess>
+#include <QUrl>
+
+// CTK includes
+#include <ctkCmdLineModuleBackendLocalProcess.h>
+#include <ctkCmdLineModuleManager.h>
 
 // SlicerQt includes
 #include "qSlicerCLIExecutableModuleFactory.h"
@@ -32,7 +37,8 @@
 
 //-----------------------------------------------------------------------------
 qSlicerCLIExecutableModuleFactoryItem::qSlicerCLIExecutableModuleFactoryItem(
-  const QString& newTempDirectory) : TempDirectory(newTempDirectory)
+    ctkCmdLineModuleManager* cmdLineModuleManager, const QString& newTempDirectory) :
+  CmdLineModuleManager(cmdLineModuleManager), TempDirectory(newTempDirectory)
 {
 }
 
@@ -45,84 +51,17 @@ bool qSlicerCLIExecutableModuleFactoryItem::load()
 //-----------------------------------------------------------------------------
 qSlicerAbstractCoreModule* qSlicerCLIExecutableModuleFactoryItem::instanciator()
 {
+  ctkScopedCurrentDir scopedCurrentDir(QFileInfo(this->path()).path());
+
   // Using a scoped pointer ensures the memory will be cleaned if instantiator
   // fails before returning the module. See QScopedPointer::take()
   QScopedPointer<qSlicerCLIModule> module(new qSlicerCLIModule());
   module->setModuleType("CommandLineModule");
   module->setEntryPoint(this->path());
 
-  ctkScopedCurrentDir scopedCurrentDir(QFileInfo(this->path()).path());
+  module->setCmdLineModuleReference(
+        this->CmdLineModuleManager->registerModule(QUrl::fromLocalFile(this->path())));
 
-  int cliProcessTimeoutInMs = 5000;
-  QProcess cli;
-  cli.start(this->path(), QStringList(QString("--xml")));
-  bool res = cli.waitForFinished(cliProcessTimeoutInMs);
-  if (!res)
-    {
-    this->appendInstantiateErrorString(QString("CLI executable: %1").arg(this->path()));
-    QString errorString;
-    switch(cli.error())
-      {
-      case QProcess::FailedToStart:
-        errorString = QLatin1String(
-              "The process failed to start. Either the invoked program is missing, or "
-              "you may have insufficient permissions to invoke the program.");
-        break;
-      case QProcess::Crashed:
-        errorString = QLatin1String(
-              "The process crashed some time after starting successfully.");
-        break;
-      case QProcess::Timedout:
-        errorString = QString(
-              "The process timed out after %1 msecs.").arg(cliProcessTimeoutInMs);
-        break;
-      case QProcess::WriteError:
-        errorString = QLatin1String(
-              "An error occurred when attempting to read from the process. "
-              "For example, the process may not be running.");
-        break;
-      case QProcess::ReadError:
-        errorString = QLatin1String(
-              "An error occurred when attempting to read from the process. "
-              "For example, the process may not be running.");
-        break;
-      case QProcess::UnknownError:
-        errorString = QLatin1String(
-              "Failed to execute process. An unknown error occurred.");
-        break;
-      }
-    this->appendInstantiateErrorString(errorString);
-    return 0;
-    }
-  QString errors = cli.readAllStandardError();
-  if (!errors.isEmpty())
-    {
-    this->appendInstantiateErrorString(QString("CLI executable: %1").arg(this->path()));
-    this->appendInstantiateErrorString(errors);
-    // TODO: More investigation for the following behavior:
-    // on my machine (Ubuntu 10.04 with ITKv4), having standard error trims the
-    // standard output results. The following readAllStandardOutput() is then
-    // missing chars and makes the XML invalid. I'm not sure if it's just on my
-    // machine so there is a chance it succeeds to parse the XML description
-    // on other machines.
-    }
-  QString xmlDescription = cli.readAllStandardOutput();
-  if (xmlDescription.isEmpty())
-    {
-    this->appendInstantiateErrorString(QString("CLI executable: %1").arg(this->path()));
-    this->appendInstantiateErrorString("Failed to retrieve Xml Description");
-    return 0;
-    }
-  if (!xmlDescription.startsWith("<?xml"))
-    {
-    this->appendInstantiateWarningString(QString("CLI executable: %1").arg(this->path()));
-    this->appendInstantiateWarningString(QLatin1String("XML description doesn't start right away."));
-    this->appendInstantiateWarningString(QString("Output before '<?xml' is [%1]").arg(
-                                           xmlDescription.mid(0, xmlDescription.indexOf("<?xml"))));
-    xmlDescription.remove(0, xmlDescription.indexOf("<?xml"));
-    }
-
-  module->setXmlModuleDescription(xmlDescription.toLatin1());
   module->setTempDirectory(this->TempDirectory);
   module->setPath(this->path());
   module->setInstalled(qSlicerCLIModuleFactoryHelper::isInstalled(this->path()));
@@ -143,8 +82,12 @@ public:
   typedef qSlicerCLIExecutableModuleFactoryPrivate Self;
   qSlicerCLIExecutableModuleFactoryPrivate(qSlicerCLIExecutableModuleFactory& object);
 
+  void init();
+
 private:
   QString TempDirectory;
+  ctkCmdLineModuleBackendLocalProcess CmdLineModuleBackend;
+  ctkCmdLineModuleManager * CmdLineModuleManager;
 };
 
 //-----------------------------------------------------------------------------
@@ -155,12 +98,22 @@ qSlicerCLIExecutableModuleFactoryPrivate::qSlicerCLIExecutableModuleFactoryPriva
 }
 
 //-----------------------------------------------------------------------------
+void qSlicerCLIExecutableModuleFactoryPrivate::init()
+{
+  this->CmdLineModuleManager->registerBackend(&this->CmdLineModuleBackend);
+}
+
+//-----------------------------------------------------------------------------
 // qSlicerCLIExecutableModuleFactory
 
 //-----------------------------------------------------------------------------
-qSlicerCLIExecutableModuleFactory::qSlicerCLIExecutableModuleFactory()
+qSlicerCLIExecutableModuleFactory::qSlicerCLIExecutableModuleFactory(
+    ctkCmdLineModuleManager * cmdLineModuleManager)
   : d_ptr(new qSlicerCLIExecutableModuleFactoryPrivate(*this))
 {
+  Q_D(qSlicerCLIExecutableModuleFactory);
+  d->CmdLineModuleManager = cmdLineModuleManager;
+  d->init();
 }
 
 //-----------------------------------------------------------------------------
@@ -202,7 +155,7 @@ ctkAbstractFactoryItem<qSlicerAbstractCoreModule>* qSlicerCLIExecutableModuleFac
 ::createFactoryFileBasedItem()
 {
   Q_D(qSlicerCLIExecutableModuleFactory);
-  return new qSlicerCLIExecutableModuleFactoryItem(d->TempDirectory);
+  return new qSlicerCLIExecutableModuleFactoryItem(d->CmdLineModuleManager, d->TempDirectory);
 }
 
 //-----------------------------------------------------------------------------

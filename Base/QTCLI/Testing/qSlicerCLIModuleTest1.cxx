@@ -25,6 +25,7 @@
 
 // CTK includes
 #include <ctkCallback.h>
+#include <ctkCmdLineModuleManager.h>
 
 // SlicerQt includes
 #include "qSlicerApplication.h"
@@ -122,7 +123,9 @@ int qSlicerCLIModuleTest1(int argc, char * argv[])
     return EXIT_FAILURE;
     }
 
-  moduleFactoryManager->registerFactory(new qSlicerCLILoadableModuleFactory);
+  ctkCmdLineModuleManager cmdLineModuleManager(ctkCmdLineModuleManager::WEAK_VALIDATION);
+
+  moduleFactoryManager->registerFactory(new qSlicerCLILoadableModuleFactory(&cmdLineModuleManager));
   QString cliPath = app.slicerHome() + "/" + Slicer_CLIMODULES_LIB_DIR + "/";
   moduleFactoryManager->addSearchPath(cliPath);
   moduleFactoryManager->addSearchPath(cliPath + app.intDir());

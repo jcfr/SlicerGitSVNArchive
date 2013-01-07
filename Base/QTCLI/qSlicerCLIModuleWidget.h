@@ -22,6 +22,7 @@
 #define __qSlicerCLIModuleWidget_h
 
 // CTK includes
+#include <ctkCmdLineModuleReference.h>
 #include <ctkPimpl.h>
 #include <ctkVTKObject.h>
 
@@ -34,6 +35,9 @@ class ModuleDescription;
 class vtkMRMLNode;
 class vtkMRMLCommandLineModuleNode;
 class qSlicerCLIModuleWidgetPrivate;
+
+#include <QDebug>
+#include <QMetaProperty>
 
 class Q_SLICER_BASE_QTCLI_EXPORT qSlicerCLIModuleWidget : public qSlicerAbstractModuleWidget
 {
@@ -48,9 +52,21 @@ public:
   /// Get the current \a commandLineModuleNode
   Q_INVOKABLE vtkMRMLCommandLineModuleNode * currentCommandLineModuleNode()const;
 
+  void setCmdLineModuleReference(const ctkCmdLineModuleReference& cmdLineModuleReference);
+
 public slots:
   /// Set the current \a commandLineModuleNode
   void setCurrentCommandLineModuleNode(vtkMRMLNode* commandLineModuleNode);
+
+  void listProp(QObject * obj)
+  {
+    const QMetaObject * mo = obj->metaObject();
+    for(int idx = 0; idx < mo->propertyCount(); ++idx)
+      {
+      QMetaProperty p = mo->property(idx);
+      qDebug() << p.name();
+      }
+  }
 
   void apply(bool wait = false);
   void cancel();

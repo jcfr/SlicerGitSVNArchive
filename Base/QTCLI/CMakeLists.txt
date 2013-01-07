@@ -41,8 +41,14 @@ set(KIT_SRCS
   qSlicerCLIModule.h
   qSlicerCLIModuleFactoryHelper.cxx
   qSlicerCLIModuleFactoryHelper.h
+  qSlicerCLIModuleFrontendQtGui.cxx
+  qSlicerCLIModuleFrontendQtGui.h
+  qSlicerCLIModuleQtXslTransform.cxx
+  qSlicerCLIModuleQtXslTransform.h
   qSlicerCLIModuleUIHelper.cxx
   qSlicerCLIModuleUIHelper.h
+  qSlicerCLIModuleUiLoader.cxx
+  qSlicerCLIModuleUiLoader.h
   qSlicerCLIModuleWidget.cxx
   qSlicerCLIModuleWidget.h
   qSlicerCLIModuleWidget_p.h
@@ -53,6 +59,8 @@ set(KIT_SRCS
 # Headers that should run through moc
 set(KIT_MOC_SRCS
   qSlicerCLIModule.h
+  qSlicerCLIModuleFrontendQtGui.h
+  qSlicerCLIModuleUiLoader.h
   qSlicerCLIModuleWidget.h
   qSlicerCLIModuleWidget_p.h
   qSlicerCLIModuleUIHelper.h
@@ -66,6 +74,7 @@ set(KIT_UI_SRCS
 
 # Resources
 set(KIT_resources
+  Resources/qSlicerBaseQTCLI.qrc
   )
 
 # Additional Target libraries (QT libs already included)
@@ -74,6 +83,9 @@ set(KIT_target_libraries
   qSlicerBaseQTGUI
   ModuleDescriptionParser
   MRMLCLI
+  CTKCommandLineModulesBackendLocalProcess
+  CTKCommandLineModulesCore
+  CTKCommandLineModulesFrontendQtGui
   )
 
 if(Slicer_USE_QtTesting)

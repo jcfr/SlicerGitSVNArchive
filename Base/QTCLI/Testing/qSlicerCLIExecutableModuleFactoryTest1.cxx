@@ -20,6 +20,9 @@
 
 // QT includes
 
+// CTK includes
+#include <ctkCmdLineModuleManager.h>
+
 // SlicerQt includes
 #include <qSlicerCLIExecutableModuleFactory.h>
 
@@ -34,7 +37,9 @@ int qSlicerCLIExecutableModuleFactoryTest1(int, char * [] )
                   << "Threshold";
 
   QString expectedModuleName = "Threshold";
-  qSlicerCLIExecutableModuleFactory factory;
+
+  ctkCmdLineModuleManager cmdLineModuleManager(ctkCmdLineModuleManager::WEAK_VALIDATION);
+  qSlicerCLIExecutableModuleFactory factory(&cmdLineModuleManager);
   foreach (const QString& executableName, executableNames)
     {
     QString moduleName = factory.fileNameToKey(executableName);

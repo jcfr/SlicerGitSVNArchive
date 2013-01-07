@@ -22,6 +22,9 @@
 #include <QFormLayout>
 #include <QDebug>
 
+// CTK includes
+#include <ctkCmdLineModuleXslTransform.h>
+
 // SlicerQt includes
 #include "qSlicerCLIModule.h"
 #include "qSlicerCLIModuleWidget_p.h"
@@ -38,8 +41,8 @@
 qSlicerCLIModuleWidgetPrivate::qSlicerCLIModuleWidgetPrivate(qSlicerCLIModuleWidget& object)
   :q_ptr(&object)
 {
-  this->CommandLineModuleNode = 0;
   this->CLIModuleUIHelper = 0;
+  this->CommandLineModuleNode = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -81,7 +84,12 @@ void qSlicerCLIModuleWidgetPrivate::setupUi(qSlicerWidget* widget)
   this->MRMLCommandLineModuleNodeSelector->addAttribute(
     "vtkMRMLCommandLineModuleNode", "CommandLineModule", title);
 
-  this->addParameterGroups();
+  // Add parameter groups
+  this->CLIModuleFrontendQtGui.reset(new qSlicerCLIModuleFrontendQtGui(this->CmdLineModuleReference));
+  this->VerticalLayout->addWidget(qobject_cast<QWidget*>(this->CLIModuleFrontendQtGui->guiHandle()));
+  this->CLIModuleFrontendQtGui->setMRMLScene(q->mrmlScene());
+  this->connect(q, SIGNAL(mrmlSceneChanged(vtkMRMLScene*)),
+                this->CLIModuleFrontendQtGui.data(), SLOT(setMRMLScene(vtkMRMLScene*)));
 
   // Connect buttons
   this->connect(this->ApplyPushButton, SIGNAL(pressed()),
@@ -119,7 +127,13 @@ void qSlicerCLIModuleWidgetPrivate::updateUiFromCommandLineModuleNode(
   Q_ASSERT(node);
 
   // Update parameters
-  this->CLIModuleUIHelper->updateUi(node);
+  //this->CLIModuleUIHelper->updateUi(node);
+  foreach(const QString& param, this->CLIModuleFrontendQtGui->parameterNames())
+    {
+    QString value = QString::fromStdString(node->GetParameterAsString(param.toLatin1()));
+    qDebug() << "param" << param << "value" << value;
+    this->CLIModuleFrontendQtGui->setValue(param, value);
+    }
 
   switch (node->GetStatus())
     {
@@ -159,7 +173,21 @@ void qSlicerCLIModuleWidgetPrivate::updateCommandLineModuleNodeFromUi(
   vtkMRMLCommandLineModuleNode * node =
     vtkMRMLCommandLineModuleNode::SafeDownCast(commandLineModuleNode);
   Q_ASSERT(node);
-  this->CLIModuleUIHelper->updateMRMLCommandLineModuleNode(node);
+
+  // Block ModifyEvent to be fired, only fire 1 event at the end.
+  int disabledModify = node->StartModify();
+
+  foreach(const QString& paramName, this->CLIModuleFrontendQtGui->parameterNames())
+    {
+    QVariant value = this->CLIModuleFrontendQtGui->value(paramName);
+    qDebug() << "paramName" << paramName << "value" << value;
+    qSlicerCLIModuleUIHelper::setCommandLineModuleParameter(
+          node, paramName, value);
+    }
+
+  node->EndModify(disabledModify);
+
+  //this->CLIModuleUIHelper->updateMRMLCommandLineModuleNode(node);
 }
 
 //-----------------------------------------------------------------------------
@@ -173,82 +201,82 @@ void qSlicerCLIModuleWidgetPrivate::setDefaultNodeValue(vtkMRMLNode* commandLine
   this->CLIProgressBar->setCommandLineModuleNode(vtkMRMLCommandLineModuleNode::SafeDownCast(commandLineModuleNode));
 }
 
-//-----------------------------------------------------------------------------
-void qSlicerCLIModuleWidgetPrivate::addParameterGroups()
-{
-  // iterate over each parameter group
-  const ModuleDescription& moduleDescription =
-    this->logic()->GetDefaultModuleDescription();
-  for (ParameterGroupConstIterator pgIt = moduleDescription.GetParameterGroups().begin();
-       pgIt != moduleDescription.GetParameterGroups().end(); ++pgIt)
-    {
-    this->addParameterGroup(this->VerticalLayout, *pgIt);
-    }
-}
+////-----------------------------------------------------------------------------
+//void qSlicerCLIModuleWidgetPrivate::addParameterGroups()
+//{
+//  // iterate over each parameter group
+//  const ModuleDescription& moduleDescription =
+//    this->logic()->GetDefaultModuleDescription();
+//  for (ParameterGroupConstIterator pgIt = moduleDescription.GetParameterGroups().begin();
+//       pgIt != moduleDescription.GetParameterGroups().end(); ++pgIt)
+//    {
+//    this->addParameterGroup(this->VerticalLayout, *pgIt);
+//    }
+//}
+
+////-----------------------------------------------------------------------------
+//void qSlicerCLIModuleWidgetPrivate::addParameterGroup(QBoxLayout* _layout,
+//                                                     const ModuleParameterGroup& parameterGroup)
+//{
+//  Q_ASSERT(_layout);
+
+//  ctkCollapsibleButton * collapsibleWidget = new ctkCollapsibleButton();
+//  collapsibleWidget->setText(QString::fromStdString(parameterGroup.GetLabel()));
+//  collapsibleWidget->setCollapsed(parameterGroup.GetAdvanced() == "true");
+
+//  // Create a vertical layout and add parameter to it
+//  QFormLayout *vbox = new QFormLayout;
+//  this->addParameters(vbox, parameterGroup);
+//  //vbox->addStretch(1);
+//  vbox->setVerticalSpacing(1);
+//  collapsibleWidget->setLayout(vbox);
+
+//  _layout->addWidget(collapsibleWidget);
+//}
+
+////-----------------------------------------------------------------------------
+//void qSlicerCLIModuleWidgetPrivate::addParameters(QFormLayout* _layout,
+//                                                const ModuleParameterGroup& parameterGroup)
+//{
+//  Q_ASSERT(_layout);
+//  // iterate over each parameter in this group
+//  ParameterConstIterator pBeginIt = parameterGroup.GetParameters().begin();
+//  ParameterConstIterator pEndIt = parameterGroup.GetParameters().end();
+
+//  for (ParameterConstIterator pIt = pBeginIt; pIt != pEndIt; ++pIt)
+//    {
+//    this->addParameter(_layout, *pIt);
+//    }
+//}
 
 //-----------------------------------------------------------------------------
-void qSlicerCLIModuleWidgetPrivate::addParameterGroup(QBoxLayout* _layout,
-                                                     const ModuleParameterGroup& parameterGroup)
-{
-  Q_ASSERT(_layout);
+//void qSlicerCLIModuleWidgetPrivate::addParameter(QFormLayout* _layout,
+//                                               const ModuleParameter& moduleParameter)
+//{
+//  Q_ASSERT(_layout);
 
-  ctkCollapsibleButton * collapsibleWidget = new ctkCollapsibleButton();
-  collapsibleWidget->setText(QString::fromStdString(parameterGroup.GetLabel()));
-  collapsibleWidget->setCollapsed(parameterGroup.GetAdvanced() == "true");
+//  if (moduleParameter.GetHidden() == "true")
+//    {
+//    return;
+//    }
 
-  // Create a vertical layout and add parameter to it
-  QFormLayout *vbox = new QFormLayout;
-  this->addParameters(vbox, parameterGroup);
-  //vbox->addStretch(1);
-  vbox->setVerticalSpacing(1);
-  collapsibleWidget->setLayout(vbox);
+//  QString _label = QString::fromStdString(moduleParameter.GetLabel());
+//  QString description = QString::fromStdString(moduleParameter.GetDescription());
 
-  _layout->addWidget(collapsibleWidget);
-}
+//  // TODO Parameters with flags can support the None node because they are optional
+//  int noneEnabled = 0;
+//  if (moduleParameter.GetLongFlag() != "" || moduleParameter.GetFlag() != "")
+//    {
+//    noneEnabled = 1;
+//    }
 
-//-----------------------------------------------------------------------------
-void qSlicerCLIModuleWidgetPrivate::addParameters(QFormLayout* _layout,
-                                                const ModuleParameterGroup& parameterGroup)
-{
-  Q_ASSERT(_layout);
-  // iterate over each parameter in this group
-  ParameterConstIterator pBeginIt = parameterGroup.GetParameters().begin();
-  ParameterConstIterator pEndIt = parameterGroup.GetParameters().end();
+//  QLabel* widgetLabel = new QLabel(_label);
+//  widgetLabel->setToolTip(description);
 
-  for (ParameterConstIterator pIt = pBeginIt; pIt != pEndIt; ++pIt)
-    {
-    this->addParameter(_layout, *pIt);
-    }
-}
+//  QWidget * widget = this->CLIModuleUIHelper->createTagWidget(moduleParameter);
 
-//-----------------------------------------------------------------------------
-void qSlicerCLIModuleWidgetPrivate::addParameter(QFormLayout* _layout,
-                                               const ModuleParameter& moduleParameter)
-{
-  Q_ASSERT(_layout);
-
-  if (moduleParameter.GetHidden() == "true")
-    {
-    return;
-    }
-
-  QString _label = QString::fromStdString(moduleParameter.GetLabel());
-  QString description = QString::fromStdString(moduleParameter.GetDescription());
-
-  // TODO Parameters with flags can support the None node because they are optional
-  int noneEnabled = 0;
-  if (moduleParameter.GetLongFlag() != "" || moduleParameter.GetFlag() != "")
-    {
-    noneEnabled = 1;
-    }
-
-  QLabel* widgetLabel = new QLabel(_label);
-  widgetLabel->setToolTip(description);
-
-  QWidget * widget = this->CLIModuleUIHelper->createTagWidget(moduleParameter);
-
-  _layout->addRow(widgetLabel, widget);
-}
+//  _layout->addRow(widgetLabel, widget);
+//}
 
 //-----------------------------------------------------------------------------
 void qSlicerCLIModuleWidgetPrivate::onValueChanged(const QString& name, const QVariant& value)
@@ -306,6 +334,14 @@ vtkMRMLCommandLineModuleNode * qSlicerCLIModuleWidget::currentCommandLineModuleN
   Q_D(const qSlicerCLIModuleWidget);
   return d->CommandLineModuleNode;
 }
+
+//-----------------------------------------------------------------------------
+void qSlicerCLIModuleWidget::setCmdLineModuleReference(const ctkCmdLineModuleReference& ref)
+{
+  Q_D(qSlicerCLIModuleWidget);
+  d->CmdLineModuleReference = ref;
+}
+//CTK_SET_CPP(qSlicerCLIModule, const ctkCmdLineModuleReference&, setCmdLineModuleReference, CmdLineModuleReference);
 
 //-----------------------------------------------------------------------------
 void qSlicerCLIModuleWidget::setCurrentCommandLineModuleNode(

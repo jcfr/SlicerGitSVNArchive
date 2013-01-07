@@ -67,7 +67,7 @@ class QMRML_WIDGETS_EXPORT qMRMLNodeComboBox
   Q_PROPERTY(bool editEnabled READ editEnabled WRITE setEditEnabled)
   Q_PROPERTY(bool renameEnabled READ renameEnabled WRITE setRenameEnabled)
   Q_PROPERTY(QString baseName READ baseName WRITE setBaseName)
-  Q_PROPERTY(QString currentNodeId READ currentNodeId WRITE setCurrentNode DESIGNABLE false)
+  Q_PROPERTY(QString currentNodeId READ currentNodeId WRITE setCurrentNode DESIGNABLE false USER true)
   Q_PROPERTY(QComboBox::SizeAdjustPolicy sizeAdjustPolicy READ sizeAdjustPolicy WRITE setSizeAdjustPolicy)
 
 public:

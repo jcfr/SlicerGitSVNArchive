@@ -40,6 +40,9 @@
 #endif
 
 // CTK includes
+#ifdef Slicer_BUILD_CLI_SUPPORT
+# include <ctkCmdLineModuleManager.h>
+#endif
 #ifdef Slicer_USE_PYTHONQT
 # include <ctkPythonConsole.h>
 #endif
@@ -102,20 +105,25 @@ void qSlicerApplicationHelper::setupModuleFactoryManager(qSlicerModuleFactoryMan
 #ifdef Slicer_BUILD_CLI_SUPPORT
   if (!options->disableCLIModules() && !options->runPythonAndExit())
     {
-
     QString tempDirectory =
       qSlicerCoreApplication::application()->coreCommandOptions()->tempDirectory();
+
+    ctkCmdLineModuleManager * cmdLineModuleManager =
+        new ctkCmdLineModuleManager(ctkCmdLineModuleManager::WEAK_VALIDATION, tempDirectory);
+    cmdLineModuleManager->setParent(qSlicerCoreApplication::application());
 
     // Option to prefer executable CLIs to limit memory consumption.
     bool preferExecutableCLIs =
       app->userSettings()->value("Modules/PreferExecutableCLI", false).toBool();
 
-    qSlicerCLILoadableModuleFactory* cliLoadableFactory = new qSlicerCLILoadableModuleFactory();
+    qSlicerCLILoadableModuleFactory* cliLoadableFactory =
+        new qSlicerCLILoadableModuleFactory(cmdLineModuleManager);
     cliLoadableFactory->setTempDirectory(tempDirectory);
     moduleFactoryManager->registerFactory(cliLoadableFactory, preferExecutableCLIs ? 0 : 1);
 
-    qSlicerCLIExecutableModuleFactory* cliExecutableFactory = new qSlicerCLIExecutableModuleFactory();
-        cliExecutableFactory->setTempDirectory(tempDirectory);
+    qSlicerCLIExecutableModuleFactory* cliExecutableFactory =
+        new qSlicerCLIExecutableModuleFactory(cmdLineModuleManager);
+    cliExecutableFactory->setTempDirectory(tempDirectory);
     moduleFactoryManager->registerFactory(cliExecutableFactory, preferExecutableCLIs ? 1 : 0);
 
     QString cliPath = app->slicerHome() + "/" + Slicer_CLIMODULES_LIB_DIR + "/";

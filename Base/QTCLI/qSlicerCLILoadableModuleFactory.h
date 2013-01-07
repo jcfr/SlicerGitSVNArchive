@@ -30,6 +30,7 @@
 #include "qSlicerAbstractModule.h"
 #include "qSlicerBaseQTCLIExport.h"
 
+class ctkCmdLineModuleManager;
 class ModuleLogo;
 
 //-----------------------------------------------------------------------------
@@ -37,11 +38,13 @@ class qSlicerCLILoadableModuleFactoryItem
   : public ctkFactoryLibraryItem<qSlicerAbstractCoreModule>
 {
 public:
-  qSlicerCLILoadableModuleFactoryItem(const QString& newTempDirectory);
+  qSlicerCLILoadableModuleFactoryItem(ctkCmdLineModuleManager* cmdLineModuleManager,
+                                      const QString& newTempDirectory);
 protected:
   virtual qSlicerAbstractCoreModule* instanciator();
   static bool updateLogo(qSlicerCLILoadableModuleFactoryItem* item, ModuleLogo& logo);
 private:
+  ctkCmdLineModuleManager* CmdLineModuleManager;
   QString TempDirectory;
 };
 
@@ -53,7 +56,7 @@ class Q_SLICER_BASE_QTCLI_EXPORT qSlicerCLILoadableModuleFactory :
 {
 public:
   typedef ctkAbstractLibraryFactory<qSlicerAbstractCoreModule> Superclass;
-  qSlicerCLILoadableModuleFactory();
+  qSlicerCLILoadableModuleFactory(ctkCmdLineModuleManager * cmdLineModuleManager);
   virtual ~qSlicerCLILoadableModuleFactory();
 
   /// Reimplemented to scan the directory of the command line modules

@@ -22,6 +22,7 @@
 #define __qSlicerCLIModule_h
 
 // CTK includes
+#include <ctkCmdLineModuleReference.h>
 #include <ctkPimpl.h>
 
 // SlicerQt includes
@@ -43,10 +44,8 @@ public:
   qSlicerCLIModule(QWidget *parent=0);
   virtual ~qSlicerCLIModule();
 
-  /// 
-  /// Assign the module XML description.
-  /// Note: That will also trigger the parsing of the XML structure
-  void setXmlModuleDescription(const QString& xmlModuleDescription);
+  /// \note Trigger the parsing of the XML structure
+  void setCmdLineModuleReference(const ctkCmdLineModuleReference& cmdLineModuleReference);
 
   /// Optionally set in the module XML description
   virtual int index() const;

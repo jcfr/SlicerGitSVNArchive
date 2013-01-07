@@ -208,8 +208,18 @@ int __stdcall WinMain(HINSTANCE hInstance,
   return ret;
 }
 #else
+#include <exception>
 int main(int argc, char *argv[])
 {
-  return SlicerAppMain(argc, argv);
+  int exit_code = EXIT_FAILURE;
+  try
+    {
+    exit_code = SlicerAppMain(argc, argv);
+    }
+  catch(const std::exception& e)
+    {
+    qDebug() << e.what();
+    }
+  return exit_code;
 }
 #endif

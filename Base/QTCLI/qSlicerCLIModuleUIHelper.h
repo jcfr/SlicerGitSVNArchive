@@ -122,7 +122,7 @@ public:
   void updateUi(vtkMRMLCommandLineModuleNode* commandLineModuleNode);
 
   /// Set parameter to the command line module node
-  void setCommandLineModuleParameter(vtkMRMLCommandLineModuleNode* node,
+  static void setCommandLineModuleParameter(vtkMRMLCommandLineModuleNode* node,
                                      const QString& name,
                                      const QVariant& value);
   void setValue(const QString& name, const QVariant& type);

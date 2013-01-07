@@ -29,8 +29,8 @@
 #include <ctkPimpl.h>
 
 // SlicerQt includes
-#include "qSlicerCLIModuleWidget.h"
 #include "ui_qSlicerCLIModuleWidget.h"
+#include "qSlicerCLIModuleFrontendQtGui.h"
 #include "qSlicerCLIModuleWidget.h"
 #include "qSlicerWidget.h"
 
@@ -40,6 +40,7 @@
 // STD includes
 #include <vector>
 
+class ctkCmdLineModuleFrontendQtGui;
 class QBoxLayout;
 class QFormLayout;
 class qSlicerCLIModule;
@@ -47,7 +48,8 @@ class vtkMRMLCommandLineModuleNode;
 class vtkSlicerCLIModuleLogic;
 
 //-----------------------------------------------------------------------------
-class qSlicerCLIModuleUIHelper; 
+class qSlicerCLIModuleFrontendQtGui;
+class qSlicerCLIModuleUIHelper;
 
 //-----------------------------------------------------------------------------
 class qSlicerCLIModuleWidgetPrivate: public QObject,
@@ -73,11 +75,11 @@ public:
   qSlicerCLIModule * module()const;
 
 
-  typedef std::vector<ModuleParameterGroup>::const_iterator ParameterGroupConstIterator;
-  typedef std::vector<ModuleParameterGroup>::iterator       ParameterGroupIterator;
+//  typedef std::vector<ModuleParameterGroup>::const_iterator ParameterGroupConstIterator;
+//  typedef std::vector<ModuleParameterGroup>::iterator       ParameterGroupIterator;
 
-  typedef std::vector<ModuleParameter>::const_iterator ParameterConstIterator;
-  typedef std::vector<ModuleParameter>::iterator       ParameterIterator;
+//  typedef std::vector<ModuleParameter>::const_iterator ParameterConstIterator;
+//  typedef std::vector<ModuleParameter>::iterator       ParameterIterator;
 
 
   /// 
@@ -86,13 +88,13 @@ public:
   virtual void setupUi(qSlicerWidget* widget);
 
   /// 
-  void addParameterGroups();
-  void addParameterGroup(QBoxLayout* layout,
-                         const ModuleParameterGroup& parameterGroup);
+//  void addParameterGroups();
+//  void addParameterGroup(QBoxLayout* layout,
+//                         const ModuleParameterGroup& parameterGroup);
 
   /// 
-  void addParameters(QFormLayout* layout, const ModuleParameterGroup& parameterGroup);
-  void addParameter(QFormLayout* layout, const ModuleParameter& moduleParameter);
+//  void addParameters(QFormLayout* layout, const ModuleParameterGroup& parameterGroup);
+//  void addParameter(QFormLayout* layout, const ModuleParameter& moduleParameter);
 
 public slots:
 
@@ -104,9 +106,13 @@ public slots:
   void onValueChanged(const QString& name, const QVariant& type);
 
 public:
-  qSlicerCLIModuleUIHelper* CLIModuleUIHelper; 
+  qSlicerCLIModuleUIHelper* CLIModuleUIHelper;
   
   vtkMRMLCommandLineModuleNode* CommandLineModuleNode;
+
+  QScopedPointer<qSlicerCLIModuleFrontendQtGui> CLIModuleFrontendQtGui;
+
+  ctkCmdLineModuleReference CmdLineModuleReference;
 };
 
 
