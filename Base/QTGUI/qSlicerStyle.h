@@ -22,19 +22,16 @@
 #define __qSlicerStyle_h
 
 // Qt includes
-//#include <QProxyStyle>
+#include <QProxyStyle>
 
-// CTK includes
-#include <ctkProxyStyle.h>
-
-// Slicer includes
 #include "qSlicerBaseQTGUIExport.h"
 
-class Q_SLICER_BASE_QTGUI_EXPORT qSlicerStyle : public ctkProxyStyle
+
+class Q_SLICER_BASE_QTGUI_EXPORT qSlicerStyle : public QProxyStyle
 {
 public:
   /// Superclass typedef
-  typedef ctkProxyStyle Superclass;
+  typedef QProxyStyle Superclass;
 
   /// Constructors
   qSlicerStyle();
