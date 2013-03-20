@@ -1,0 +1,66 @@
+  <!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    INTEGER parameter (default: QSpinBox)
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -->
+
+  <xsl:template match="parameters/integer" priority="1">
+    <xsl:call-template name="gridItemWithLabel"/>
+    <item  row="{position()-1}" column="1">
+      <xsl:choose>
+        <xsl:when test="not(constraints)">
+          <widget class="{$integerWidget}"  name="parameter:{name}">
+            <property name="minimum">
+              <number>-999999999</number>
+            </property>
+            <property name="maximum">
+              <number>999999999</number>
+            </property>
+            <xsl:call-template name="commonWidgetProperties"/>
+          </widget>
+        </xsl:when>
+        <xsl:otherwise>
+          <widget class="ctkSliderWidget"  name="parameter:{name}">
+            <xsl:call-template name="commonWidgetProperties"/>
+          </widget>
+        </xsl:otherwise>
+      </xsl:choose>
+    </item>
+  </xsl:template>
+
+  <!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    DOUBLE, FLOAT parameter (default: QDoubleSpinBox)
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  -->
+
+  <xsl:template match="parameters/*[name()=('double','float')]" priority="1">
+    <xsl:call-template name="gridItemWithLabel"/>
+    <item  row="{position()-1}" column="1">
+      <xsl:choose>
+        <xsl:when test="not(constraints)">
+          <widget class="{$floatingWidget}"  name="parameter:{name}">
+            <property name="decimals">
+              <number>6</number>
+            </property>
+            <property name="minimum">
+              <double>-999999999</double>
+            </property>
+            <property name="maximum">
+              <double>999999999</double>
+            </property>
+            <xsl:call-template name="commonWidgetProperties"/>
+          </widget>
+        </xsl:when>
+        <xsl:otherwise>
+          <widget class="ctkSliderWidget"  name="parameter:{name}">
+            <property name="decimals">
+              <number>6</number>
+            </property>
+            <xsl:call-template name="commonWidgetProperties"/>
+          </widget>
+        </xsl:otherwise>
+      </xsl:choose>
+    </item>
+  </xsl:template>
+
