@@ -15,6 +15,9 @@ if(Slicer_USE_PYTHONQT_WITH_TCL)
     list(APPEND python_DEPENDENCIES tcl tk)
   endif()
 endif()
+if(WIN32)
+  list(APPEND python_DEPENDENCIES zlib)
+endif()
 
 # Include dependent projects if any
 SlicerMacroCheckExternalProjectDependency(python)
@@ -83,6 +86,17 @@ if(NOT DEFINED python_DIR)
   else()
     list(APPEND python_TCL_EXTERNAL_PROJECT_ARGS
       -DENABLE_TKINTER:BOOL=OFF
+      )
+  endif()
+
+  set(python_zlib_EXTERNAL_PROJECT_ARGS)
+  if(WIN32)
+    list(APPEND python_zlib_EXTERNAL_PROJECT_ARGS
+      -DZLIB_LIBRARIES:FILEPATH=${zlib_DIR}/lib/zlib.lib
+      )
+  else()
+    list(APPEND python_zlib_EXTERNAL_PROJECT_ARGS
+      -DUSE_SYSTEM_ZLIB_ISSET:BOOL=ON
       )
   endif()
 
