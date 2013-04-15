@@ -74,6 +74,10 @@ function(gp_item_default_embedded_path_override item default_embedded_path_var)
       set(path "@executable_path@/../@Slicer_LIB_DIR@")
     endif()
 
+    if(item MATCHES "python-install/lib/python2\\.7/lib\\-dynload/[^/]+\\.so")
+      set(path "@executable_path@/../lib/Python/lib/python2.7/lib-dynload")
+    endif()
+
   endif()
 
   set(Slicer_USE_PYTHONQT_WITH_TCL "@Slicer_USE_PYTHONQT_WITH_TCL@")
@@ -172,7 +176,6 @@ function(fixup_bundle_with_plugins app)
     list(APPEND candiates_pattern
       "${app_dir}/Contents/@Slicer_LIB_DIR@/*Python.so"
       "${app_dir}/Contents/@Slicer_LIB_DIR@/*PythonQt.so"
-      "${app_dir}/Contents/lib/Python/lib/python2.7/site-packages/*.so"
       "${app_dir}/Contents/lib/Python/lib/python2.7/lib-dynload/*.so"
       )
   endif()
