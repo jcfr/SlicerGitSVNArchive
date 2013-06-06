@@ -294,6 +294,8 @@ void qMRMLLabelComboBox::updateWidgetFromMRML()
   //qDebug() << "qMRMLLabelComboBox::updateWidgetFromMRML";
 
   d->ComboBox->clear();
+
+  d->CurrentColor = -1;
   
   if (!d->ColorNode->GetNamesInitialised())
     {
@@ -343,5 +345,5 @@ void qMRMLLabelComboBox::updateWidgetFromMRML()
     d->ComboBox->addItem(colorIcon, text);
 
     }
-  d->CurrentColor = -1;
+  this->onCurrentIndexChanged(this->noneEnabled() ? 1 : 0);
 }
