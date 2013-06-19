@@ -198,6 +198,15 @@ void qSlicerCoreApplicationPrivate::init()
   this->setPythonEnvironmentVariables();
   this->setTclEnvironmentVariables();
 
+#ifdef Slicer_BUILD_CLI_SUPPORT
+  // This environment variables are set to give CLIs a way to retrieve
+  // application specific settings.
+  this->setEnvironmentVariable(
+        "SEM_APPLICATION_USER_SETTINGS", q->userSettings());
+  this->setEnvironmentVariable(
+        "SEM_APPLICATION_REVISION_USER_SETTINGS", q->revisionUserSettings()->fileName());
+#endif
+
   // Instantiate ErrorLogModel
   this->ErrorLogModel = QSharedPointer<ctkErrorLogModel>(new ctkErrorLogModel);
   this->ErrorLogModel->setLogEntryGrouping(true);
