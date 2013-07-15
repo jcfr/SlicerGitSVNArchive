@@ -154,7 +154,26 @@ bool qSlicerScriptedLoadableModule::setPythonSource(const QString& newPythonSour
   if (!classToInstantiate)
     {
     PyDict_SetItemString(global_dict, "__name__", PyString_FromString(className.toLatin1()));
-    PyObject * pyRes = PyRun_String(QString("execfile('%1')").arg(newPythonSource).toLatin1(),
+
+    QString path = QFileInfo(newPythonSource).absolutePath();
+    // See http://nedbatchelder.com/blog/200711/rethrowing_exceptions_in_python.html
+    QStringList code = QStringList()
+      << "import sys"
+      << QString("sys.path.insert(0, '%1')").arg(path)
+      << "_updated_globals = globals()"
+      << QString("_updated_globals['__file__'] = '%1'").arg(newPythonSource)
+      << "_slicer_executeFile_exc_info = None"
+      << "try:"
+      << QString("    execfile('%1', _updated_globals)").arg(newPythonSource)
+      << "except Exception, e:"
+      << "    _slicer_executeFile_exc_info = sys.exc_info()"
+      << "finally:"
+      << "    del _updated_globals"
+      << QString("    if sys.path[0] == '%1': sys.path.pop(0)").arg(path)
+      << "    if _slicer_executeFile_exc_info:"
+      << "        raise _slicer_executeFile_exc_info[1], None, _slicer_executeFile_exc_info[2]";
+
+    PyObject * pyRes = PyRun_String(code.join("\n").toLatin1(),
                                     Py_file_input, global_dict, global_dict);
     if (!pyRes)
       {
