@@ -58,6 +58,7 @@ protected slots:
   void onAddModulesAdditionalPathClicked();
   void onRemoveModulesAdditionalPathClicked();
   void onModulesToIgnoreChanged();
+  void onEnableModulesAdditionalClicked();
 
 protected:
   QScopedPointer<qSlicerSettingsModulesPanelPrivate> d_ptr;

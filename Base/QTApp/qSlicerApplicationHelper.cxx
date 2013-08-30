@@ -123,7 +123,7 @@ void qSlicerApplicationHelper::setupModuleFactoryManager(qSlicerModuleFactoryMan
     }
 #endif
   moduleFactoryManager->addSearchPaths(
-    app->revisionUserSettings()->value("Modules/AdditionalPaths").toStringList());
+    qSlicerLoadableModuleFactory::decodePaths(app->revisionUserSettings()->value("Modules/AdditionalPaths").toStringList()));
   QStringList ignoreModules =
     app->revisionUserSettings()->value("Modules/IgnoreModules").toStringList();
   moduleFactoryManager->setModulesToIgnore(ignoreModules);

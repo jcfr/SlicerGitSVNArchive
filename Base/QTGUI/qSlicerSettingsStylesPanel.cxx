@@ -203,7 +203,7 @@ void qSlicerSettingsStylesPanel::onAdditionalStylePathsChanged()
     }
 
   // Add new ones
-  d->AdditionalPaths = d->AdditionalStylePathsView->directoryList(true);
+  d->AdditionalPaths = d->AdditionalStylePathsView->directoryList();
   foreach(const QString&  path, d->AdditionalPaths)
     {
     QCoreApplication::addLibraryPath(path);

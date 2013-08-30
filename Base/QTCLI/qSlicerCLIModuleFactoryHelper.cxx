@@ -26,6 +26,7 @@
 
 // SlicerQT includes
 #include "qSlicerCoreApplication.h" // For: Slicer_CLIMODULES_LIB_DIR
+#include "qSlicerLoadableModuleFactory.h"
 #include "qSlicerUtils.h"
 
 //-----------------------------------------------------------------------------
@@ -51,7 +52,8 @@ const QStringList qSlicerCLIModuleFactoryHelper::modulePaths()
     }
 
   QSettings * settings = app->revisionUserSettings();
-  QStringList additionalModulePaths = settings->value("Modules/AdditionalPaths").toStringList();
+  QStringList additionalModulePaths =
+      qSlicerLoadableModuleFactory::decodePaths(settings->value("Modules/AdditionalPaths").toStringList());
   QStringList cmdLineModulePaths = additionalModulePaths + defaultCmdLineModulePaths;
   foreach(const QString& path, cmdLineModulePaths)
     {

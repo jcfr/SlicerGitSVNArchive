@@ -28,6 +28,7 @@
 // SlicerQt includes
 #include "qSlicerScriptedLoadableModuleFactory.h"
 #include "qSlicerCoreApplication.h"
+#include "qSlicerLoadableModuleFactory.h"
 #include "qSlicerScriptedLoadableModule.h"
 #include "qSlicerUtils.h"
 #ifdef Slicer_USE_PYTHONQT
@@ -130,7 +131,8 @@ QStringList qSlicerScriptedLoadableModuleFactoryPrivate::modulePaths() const
   // Add the default modules directory (based on the slicer
   // installation or build tree) to the user paths
   QSettings * settings = app->revisionUserSettings();
-  QStringList additionalModulePaths = settings->value("Modules/AdditionalPaths").toStringList();
+  QStringList additionalModulePaths =
+      qSlicerLoadableModuleFactory::decodePaths(settings->value("Modules/AdditionalPaths").toStringList());
   QStringList qtModulePaths = additionalModulePaths + defaultQTModulePaths;
 
 //  qDebug() << "scriptedModulePaths:" << qtModulePaths;

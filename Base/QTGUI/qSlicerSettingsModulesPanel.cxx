@@ -74,7 +74,10 @@ void qSlicerSettingsModulesPanelPrivate::init()
                    q, SLOT(onShowHiddenModulesChanged(bool)));
 
   // Additional module paths
+  this->AdditionalModulePathsView->setHasEnableDisableFeature(true);
   this->AdditionalModulePathMoreButton->setChecked(false);
+  QObject::connect(this->AdditionalModulePathsView, SIGNAL(directorySelectionChanged()),
+                   q, SLOT(onAdditionalModulePathsChanged()));
 
   // Modules
   qSlicerModuleFactoryFilterModel* filterModel =
@@ -126,6 +129,11 @@ void qSlicerSettingsModulesPanelPrivate::init()
   favorites  << "Volumes" << "Models" << "Transforms" << "Markups" << "Editor";
   this->FavoritesModulesListView->filterModel()->setShowModules(favorites);
 
+  // Actions to propagate to the application when settings are changed.
+  // Note: Done before registering the settings so that panel can be updated.
+  QObject::connect(this->AdditionalModulePathsView, SIGNAL(directoryListChanged()),
+                   q, SLOT(onAdditionalModulePathsChanged()));
+
   // Register settings
   q->registerProperty("disable-loadable-modules", this->LoadLoadableModulesCheckBox,
                       "checked", SIGNAL(toggled(bool)));
@@ -144,7 +152,7 @@ void qSlicerSettingsModulesPanelPrivate::init()
   q->registerProperty("Modules/ShowHiddenModules", this->ShowHiddenModulesCheckBox,
                       "checked", SIGNAL(toggled(bool)));
   q->registerProperty("Modules/AdditionalPaths", this->AdditionalModulePathsView,
-                      "directoryList", SIGNAL(directoryListChanged()),
+                      "encodedDirectoryList", SIGNAL(directoryListChanged()),
                       "Additional module paths", ctkSettingsPanel::OptionRequireRestart,
                       coreApp->revisionUserSettings());
   q->registerProperty("Modules/IgnoreModules", factoryManager,
@@ -155,14 +163,14 @@ void qSlicerSettingsModulesPanelPrivate::init()
   // Actions to propagate to the application when settings are changed
   QObject::connect(this->TemporaryDirectoryButton, SIGNAL(directoryChanged(QString)),
                    q, SLOT(onTemporaryPathChanged(QString)));
-  QObject::connect(this->AdditionalModulePathsView, SIGNAL(directoryListChanged()),
-                   q, SLOT(onAdditionalModulePathsChanged()));
 
   // Connect AdditionalModulePaths buttons
   QObject::connect(this->AddAdditionalModulePathButton, SIGNAL(clicked()),
                    q, SLOT(onAddModulesAdditionalPathClicked()));
   QObject::connect(this->RemoveAdditionalModulePathButton, SIGNAL(clicked()),
                    q, SLOT(onRemoveModulesAdditionalPathClicked()));
+  QObject::connect(this->EnableAdditionalModulePathButton, SIGNAL(clicked()),
+                   q, SLOT(onEnableModulesAdditionalClicked()));
 
   // Connect Modules to ignore
   QObject::connect(factoryManager, SIGNAL(modulesToIgnoreChanged(QStringList)),
@@ -220,8 +228,10 @@ void qSlicerSettingsModulesPanel::onShowHiddenModulesChanged(bool show)
 void qSlicerSettingsModulesPanel::onAdditionalModulePathsChanged()
 {
   Q_D(qSlicerSettingsModulesPanel);
-  d->RemoveAdditionalModulePathButton->setEnabled(
-        d->AdditionalModulePathsView->directoryList().count() > 0);
+  bool selected = d->AdditionalModulePathsView->selectedDirectoryList().count() > 0;
+  int added = d->AdditionalModulePathsView->directoryList().count() > 0;
+  d->RemoveAdditionalModulePathButton->setEnabled(selected && added);
+  d->EnableAdditionalModulePathButton->setEnabled(selected && added);
 }
 
 // --------------------------------------------------------------------------
@@ -253,3 +263,9 @@ void qSlicerSettingsModulesPanel::onRemoveModulesAdditionalPathClicked()
   d->AdditionalModulePathsView->removeSelectedDirectories();
 }
 
+// --------------------------------------------------------------------------
+void qSlicerSettingsModulesPanel::onEnableModulesAdditionalClicked()
+{
+  Q_D(qSlicerSettingsModulesPanel);
+  d->AdditionalModulePathsView->toggleSelectedDirectories();
+}

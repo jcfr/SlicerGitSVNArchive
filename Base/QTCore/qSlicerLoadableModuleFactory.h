@@ -62,6 +62,11 @@ public:
   /// \sa qSlicerUtils::extractModuleNameFromLibraryName
   static QString extractModuleName(const QString& libraryName);
 
+  /// Return the enabled or disabled paths associated with a QStringList.
+  /// An encoded path is regular path optionally appended with the string "?disabled=1"
+  /// \sa qSlicerDirectoryListView::encodedDirectoryList()
+  static QStringList decodePaths(const QStringList& encodedPaths, bool enabled = true);
+
 protected:
   virtual qSlicerLoadableModuleFactoryItem* createFactoryFileBasedItem();
 

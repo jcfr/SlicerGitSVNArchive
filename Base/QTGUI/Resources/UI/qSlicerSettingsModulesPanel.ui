@@ -6,21 +6,75 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>538</height>
+    <width>718</width>
+    <height>652</height>
    </rect>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Module</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
-   <property name="fieldGrowthPolicy">
-    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-   </property>
    <item row="0" column="0">
     <widget class="QLabel" name="LoadLoadableModulesLabel">
      <property name="text">
       <string>Skip loading of:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QCheckBox" name="LoadLoadableModulesCheckBox">
+       <property name="toolTip">
+        <string>To temporarilly disable, pass --disable-loadable-modules on the command line</string>
+       </property>
+       <property name="text">
+        <string>loadable modules</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="LoadCommandLineModulesCheckBox">
+       <property name="toolTip">
+        <string>To temporarily disable, pass --disable-cli-modules on the command line</string>
+       </property>
+       <property name="text">
+        <string>command-line plugins</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="LoadScriptedLoadableModulesCheckBox">
+       <property name="toolTip">
+        <string>To temporarily disable, pass  --disable-scripted-loadable-modules on the command line</string>
+       </property>
+       <property name="text">
+        <string>scripted loadable modules</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="PreferExecutableCLILabel">
+     <property name="toolTip">
+      <string>To limit memory consumption, loading executable CLIs is prefered as they don't load in Slicer's memory</string>
+     </property>
+     <property name="text">
+      <string>Prefer Executable CLIs:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QCheckBox" name="PreferExecutableCLICheckBox">
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </item>
@@ -56,71 +110,100 @@
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QWidget" name="AdditionalModulePathsWidget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="margin">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="qSlicerDirectoryListView" name="AdditionalModulePathsView" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="qSlicerDirectoryListView" name="AdditionalModulePathsView" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>140</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="AdditionalModulePathsGroupBox">
+       <property name="title">
+        <string>Paths</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinimumSize</enum>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>Paths</string>
+        <property name="margin">
+         <number>0</number>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QPushButton" name="AddAdditionalModulePathButton">
-           <property name="text">
-            <string>Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="RemoveAdditionalModulePathButton">
-           <property name="text">
-            <string>Remove</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="ctkExpandButton" name="AdditionalModulePathMoreButton">
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-        <property name="mirrorOnExpand">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+        <item>
+         <widget class="QPushButton" name="AddAdditionalModulePathButton">
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="RemoveAdditionalModulePathButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="EnableAdditionalModulePathButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Enable/Disable</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="ctkExpandButton" name="AdditionalModulePathMoreButton">
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>114</height>
+        </size>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+       <property name="mirrorOnExpand">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="6" column="0">
+   <item row="5" column="0">
     <widget class="QLabel" name="DisableModulesLabel">
      <property name="toolTip">
       <string>when checking/unchecking a module, its dependencies are checked/unchecked accordingly</string>
@@ -130,7 +213,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="5" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="qSlicerModulesListView" name="DisableModulesListView">
@@ -388,21 +471,21 @@
      </item>
     </layout>
    </item>
-   <item row="7" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="HomeModuleLabel">
      <property name="text">
       <string>Default startup module:</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="6" column="1">
     <widget class="QPushButton" name="HomeModuleButton">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="FavoritesModulesLabel">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -421,7 +504,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="7" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="qSlicerModulesListView" name="FavoritesModulesListView">
@@ -523,68 +606,12 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="PreferExecutableCLILabel">
-     <property name="toolTip">
-      <string>To limit memory consumption, loading executable CLIs is prefered as they don't load in Slicer's memory</string>
-     </property>
-     <property name="text">
-      <string>Prefer Executable CLIs:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="PreferExecutableCLICheckBox">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QCheckBox" name="LoadLoadableModulesCheckBox">
-       <property name="toolTip">
-        <string>To temporarilly disable, pass --disable-loadable-modules on the command line</string>
-       </property>
-       <property name="text">
-        <string>loadable modules</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="LoadCommandLineModulesCheckBox">
-       <property name="toolTip">
-        <string>To temporarily disable, pass --disable-cli-modules on the command line</string>
-       </property>
-       <property name="text">
-        <string>command-line plugins</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="LoadScriptedLoadableModulesCheckBox">
-       <property name="toolTip">
-        <string>To temporarily disable, pass  --disable-scripted-loadable-modules on the command line</string>
-       </property>
-       <property name="text">
-        <string>scripted loadable modules</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>qSlicerModulesListView</class>
-   <extends>QListView</extends>
-   <header>qSlicerModulesListView.h</header>
-  </customwidget>
-  <customwidget>
    <class>ctkCheckablePushButton</class>
-   <extends>QPushButton</extends>
+   <extends>ctkPushButton</extends>
    <header>ctkCheckablePushButton.h</header>
   </customwidget>
   <customwidget>
@@ -598,6 +625,11 @@
    <header>ctkExpandButton.h</header>
   </customwidget>
   <customwidget>
+   <class>ctkPushButton</class>
+   <extends>QPushButton</extends>
+   <header>ctkPushButton.h</header>
+  </customwidget>
+  <customwidget>
    <class>ctkSearchBox</class>
    <extends>QLineEdit</extends>
    <header>ctkSearchBox.h</header>
@@ -607,6 +639,11 @@
    <extends>QWidget</extends>
    <header>ctkSettingsPanel.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerModulesListView</class>
+   <extends>QListView</extends>
+   <header>qSlicerModulesListView.h</header>
   </customwidget>
   <customwidget>
    <class>qSlicerDirectoryListView</class>
@@ -652,7 +689,7 @@
   <connection>
    <sender>AdditionalModulePathMoreButton</sender>
    <signal>toggled(bool)</signal>
-   <receiver>groupBox</receiver>
+   <receiver>AdditionalModulePathsGroupBox</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">

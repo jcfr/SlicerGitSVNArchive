@@ -346,7 +346,7 @@ bool hasPath(const QStringList& paths, const QString& pathToCheck)
   QDir dirToCheck(pathToCheck);
   foreach(const QString& path, paths)
     {
-    if (dirToCheck == QDir(path))
+    if (dirToCheck == QDir(QUrl(path).path()))
       {
       return true;
       }
@@ -385,7 +385,7 @@ QStringList removeFromPathList(QStringList& paths, const QString& pathToRemove)
   QDir extensionDir(pathToRemove);
   foreach(const QString& path, paths)
     {
-    if (extensionDir == QDir(path))
+    if (extensionDir == QDir(QUrl(path).path()))
       {
       paths.removeOne(path);
       break;

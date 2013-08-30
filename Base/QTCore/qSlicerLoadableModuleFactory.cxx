@@ -20,6 +20,7 @@
 
 // Qt includes
 #include <QSettings>
+#include <QUrl>
 
 // For:
 //  - Slicer_QTLOADABLEMODULES_LIB_DIR
@@ -91,7 +92,8 @@ QStringList qSlicerLoadableModuleFactoryPrivate::modulePaths() const
     }
 
   QSettings * settings = app->revisionUserSettings();
-  QStringList additionalModulePaths = settings->value("Modules/AdditionalPaths").toStringList();
+  QStringList additionalModulePaths =
+      qSlicerLoadableModuleFactory::decodePaths(settings->value("Modules/AdditionalPaths").toStringList());
   QStringList qtModulePaths =  additionalModulePaths + defaultQTModulePaths;
 
   //qDebug() << "qtModulePaths:" << qtModulePaths;
@@ -131,6 +133,22 @@ QString qSlicerLoadableModuleFactory::fileNameToKey(const QString& fileName)cons
 QString qSlicerLoadableModuleFactory::extractModuleName(const QString& libraryName)
 {
   return qSlicerUtils::extractModuleNameFromLibraryName(libraryName);
+}
+
+//-----------------------------------------------------------------------------
+QStringList qSlicerLoadableModuleFactory::decodePaths(const QStringList &encodedPaths, bool enabled)
+{
+  QStringList paths;
+  foreach(const QString& encodedPath, encodedPaths)
+    {
+    QUrl url(encodedPath);
+    bool pathEnabled = !QVariant(url.queryItemValue("disabled")).toBool();
+    if ((enabled && pathEnabled) || (!enabled && !pathEnabled))
+      {
+      paths << url.path();
+      }
+    }
+  return paths;
 }
 
 //-----------------------------------------------------------------------------
