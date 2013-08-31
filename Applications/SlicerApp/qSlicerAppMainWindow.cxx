@@ -481,6 +481,12 @@ void qSlicerAppMainWindowPrivate::setupRecentlyLoadedMenu(const QList<qSlicerIO:
         this->menuRecentlyLoaded->addAction(fileName, q, SLOT(onFileRecentLoadedActionTriggered()));
     action->setProperty("fileParameters", filePropertie);
     action->setEnabled(QFile::exists(fileName));
+    QString fileLoadDateTime = filePropertie.value("fileLoadDateTime").toString();
+    if (!fileLoadDateTime.isEmpty())
+      {
+      action->setStatusTip(QString("Last loaded on %1").arg(fileLoadDateTime));
+      action->setToolTip(QString("Last loaded on %1").arg(fileLoadDateTime));
+      }
     }
 
   // Add separator and clear action

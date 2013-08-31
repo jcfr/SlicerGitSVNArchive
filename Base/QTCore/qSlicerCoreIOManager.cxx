@@ -387,6 +387,7 @@ bool qSlicerCoreIOManager::loadNodes(const qSlicerIO::IOFileType& fileType,
 
   qSlicerIO::IOProperties parametersWithFileType = parameters;
   parametersWithFileType.insert("fileType", fileType);
+  parametersWithFileType.insert("fileLoadDateTime", QDateTime::currentDateTime().toString());
 
   const QList<qSlicerFileReader*>& readers = this->readers(fileType);
 
