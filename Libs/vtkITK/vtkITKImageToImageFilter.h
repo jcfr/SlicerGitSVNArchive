@@ -20,7 +20,7 @@
 #include "itkProcessObject.h"
 #include "vtkImageImport.h"
 #include "vtkImageExport.h"
-#include "vtkImageToImageFilter.h"
+#include "vtkImageAlgorithm.h"
 #include "vtkImageCast.h"
 #include "vtkImageData.h"
 
@@ -46,7 +46,7 @@
 /// \brief Abstract base class for connecting ITK and VTK.
 ///
 /// vtkITKImageToImageFilter provides a foo.
-class VTK_ITK_EXPORT vtkITKImageToImageFilter : public vtkImageToImageFilter
+class VTK_ITK_EXPORT vtkITKImageToImageFilter : public vtkImageAlgorithm
 {
 public:
   static vtkITKImageToImageFilter *New()
@@ -54,7 +54,7 @@ public:
      return new vtkITKImageToImageFilter;
    };
   
-  vtkTypeMacro(vtkITKImageToImageFilter,vtkImageToImageFilter);
+  vtkTypeMacro(vtkITKImageToImageFilter,vtkImageAlgorithm);
 
   void PrintSelf(ostream& os, vtkIndent indent)
   {
@@ -126,7 +126,7 @@ public:
   /// 
   /// This method returns the cache to make a connection
   /// It justs feeds the request to the sub filter.
-  void SetOutput ( vtkImageData* d ) { this->vtkImporter->SetOutput ( d ); };
+  virtual void SetOutput ( vtkDataObject* d ) { this->vtkImporter->SetOutput ( d ); };
   virtual vtkImageData *GetOutput() { return this->vtkImporter->GetOutput(); };
   virtual vtkImageData *GetOutput(int idx)
   {

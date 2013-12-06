@@ -19,7 +19,7 @@ Version:   $Revision$
 #include "vtkITK.h"
 
 // VTK includes
-#include "vtkImageSource.h"
+#include "vtkImageAlgorithm.h"
 class vtkMatrix4x4;
 
 // ITK includes
@@ -40,11 +40,11 @@ class vtkMatrix4x4;
 /// This work is part of the National Alliance for Medical Image Computing 
 /// (NAMIC), funded by the National Institutes of Health through the NIH Roadmap
 /// for Medical Research, Grant U54 EB005149.
-class VTK_ITK_EXPORT vtkITKArchetypeImageSeriesReader : public vtkImageSource
+class VTK_ITK_EXPORT vtkITKArchetypeImageSeriesReader : public vtkImageAlgorithm
 {
 public:
   static vtkITKArchetypeImageSeriesReader *New();
-  vtkTypeRevisionMacro(vtkITKArchetypeImageSeriesReader,vtkImageSource);
+  vtkTypeRevisionMacro(vtkITKArchetypeImageSeriesReader,vtkImageAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);   
 
   typedef itk::SpatialOrientation::ValidCoordinateOrientationFlags CoordinateOrientationCode;
@@ -212,12 +212,12 @@ public:
     UseNativeOrigin = false;
     }
 
-  /// 
+  ///
   /// Get the file format.  Pixels are this type in the file.
   vtkSetMacro(OutputScalarType, int);
   vtkGetMacro(OutputScalarType, int);
 
-  /// 
+  ///
   /// Get number of scalars
   vtkSetMacro(NumberOfComponents, unsigned int);
   vtkGetMacro(NumberOfComponents, unsigned int);
@@ -828,7 +828,7 @@ protected:
   std::vector<std::string> FileNames;
   std::vector<std::pair <double, int> > FileNameSliceKey;
   CoordinateOrientationCode DesiredCoordinateOrientation;
-  virtual void ExecuteInformation();
+  virtual int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   /// defined in the subclasses
   virtual void ExecuteData(vtkDataObject *data);
 

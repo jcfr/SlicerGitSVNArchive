@@ -1,5 +1,8 @@
 #include "vtkImageRectangularSource.h"
+#include "vtkInformation.h"
+#include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 #include "assert.h"
 #include "vtkImageData.h"
 
@@ -99,14 +102,19 @@ void vtkImageRectangularSource::GetWholeExtent(int extent[6])
 }
 
 //----------------------------------------------------------------------------
-void vtkImageRectangularSource::ExecuteInformation()
+int vtkImageRectangularSource::RequestInformation(
+  vtkInformation * vtkNotUsed(request),
+  vtkInformationVector **vtkNotUsed(inputVector),
+  vtkInformationVector *outputVector)
 {
-  vtkImageData *data = this->GetOutput();
-  
-  data->SetSpacing(1.0, 1.0, 1.0);
-  data->SetWholeExtent(this->WholeExtent);
-  data->SetNumberOfScalarComponents(1);
-  data->SetScalarType(this->OutputScalarType);
+  // get the info objects
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
+
+  double spacing[3] = {1.0, 1.0, 1.0};
+  outInfo->Set(vtkDataObject::SPACING(), spacing, 3);
+  outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), this->WholeExtent, 6);
+  vtkDataObject::SetPointDataActiveScalarInfo(outInfo, this->OutputScalarType, 1);
+  return 1;
 }
 
 //----------------------------------------------------------------------------
