@@ -496,6 +496,12 @@ message(STATUS "Configuring ${SlicerApp_APPLICATION_NAME} version [${Slicer_VERS
 message(STATUS "Configuring ${SlicerApp_APPLICATION_NAME} revision [${Slicer_WC_REVISION}]")
 
 #-----------------------------------------------------------------------------
+# Get operating system, architecture and bitness
+#-----------------------------------------------------------------------------
+SlicerMacroGetOperatingSystemArchitectureBitness(VAR_PREFIX Slicer)
+message(STATUS "Configuring ${SlicerApp_APPLICATION_NAME} for [${Slicer_OS}-${Slicer_ARCHITECTURE}]")
+
+#-----------------------------------------------------------------------------
 # Slicer sub-directories
 #-----------------------------------------------------------------------------
 set(Slicer_BIN_DIR "bin")
@@ -543,7 +549,7 @@ if(Slicer_BUILD_CLI_SUPPORT)
 endif()
 
 #-----------------------------------------------------------------------------
-# ITKv4 - Slicer_ITK_COMPONENTS
+# ITKv4
 #-----------------------------------------------------------------------------
 set(Slicer_ITK_COMPONENTS "")
 if(${ITK_VERSION_MAJOR} GREATER 3)
@@ -619,6 +625,11 @@ if(${ITK_VERSION_MAJOR} GREATER 3)
     ITKZLIB
     ${ITK_IO_MODULES_USED}
     )
+endif()
+
+if(Slicer_BITNESS EQUAL 64)
+  set(ITK_USE_64BITS_IDS 1)
+  mark_as_superbuild(VARS ITK_USE_64BITS_IDS PROJECTS ITKv4)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -737,12 +748,6 @@ set(Slicer_Base_INCLUDE_DIRS CACHE INTERNAL "Slicer Base includes" FORCE)
 set(Slicer_ModuleLogic_INCLUDE_DIRS CACHE INTERNAL "Slicer Module logic includes" FORCE)
 set(Slicer_ModuleMRML_INCLUDE_DIRS CACHE INTERNAL "Slicer Module MRML includes" FORCE)
 set(Slicer_ModuleWidgets_INCLUDE_DIRS CACHE INTERNAL "Slicer Module Widgets includes" FORCE)
-
-#-----------------------------------------------------------------------------
-# Get operating system, architecture and bitness
-#-----------------------------------------------------------------------------
-SlicerMacroGetOperatingSystemArchitectureBitness(VAR_PREFIX Slicer)
-message(STATUS "Configuring ${SlicerApp_APPLICATION_NAME} for [${Slicer_OS}-${Slicer_ARCHITECTURE}]")
 
 #-----------------------------------------------------------------------------
 # ExternalData configuration for test data
