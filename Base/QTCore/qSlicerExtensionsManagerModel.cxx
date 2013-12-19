@@ -1533,6 +1533,48 @@ bool qSlicerExtensionsManagerModel::extractExtensionArchive(
 }
 
 // --------------------------------------------------------------------------
+bool qSlicerExtensionsManagerModel::installExtensionPackage(const QString& archiveFile)
+{
+  Q_D(qSlicerExtensionsManagerModel);
+
+  // Create temporary directory
+  QString extensionName = QString("%1-%2")
+      .arg(QFileInfo(archiveFile).baseName())
+      .arg(QTime::currentTime().toString("hhmmsszzz"));
+
+  // Extract archive
+  if (!this->extractExtensionArchive(extensionName, archiveFile, this->extensionsInstallPath()))
+    {
+    return false;
+    }
+
+  // Lookup description file
+  QDir descriptionDir = QDir(QDir(this->extensionInstallPath(extensionName)).filePath(
+                               QString(Slicer_SHARE_DIR).replace(
+                                     Slicer_VERSION, d->SlicerVersion)));
+  QString descriptionFile = descriptionDir.filePath(
+        descriptionDir.entryList(QStringList() << "*.s4ext").first());
+  if (!QFile::exists(descriptionFile))
+    {
+    qWarning() << "Failed to lookup extension description file in extension archive" << descriptionFile;
+    return false;
+    }
+
+  // Parse description file
+  ExtensionMetadataType metadata = this->parseExtensionDescriptionFile(descriptionFile);
+  // XXX Check metadata
+
+  // Remove temporary directory used to lookup the description file
+  if (!ctk::removeDirRecursively(this->extensionInstallPath(extensionName)))
+    {
+    qWarning() << "Failed to remove temporary directory" << this->extensionInstallPath(extensionName);
+    return false;
+    }
+
+  return this->installExtension(metadata.value("extensionname").toString(), metadata, archiveFile);
+}
+
+// --------------------------------------------------------------------------
 bool qSlicerExtensionsManagerModel::writeExtensionDescriptionFile(const QString& file, const ExtensionMetadataType &metadata)
 {
   QFile outputFile(file);
