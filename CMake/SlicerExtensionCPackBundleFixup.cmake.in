@@ -62,6 +62,13 @@ function(gp_item_default_embedded_path_override item default_embedded_path_var)
     set(path "@fixup_path@/@Slicer_LIB_DIR@")
   endif()
 
+  set(Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS "@Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS@")
+  foreach(dir ${Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS})
+    if(item MATCHES "${dir}/.+\\.(dylib|so)$")
+      set(path "@fixup_path@/@Slicer_BUNDLE_EXTENSIONS_LOCATION@thirdparty")
+    endif()
+  endforeach()
+
   set(Slicer_USE_PYTHONQT "@Slicer_USE_PYTHONQT@")
   if(Slicer_USE_PYTHONQT)
     # Python library
@@ -320,6 +327,11 @@ function(fixup_slicer_extension)
   if(Slicer_BUILD_CLI_SUPPORT)
     list(APPEND libs_path "@EXTENSION_BINARY_DIR@/@Slicer_CLIMODULES_LIB_DIR@")
   endif()
+
+  set(Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS "@Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS@")
+  foreach(dir ${Slicer_EXTENSION_EXTERNAL_PROJECT_LIBRARY_DIRS})
+    list(APPEND libs_path ${dir})
+  endforeach()
 
   list(REMOVE_DUPLICATES libs_path)
 
