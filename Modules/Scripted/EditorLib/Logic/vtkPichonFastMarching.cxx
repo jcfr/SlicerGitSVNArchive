@@ -64,11 +64,11 @@ float vtkPichonFastMarching::speed( int index )
 
   float s=(float)pow(pI*pI*pH, powerSpeed);
   // make sure speed is not too small
-  s*=1e10;
+  s*=1e10f;
 
   if(!isfinite(s))
     {
-    s = 1.;
+    s = 1.0F;
     if(!warned){
       std::cerr << "WARNING: s set to 1.0, since it was not finite()" << std::endl;
       warned = true;
