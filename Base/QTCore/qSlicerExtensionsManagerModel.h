@@ -164,6 +164,9 @@ public:
                                            const QString& archiveFile,
                                            const QString &destinationPath);
 
+
+  Q_INVOKABLE bool installExtensionPackage(const QString& archiveFile);
+
   /// Return the item model used internally
   Q_INVOKABLE const QStandardItemModel * model()const;
 
