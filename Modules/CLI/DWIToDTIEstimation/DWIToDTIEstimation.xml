@@ -49,7 +49,7 @@
       <flag>e</flag>
       <longflag>enumeration</longflag>
       <description><![CDATA[LS: Least Squares, WLS: Weighted Least Squares]]></description>
-      <label>Estimation Parameters</label>
+      <label>Estimation Methods</label>
       <default>LS</default>
       <element>LS</element>
       <element>WLS</element>
