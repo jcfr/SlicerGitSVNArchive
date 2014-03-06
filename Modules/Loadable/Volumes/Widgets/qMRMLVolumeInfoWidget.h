@@ -27,13 +27,14 @@
 
 // qMRML includes
 #include "qMRMLWidget.h"
-#include "qMRMLWidgetsExport.h"
+
+#include "qSlicerVolumesModuleWidgetsExport.h"
 
 class qMRMLVolumeInfoWidgetPrivate;
 class vtkMRMLNode;
 class vtkMRMLVolumeNode;
 
-class QMRML_WIDGETS_EXPORT qMRMLVolumeInfoWidget : public qMRMLWidget
+class Q_SLICER_QTMODULES_VOLUMES_WIDGETS_EXPORT qMRMLVolumeInfoWidget : public qMRMLWidget
 {
   Q_OBJECT
   QVTK_OBJECT
@@ -44,11 +45,11 @@ public:
 
   qMRMLVolumeInfoWidget(QWidget *parent=0);
   virtual ~qMRMLVolumeInfoWidget();
-  
+
   vtkMRMLVolumeNode* volumeNode()const;
   // Depends on the dimension, spacing and origin of the volume
   bool isCentered()const;
-  
+
   // Disabled by default
   bool isDataTypeEditable()const;
   // Enabled by default
@@ -61,7 +62,7 @@ public slots:
   void setVolumeNode(vtkMRMLVolumeNode *node);
   void setDataTypeEditable(bool enable);
   void setLabelMapEditable(bool enable);
-  
+
   void setImageSpacing(double*);
   void setImageOrigin(double*);
   void center();

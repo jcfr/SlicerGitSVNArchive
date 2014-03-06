@@ -35,6 +35,9 @@
 #include <vtkMRMLScalarVolumeDisplayNode.h>
 #include <vtkMRMLStorageNode.h>
 
+// MRMLLogic includes
+#include <vtkSlicerVolumesLogic.h>
+
 // VTK includes
 #include <vtkDataArray.h>
 #include <vtkImageData.h>
@@ -70,7 +73,7 @@ void qMRMLVolumeInfoWidgetPrivate::init()
 {
   Q_Q(qMRMLVolumeInfoWidget);
   this->setupUi(q);
-  
+
   // populate Scalar Types
   for (int i = VTK_VOID; i < VTK_OBJECT; ++i)
     {
@@ -83,7 +86,7 @@ void qMRMLVolumeInfoWidgetPrivate::init()
   this->ScanOrderComboBox->addItem("Coronal AP", "AP");
   this->ScanOrderComboBox->addItem("Axial IS", "IS");
   this->ScanOrderComboBox->addItem("Axial SI", "SI");
-  
+
   // Image dimension is read-only
   QObject::connect(this->ImageSpacingWidget, SIGNAL(coordinatesChanged(double*)),
                    q, SLOT(setImageSpacing(double*)));
@@ -122,7 +125,7 @@ bool qMRMLVolumeInfoWidgetPrivate::centeredOrigin(double* origin)const
     qWarning() << __FUNCTION__ << "No image data, can't retrieve origin.";
     return false;
     }
- 
+
   int *dims = imageData->GetDimensions();
   double dimsH[4];
   dimsH[0] = dims[0] - 1;
@@ -138,7 +141,7 @@ bool qMRMLVolumeInfoWidgetPrivate::centeredOrigin(double* origin)const
   origin[0] = -0.5 * rasCorner[0];
   origin[1] = -0.5 * rasCorner[1];
   origin[2] = -0.5 * rasCorner[2];
-  
+
   return true;
 }
 
@@ -225,13 +228,13 @@ void qMRMLVolumeInfoWidget::updateWidgetFromMRML()
     {
     double dimensions[3] = {0.,0.,0.};
     d->ImageDimensionsWidget->setCoordinates(dimensions);
-  
+
     double spacing[3] = {1.,1.,1.};
     d->ImageSpacingWidget->setCoordinates(spacing);
-  
+
     double origin[3] = {0.,0.,0.};
     d->ImageOriginWidget->setCoordinates(origin);
-  
+
     d->MinScalarDoubleSpinBox->setRange(0., 0.);
     d->MaxScalarDoubleSpinBox->setRange(0., 0.);
     d->MinScalarDoubleSpinBox->setValue(0.);
@@ -240,11 +243,11 @@ void qMRMLVolumeInfoWidget::updateWidgetFromMRML()
     d->ScanOrderComboBox->setCurrentIndex(-1);
 
     d->NumberOfScalarsSpinBox->setValue(1);
-  
+
     d->ScalarTypeComboBox->setCurrentIndex(-1);
-    
+
     d->FileNameLineEdit->setText("");
-  
+
     d->LabelMapCheckBox->setChecked(false);
 
     d->WindowLevelPresetsListWidget->clear();
@@ -261,13 +264,13 @@ void qMRMLVolumeInfoWidget::updateWidgetFromMRML()
     dimensions[2] = dims[2];
     }
   d->ImageDimensionsWidget->setCoordinates(dimensions);
-  
+
   double* spacing = d->VolumeNode->GetSpacing();
   d->ImageSpacingWidget->setCoordinates(spacing);
-  
+
   double* origin = d->VolumeNode->GetOrigin();
   d->ImageOriginWidget->setCoordinates(origin);
-  
+
   double IJKToRASDirections[3][3] = { {1,0,0}, {0,1,0}, {0,0,1} };
   d->VolumeNode->GetIJKToRASDirections(IJKToRASDirections);
   for (int i=0; i<3; i++)
@@ -279,15 +282,15 @@ void qMRMLVolumeInfoWidget::updateWidgetFromMRML()
     }
 
   d->CenterVolumePushButton->setEnabled(!this->isCentered());
-  
+
   vtkNew<vtkMatrix4x4> mat;
   d->VolumeNode->GetIJKToRASMatrix(mat.GetPointer());
   d->ScanOrderComboBox->setCurrentIndex(d->ScanOrderComboBox->findData(
     vtkMRMLVolumeNode::ComputeScanOrderFromIJKToRAS(mat.GetPointer())));
-  
+
   d->NumberOfScalarsSpinBox->setValue(
     image ? image->GetNumberOfScalarComponents() : 0);
-  
+
   d->ScalarTypeComboBox->setCurrentIndex( d->ScalarTypeComboBox->findData(
     image ? image->GetScalarType() : -1));
 
@@ -312,13 +315,13 @@ void qMRMLVolumeInfoWidget::updateWidgetFromMRML()
 
   vtkMRMLStorageNode* storageNode = d->VolumeNode->GetStorageNode();
   d->FileNameLineEdit->setText(storageNode ? storageNode->GetFileName() : "");
-  
+
   d->LabelMapCheckBox->setEnabled(d->VolumeNode->IsA("vtkMRMLScalarVolumeNode")
                                && !d->VolumeNode->IsA("vtkMRMLTensorVolumeNode") );
   vtkMRMLScalarVolumeNode *scalarNode = vtkMRMLScalarVolumeNode::SafeDownCast( d->VolumeNode );
   d->LabelMapCheckBox->setChecked(scalarNode ? scalarNode->GetLabelMap() : false);
 
-  vtkMRMLScalarVolumeDisplayNode *displayNode = 
+  vtkMRMLScalarVolumeDisplayNode *displayNode =
     scalarNode ? scalarNode->GetScalarVolumeDisplayNode() : 0;
   if (displayNode)
     {
@@ -442,39 +445,5 @@ void qMRMLVolumeInfoWidget::setScalarType(int index)
 void qMRMLVolumeInfoWidget::setLabelMap(bool labelMap)
 {
   Q_D(qMRMLVolumeInfoWidget);
-  vtkMRMLScalarVolumeNode *scalarNode =
-    vtkMRMLScalarVolumeNode::SafeDownCast(d->VolumeNode);
-  if (scalarNode == 0 ||
-      scalarNode->IsA("vtkMRMLTensorVolumeNode") ||
-      static_cast<bool>(scalarNode->GetLabelMap()) == labelMap)
-    {
-    return;
-    }
-
-  vtkWeakPointer<vtkMRMLDisplayNode> oldDisplayNode = scalarNode->GetDisplayNode();
-
-  vtkMRMLVolumeDisplayNode* displayNode = 0;
-  if (labelMap)
-    {
-    displayNode = vtkMRMLLabelMapVolumeDisplayNode::New();
-    }
-  else
-    {
-    displayNode = vtkMRMLScalarVolumeDisplayNode::New();
-    }
-  displayNode->SetAndObserveColorNodeID (
-    labelMap ? "vtkMRMLColorTableNodeLabels" : "vtkMRMLColorTableNodeGrey");
-  scalarNode->GetScene()->AddNode(displayNode);
-  scalarNode->SetLabelMap( labelMap );
-  scalarNode->SetAndObserveDisplayNodeID( displayNode->GetID() );
-  displayNode->Delete();
-
-  // We need to remove it after the new display node is set otherwise the
-  // slice layer logic would create one between the scene removal and the set.
-  if (oldDisplayNode.GetPointer())
-    {
-    scalarNode->GetScene()->RemoveNode(oldDisplayNode);
-    }
+  vtkSlicerVolumesLogic::SetVolumeAsLabelMap(d->VolumeNode, labelMap);
 }
-
-

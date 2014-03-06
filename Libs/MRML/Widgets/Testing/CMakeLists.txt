@@ -60,7 +60,6 @@ set(TEST_SOURCES
   qMRMLTreeViewTest1.cxx
   qMRMLUtf8Test1.cxx
   qMRMLUtilsTest1.cxx
-  qMRMLVolumeInfoWidgetTest1.cxx
   qMRMLVolumeThresholdWidgetTest1.cxx
   qMRMLVolumeThresholdWidgetTest2.cxx
   qMRMLWidgetsExportTest1.cxx
@@ -93,7 +92,6 @@ if(Slicer_USE_QtTesting)
     qMRMLThreeDWidgetEventTranslatorPlayerTest1.cxx
     qMRMLTransformSlidersEventTranslatorPlayerTest1.cxx
     qMRMLTreeViewEventTranslatorPlayerTest1.cxx
-    qMRMLVolumeInfoWidgetEventTranslatorPlayerTest1.cxx
     qMRMLVolumeThresholdWidgetEventTranslatorPlayerTest1.cxx
     qMRMLWindowLevelWidgetEventTranslatorPlayerTest1.cxx
     )
@@ -187,7 +185,6 @@ simple_test( qMRMLThreeDWidgetTest1 )
 SCENE_TEST(  qMRMLTreeViewTest1 vol_and_cube.mrml )
 SCENE_TEST(  qMRMLUtf8Test1 cube-utf8.mrml )
 simple_test( qMRMLUtilsTest1 )
-simple_test( qMRMLVolumeInfoWidgetTest1 )
 SCENE_TEST( qMRMLVolumeThresholdWidgetTest1 vol_and_cube.mrml)
 SCENE_TEST( qMRMLVolumeThresholdWidgetTest2 vol_and_cube.mrml)
 simple_test( qMRMLWidgetsExportTest1 )
@@ -221,7 +218,6 @@ if(Slicer_USE_QtTesting)
   QtTesting_TEST(qMRMLThreeDWidgetEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR})
   QtTesting_TEST(qMRMLTransformSlidersEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR})
   QtTesting_TEST(qMRMLTreeViewEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR} "${MRMLCore_SOURCE_DIR}/Testing/vol_and_cube.mrml")
-  QtTesting_TEST(qMRMLVolumeInfoWidgetEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR})
   QtTesting_TEST(qMRMLVolumeThresholdWidgetEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR} "${MRMLCore_SOURCE_DIR}/Testing/vol_and_cube.mrml")
   QtTesting_TEST(qMRMLWindowLevelWidgetEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR} "${MRMLCore_SOURCE_DIR}/Testing/vol_and_cube.mrml")
 endif()

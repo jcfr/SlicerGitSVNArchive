@@ -141,7 +141,7 @@ public:
 
   /// Change the scalar volume into/from a labelmap.
   /// This is the same code as in qMRMLVolumeInfoWidget.
-  void SetVolumeAsLabelMap(vtkMRMLVolumeNode *volumeNode, bool labelMap);
+  static void SetVolumeAsLabelMap(vtkMRMLVolumeNode *volumeNode, bool labelMap);
 
   /// Create a label map volume to match the given \a volumeNode and add it to the current scene
   /// \sa GetMRMLScene()

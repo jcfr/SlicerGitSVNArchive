@@ -23,7 +23,7 @@ slicerMacroConfigureModuleCxxTestDriver(
 simple_test(qSlicerVolumesIOOptionsWidgetTest1)
 simple_test(qSlicerVolumesModuleWidgetTest1 ${INPUT}/fixed.nrrd)
 simple_test(vtkSlicerVolumesLogicTest1 ${INPUT}/fixed.nrrd)
-  
+
 #-----------------------------------------------------------------------------
 add_executable(vtkSlicer${MODULE_NAME}LogicTest2 vtkSlicer${MODULE_NAME}LogicTest2.cxx)
 target_link_libraries(vtkSlicer${MODULE_NAME}LogicTest2 ${KIT})

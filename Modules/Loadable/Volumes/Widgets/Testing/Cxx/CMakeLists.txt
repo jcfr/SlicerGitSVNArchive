@@ -5,10 +5,17 @@ set(INPUT "${MRMLCore_SOURCE_DIR}/Testing/TestData")
 
 #-----------------------------------------------------------------------------
 set(KIT_TEST_SRCS
+  qMRMLVolumeInfoWidgetTest1.cxx
   qSlicerDiffusionTensorVolumeDisplayWidgetTest1.cxx
   qSlicerDTISliceDisplayWidgetTest1.cxx
   qSlicerDTISliceDisplayWidgetTest2.cxx
   )
+
+if(Slicer_USE_QtTesting)
+  list(APPEND KIT_TEST_SRCS
+    qMRMLVolumeInfoWidgetEventTranslatorPlayerTest1.cxx
+    )
+endif()
 
 #-----------------------------------------------------------------------------
 slicerMacroConfigureModuleCxxTestDriver(
@@ -22,6 +29,15 @@ slicerMacroConfigureModuleCxxTestDriver(
   )
 
 #-----------------------------------------------------------------------------
+simple_test(qMRMLVolumeInfoWidgetTest1)
 simple_test(qSlicerDiffusionTensorVolumeDisplayWidgetTest1)
 simple_test(qSlicerDTISliceDisplayWidgetTest1)
 simple_test(qSlicerDTISliceDisplayWidgetTest2 ${INPUT}/helix-DTI.nhdr)
+
+if(Slicer_USE_QtTesting)
+  macro(QtTesting_TEST testname)
+    simple_test(${testname} ${ARGN})
+    set_tests_properties(${testname} PROPERTIES RUN_SERIAL ON)
+  endmacro()
+  QtTesting_TEST(qMRMLVolumeInfoWidgetEventTranslatorPlayerTest1 ${Slicer_SOURCE_DIR})
+endif()

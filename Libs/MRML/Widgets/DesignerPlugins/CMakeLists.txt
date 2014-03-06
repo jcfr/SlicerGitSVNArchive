@@ -77,8 +77,6 @@ set(${KIT}_SRCS
   qMRMLTransformSlidersPlugin.h
   qMRMLTreeViewPlugin.cxx
   qMRMLTreeViewPlugin.h
-  qMRMLVolumeInfoWidgetPlugin.cxx
-  qMRMLVolumeInfoWidgetPlugin.h
   qMRMLVolumeThresholdWidgetPlugin.cxx
   qMRMLVolumeThresholdWidgetPlugin.h
   qMRMLWidgetPlugin.cxx
@@ -122,7 +120,6 @@ set(${KIT}_MOC_SRCS
   qMRMLThreeDViewPlugin.h
   qMRMLTransformSlidersPlugin.h
   qMRMLTreeViewPlugin.h
-  qMRMLVolumeInfoWidgetPlugin.h
   qMRMLVolumeThresholdWidgetPlugin.h
   qMRMLWidgetPlugin.h
   qMRMLWindowLevelWidgetPlugin.h

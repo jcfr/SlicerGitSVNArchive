@@ -21,11 +21,11 @@
 #ifndef __qMRMLVolumeInfoWidgetPlugin_h
 #define __qMRMLVolumeInfoWidgetPlugin_h
 
-#include "qMRMLWidgetsAbstractPlugin.h"
+#include "qSlicerVolumesModuleWidgetsAbstractPlugin.h"
 
-class QMRML_WIDGETS_PLUGINS_EXPORT qMRMLVolumeInfoWidgetPlugin
+class Q_SLICER_MODULE_VOLUMES_WIDGETS_PLUGINS_EXPORT qMRMLVolumeInfoWidgetPlugin
   : public QObject
-  , public qMRMLWidgetsAbstractPlugin
+  , public qSlicerVolumesModuleWidgetsAbstractPlugin
 {
   Q_OBJECT
 
@@ -41,4 +41,3 @@ public:
 };
 
 #endif
-
