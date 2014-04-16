@@ -23,7 +23,7 @@
 # SlicerMacroPythonWrapModuleVTKLibrary
 #
 
-macro(SlicerMacroPythonWrapModuleVTKLibrary)
+function(SlicerMacroPythonWrapModuleVTKLibrary)
   set(options
     )
   set(oneValueArgs
@@ -82,6 +82,7 @@ macro(SlicerMacroPythonWrapModuleVTKLibrary)
     KIT_PYTHON_LIBRARIES ${PYTHONWRAPMODULEVTKLIBRARY_Wrapped_LIBRARIES}
     )
 
+  set(lib_name ${PYTHONWRAPMODULEVTKLIBRARY_NAME})
   # Generate "Python/<lib_name>.py" file
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Python/${PYTHONWRAPMODULEVTKLIBRARY_RELATIVE_PYTHON_DIR}/${lib_name}.py "
 \"\"\" This module loads all the classes from the ${lib_name} library into its
@@ -106,4 +107,4 @@ from ${lib_name}Python import *
       )
   endif()
 
-endmacro()
+endfunction()

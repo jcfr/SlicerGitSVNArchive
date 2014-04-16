@@ -22,7 +22,7 @@
 # SlicerMacroBuildModuleQtLibrary
 #
 
-macro(SlicerMacroBuildModuleQtLibrary)
+function(SlicerMacroBuildModuleQtLibrary)
   set(options
     WRAP_PYTHONQT
     NO_INSTALL
@@ -219,4 +219,4 @@ macro(SlicerMacroBuildModuleQtLibrary)
       )
   endif()
 
-endmacro()
+endfunction()

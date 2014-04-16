@@ -22,7 +22,7 @@
 #
 #
 
-macro(slicerMacroBuildLoadableModule)
+function(slicerMacroBuildLoadableModule)
   set(options
     NO_INSTALL
     NO_TITLE
@@ -260,7 +260,7 @@ macro(slicerMacroBuildLoadableModule)
     endforeach()
   endif()
 
-endmacro()
+endfunction()
 
 
 #

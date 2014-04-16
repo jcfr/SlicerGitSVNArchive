@@ -18,7 +18,7 @@
 #
 ################################################################################
 
-macro(SlicerMacroConfigureModuleCxxTestDriver)
+function(SlicerMacroConfigureModuleCxxTestDriver)
   set(options
     WITH_VTK_DEBUG_LEAKS_CHECK
     )
@@ -95,4 +95,4 @@ macro(SlicerMacroConfigureModuleCxxTestDriver)
       )
   endif()
 
-endmacro()
+endfunction()

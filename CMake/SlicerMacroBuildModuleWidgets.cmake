@@ -22,7 +22,7 @@
 # SlicerMacroBuildModuleWidgets
 #
 
-macro(SlicerMacroBuildModuleWidgets)
+function(SlicerMacroBuildModuleWidgets)
   set(options
     WRAP_PYTHONQT
     NO_INSTALL
@@ -95,5 +95,5 @@ macro(SlicerMacroBuildModuleWidgets)
     ${CMAKE_CURRENT_BINARY_DIR}
     CACHE INTERNAL "Slicer Module widgets includes" FORCE)
 
-endmacro()
+endfunction()
 

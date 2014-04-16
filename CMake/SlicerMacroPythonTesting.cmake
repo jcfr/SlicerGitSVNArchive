@@ -19,7 +19,7 @@
 ################################################################################
 
 
-macro(SLICER_ADD_PYTHON_TEST)
+function(SLICER_ADD_PYTHON_TEST)
   set(options)
   set(oneValueArgs TESTNAME_PREFIX SCRIPT)
   set(multiValueArgs SLICER_ARGS SCRIPT_ARGS)
@@ -34,9 +34,9 @@ macro(SLICER_ADD_PYTHON_TEST)
     --python-script ${CMAKE_CURRENT_SOURCE_DIR}/${MY_SCRIPT} ${MY_SCRIPT_ARGS}
     )
   set_property(TEST py_${MY_TESTNAME_PREFIX}${test_name} PROPERTY RUN_SERIAL TRUE)
-endmacro()
+endfunction()
 
-macro(SLICER_ADD_PYTHON_UNITTEST)
+function(SLICER_ADD_PYTHON_UNITTEST)
   set(options)
   set(oneValueArgs TESTNAME_PREFIX SCRIPT)
   set(multiValueArgs SLICER_ARGS)
@@ -56,4 +56,4 @@ macro(SLICER_ADD_PYTHON_UNITTEST)
     ${MY_SLICER_ARGS}
     )
   set_property(TEST py_${MY_TESTNAME_PREFIX}${test_name} PROPERTY RUN_SERIAL TRUE)
-endmacro()
+endfunction()

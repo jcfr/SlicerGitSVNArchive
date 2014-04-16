@@ -22,7 +22,7 @@
 # SlicerMacroBuildModuleVTKLibrary
 #
 
-macro(SlicerMacroBuildModuleVTKLibrary)
+function(SlicerMacroBuildModuleVTKLibrary)
   set(options
     DISABLE_WRAP_PYTHON
     NO_INSTALL
@@ -158,4 +158,4 @@ macro(SlicerMacroBuildModuleVTKLibrary)
   # --------------------------------------------------------------------------
   set_property(GLOBAL APPEND PROPERTY Slicer_TARGETS ${MODULEVTKLIBRARY_NAME})
 
-endmacro()
+endfunction()

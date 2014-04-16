@@ -20,7 +20,7 @@
 
 # Based on VTK/CMake/KitCommonWrapBlock.cmake
 
-macro(vtkMacroKitPythonWrap)
+function(vtkMacroKitPythonWrap)
   set(options)
   set(oneValueArgs KIT_NAME KIT_INSTALL_BIN_DIR KIT_INSTALL_LIB_DIR)
   set(multiValueArgs KIT_SRCS KIT_PYTHON_EXTRA_SRCS KIT_WRAP_HEADERS KIT_PYTHON_LIBRARIES)
@@ -103,5 +103,5 @@ macro(vtkMacroKitPythonWrap)
       )
   endif()
 
-endmacro()
+endfunction()
 

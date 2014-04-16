@@ -22,7 +22,7 @@
 # SlicerMacroBuildModuleLogic
 #
 
-macro(SlicerMacroBuildModuleLogic)
+function(SlicerMacroBuildModuleLogic)
   set(options
     DISABLE_WRAP_PYTHON
     NO_INSTALL
@@ -134,4 +134,4 @@ macro(SlicerMacroBuildModuleLogic)
     set_property(GLOBAL APPEND PROPERTY Slicer_TARGETS ${MODULELOGIC_NAME}Python ${MODULELOGIC_NAME}PythonD)
   endif()
 
-endmacro()
+endfunction()

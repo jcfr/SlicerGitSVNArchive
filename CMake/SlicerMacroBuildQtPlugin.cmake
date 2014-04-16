@@ -26,7 +26,7 @@
 #  cmake_parse_arguments ( >= CMake 2.8.3)
 #
 
-macro(slicerMacroBuildQtPlugin)
+function(slicerMacroBuildQtPlugin)
   cmake_parse_arguments(MY
     "" # no options
     "NAME;EXPORT_DIRECTIVE;PLUGIN_DIR" # one value args
@@ -51,22 +51,22 @@ macro(slicerMacroBuildQtPlugin)
     INCLUDE_DIRECTORIES ${MY_INCLUDE_DIRECTORIES} ${Slicer_Base_INCLUDE_DIRS}
     RESOURCES ${MY_RESOURCES}
     )
-endmacro()
+endfunction()
 
-macro(slicerMacroBuildQtDesignerPlugin)
+function(slicerMacroBuildQtDesignerPlugin)
   slicerMacroBuildQtPlugin(
     PLUGIN_DIR designer
     ${ARGN})
-endmacro()
+endfunction()
 
-macro(slicerMacroBuildQtIconEnginesPlugin)
+function(slicerMacroBuildQtIconEnginesPlugin)
   slicerMacroBuildQtPlugin(
     PLUGIN_DIR iconengines
     ${ARGN})
-endmacro()
+endfunction()
 
-macro(slicerMacroBuildQtStylesPlugin)
+function(slicerMacroBuildQtStylesPlugin)
   slicerMacroBuildQtPlugin(
     PLUGIN_DIR styles
     ${ARGN})
-endmacro()
+endfunction()

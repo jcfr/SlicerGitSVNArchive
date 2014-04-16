@@ -18,7 +18,7 @@
 #
 ################################################################################
 
-macro(slicerMacroBuildScriptedModule)
+function(slicerMacroBuildScriptedModule)
   set(options
     WITH_GENERIC_TESTS
     WITH_SUBDIR
@@ -102,5 +102,5 @@ macro(slicerMacroBuildScriptedModule)
     endforeach()
   endif()
 
-endmacro()
+endfunction()
 

@@ -3,7 +3,7 @@
 # SlicerMacroConfigureGenericCxxModuleTests
 #
 
-macro(SlicerMacroConfigureGenericCxxModuleTests MODULENAMES TEST_SRCS_OUTPUT_VAR TEST_NAMES_OUTPUT_VAR TEST_NAMES_CXX_OUTPUT_VAR)
+function(SlicerMacroConfigureGenericCxxModuleTests MODULENAMES TEST_SRCS_OUTPUT_VAR TEST_NAMES_OUTPUT_VAR TEST_NAMES_CXX_OUTPUT_VAR)
   # Sanity checks
   if("${MODULENAMES}" STREQUAL "")
     message(FATAL_ERROR "error: Variable MODULENAMES is empty !")
@@ -46,5 +46,9 @@ macro(SlicerMacroConfigureGenericCxxModuleTests MODULENAMES TEST_SRCS_OUTPUT_VAR
     endforeach()
   endforeach()
 
-endmacro()
+  set(${TEST_SRCS_OUTPUT_VAR} ${${TEST_SRCS_OUTPUT_VAR}} PARENT_SCOPE)
+  set(${TEST_NAMES_OUTPUT_VAR} ${${TEST_NAMES_OUTPUT_VAR}} PARENT_SCOPE)
+  set(${TEST_NAMES_CXX_OUTPUT_VAR} ${${TEST_NAMES_CXX_OUTPUT_VAR}} PARENT_SCOPE)
+
+endfunction()
 

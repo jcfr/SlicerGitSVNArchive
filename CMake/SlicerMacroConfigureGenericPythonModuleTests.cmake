@@ -3,7 +3,7 @@
 # SlicerMacroConfigureGenericPythonModuleTests
 #
 
-macro(SlicerMacroConfigureGenericPythonModuleTests MODULENAMES TEST_SCRIPTS_OUTPUT_VAR)
+function(SlicerMacroConfigureGenericPythonModuleTests MODULENAMES TEST_SCRIPTS_OUTPUT_VAR)
   # Sanity checks
   if("${MODULENAMES}" STREQUAL "")
     message(FATAL_ERROR "error: Variable MODULENAMES is empty !")
@@ -32,5 +32,7 @@ macro(SlicerMacroConfigureGenericPythonModuleTests MODULENAMES TEST_SCRIPTS_OUTP
 
   endforeach()
 
-endmacro()
+  set(${TEST_SCRIPTS_OUTPUT_VAR} ${${TEST_SCRIPTS_OUTPUT_VAR}} PARENT_SCOPE)
+
+endfunction()
 

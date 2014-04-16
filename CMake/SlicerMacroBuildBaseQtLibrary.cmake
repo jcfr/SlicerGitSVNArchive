@@ -52,7 +52,7 @@
 #                           library named <NAME>PythonQt will be built.
 #
 
-macro(SlicerMacroBuildBaseQtLibrary)
+function(SlicerMacroBuildBaseQtLibrary)
   set(options
     WRAP_PYTHONQT
     )
@@ -255,4 +255,4 @@ macro(SlicerMacroBuildBaseQtLibrary)
   # --------------------------------------------------------------------------
   set_property(GLOBAL APPEND PROPERTY Slicer_TARGETS ${SLICERQTBASELIB_NAME})
 
-endmacro()
+endfunction()
