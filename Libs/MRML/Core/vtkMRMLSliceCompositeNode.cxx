@@ -15,28 +15,25 @@ Version:   $Revision: 1.2 $
 // MRML includes
 #include "vtkMRMLSliceCompositeNode.h"
 #include "vtkMRMLScene.h"
+#include "vtkMRMLVolumeNode.h"
 
 // VTK includes
-#include "vtkObjectFactory.h"
+#include <vtkObjectFactory.h>
 
 // STD includes
 #include <sstream>
 
-vtkCxxSetReferenceStringMacro(vtkMRMLSliceCompositeNode, BackgroundVolumeID);
-vtkCxxSetReferenceStringMacro(vtkMRMLSliceCompositeNode, ForegroundVolumeID);
-vtkCxxSetReferenceStringMacro(vtkMRMLSliceCompositeNode, LabelVolumeID);
+//------------------------------------------------------------------------------
+static const char* LAYER_VOLUME_REFERENCE_ROLE = "layerVolumeRef";
 
 //----------------------------------------------------------------------------
-vtkMRMLNodeNewMacro(vtkMRMLSliceCompositeNode);
+vtkMRMLNodeNewMacro(vtkMRMLSliceCompositeNode)
 
 //----------------------------------------------------------------------------
 vtkMRMLSliceCompositeNode::vtkMRMLSliceCompositeNode()
 {
   this->HideFromEditors = 1;
 
-  this->BackgroundVolumeID = NULL;
-  this->ForegroundVolumeID = NULL;
-  this->LabelVolumeID = NULL;
   this->Compositing = 0;
   this->ForegroundOpacity = 0.0; // start by showing only the background volume
   this->LabelOpacity = 1.0; // Show the label if there is one
@@ -56,18 +53,6 @@ vtkMRMLSliceCompositeNode::vtkMRMLSliceCompositeNode()
 //----------------------------------------------------------------------------
 vtkMRMLSliceCompositeNode::~vtkMRMLSliceCompositeNode()
 {
-  if (this->BackgroundVolumeID)
-    {
-    this->SetBackgroundVolumeID(NULL);
-    }
-  if (this->ForegroundVolumeID)
-    {
-    this->SetForegroundVolumeID(NULL);
-    }
-  if (this->LabelVolumeID)
-    {
-    this->SetLabelVolumeID(NULL);
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -76,13 +61,6 @@ void vtkMRMLSliceCompositeNode::WriteXML(ostream& of, int nIndent)
   Superclass::WriteXML(of, nIndent);
 
   vtkIndent indent(nIndent);
-
-  of << indent << " backgroundVolumeID=\"" <<
-   (this->BackgroundVolumeID ? this->BackgroundVolumeID : "") << "\"";
-  of << indent << " foregroundVolumeID=\"" <<
-   (this->ForegroundVolumeID ? this->ForegroundVolumeID : "") << "\"";
-  of << indent << " labelVolumeID=\"" <<
-   (this->LabelVolumeID ? this->LabelVolumeID : "") << "\"";
 
   of << indent << " compositing=\"" << this->Compositing << "\"";
   of << indent << " foregroundOpacity=\"" << this->ForegroundOpacity << "\"";
@@ -160,53 +138,6 @@ void vtkMRMLSliceCompositeNode::ResetInteractionFlagsModifier()
   this->InteractionFlagsModifier = (unsigned int) -1;
 }
 
-//-----------------------------------------------------------
-void vtkMRMLSliceCompositeNode::SetSceneReferences()
-{
-   Superclass::SetSceneReferences();
-   this->Scene->AddReferencedNodeID(this->BackgroundVolumeID, this);
-   this->Scene->AddReferencedNodeID(this->ForegroundVolumeID, this);
-   this->Scene->AddReferencedNodeID(this->LabelVolumeID, this);
-}
-
-//-----------------------------------------------------------
-void vtkMRMLSliceCompositeNode::UpdateReferences()
-{
-   Superclass::UpdateReferences();
-
-  if (this->BackgroundVolumeID != NULL && this->Scene->GetNodeByID(this->BackgroundVolumeID) == NULL)
-    {
-    this->SetBackgroundVolumeID(NULL);
-    }
-  if (this->ForegroundVolumeID != NULL && this->Scene->GetNodeByID(this->ForegroundVolumeID) == NULL)
-    {
-    this->SetForegroundVolumeID(NULL);
-    }
-  if (this->LabelVolumeID != NULL && this->Scene->GetNodeByID(this->LabelVolumeID) == NULL)
-    {
-    this->SetLabelVolumeID(NULL);
-    }
-
-
-}
-//----------------------------------------------------------------------------
-void vtkMRMLSliceCompositeNode::UpdateReferenceID(const char *oldID, const char *newID)
-{
-  Superclass::UpdateReferenceID(oldID, newID);
-  if (this->BackgroundVolumeID && !strcmp(oldID, this->BackgroundVolumeID))
-    {
-    this->SetBackgroundVolumeID(newID);
-    }
-  if (this->ForegroundVolumeID && !strcmp(oldID, this->ForegroundVolumeID))
-    {
-    this->SetForegroundVolumeID(newID);
-    }
-  if (this->LabelVolumeID && !strcmp(oldID, this->LabelVolumeID))
-    {
-    this->SetLabelVolumeID(newID);
-    }
-}
-
 //----------------------------------------------------------------------------
 void vtkMRMLSliceCompositeNode::ReadXMLAttributes(const char** atts)
 {
@@ -229,7 +160,6 @@ void vtkMRMLSliceCompositeNode::ReadXMLAttributes(const char** atts)
       else
         {
         this->SetBackgroundVolumeID(attValue);
-        //this->Scene->AddReferencedNodeID(this->BackgroundVolumeID, this);
         }
       }
     else if (!strcmp(attName, "foregroundVolumeID"))
@@ -241,7 +171,6 @@ void vtkMRMLSliceCompositeNode::ReadXMLAttributes(const char** atts)
       else
         {
         this->SetForegroundVolumeID(attValue);
-        //this->Scene->AddReferencedNodeID(this->ForegroundVolumeID, this);
         }
       }
     else if (!strcmp(attName, "labelVolumeID"))
@@ -253,7 +182,6 @@ void vtkMRMLSliceCompositeNode::ReadXMLAttributes(const char** atts)
       else
         {
         this->SetLabelVolumeID(attValue);
-        //this->Scene->AddReferencedNodeID(this->LabelVolumeID, this);
         }
       }
     else if (!strcmp(attName, "compositing"))
@@ -347,12 +275,9 @@ void vtkMRMLSliceCompositeNode::Copy(vtkMRMLNode *anode)
 {
   int disabledModify = this->StartModify();
 
-  Superclass::Copy(anode);
+  this->Superclass::Copy(anode);
   vtkMRMLSliceCompositeNode *node = vtkMRMLSliceCompositeNode::SafeDownCast(anode);
 
-  this->SetBackgroundVolumeID(node->GetBackgroundVolumeID());
-  this->SetForegroundVolumeID(node->GetForegroundVolumeID());
-  this->SetLabelVolumeID(node->GetLabelVolumeID());
   this->SetCompositing(node->GetCompositing());
   this->SetForegroundOpacity(node->GetForegroundOpacity());
   this->SetLabelOpacity(node->GetLabelOpacity());
@@ -372,12 +297,6 @@ void vtkMRMLSliceCompositeNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os,indent);
 
-  os << indent << "BackgroundVolumeID: " <<
-   (this->BackgroundVolumeID ? this->BackgroundVolumeID : "(none)") << "\n";
-  os << indent << "ForegroundVolumeID: " <<
-   (this->ForegroundVolumeID ? this->ForegroundVolumeID : "(none)") << "\n";
-  os << indent << "LabelVolumeID: " <<
-    (this->LabelVolumeID ? this->LabelVolumeID : "(none)") << "\n";
   os << indent << "Compositing: " << this->Compositing << "\n";
   os << indent << "ForegroundOpacity: " << this->ForegroundOpacity << "\n";
   os << indent << "LabelOpacity: " << this->LabelOpacity << "\n";
@@ -393,4 +312,75 @@ void vtkMRMLSliceCompositeNode::PrintSelf(ostream& os, vtkIndent indent)
     (this->Interacting ? "on" : "off") << "\n";
 }
 
-// End
+//----------------------------------------------------------------------------
+vtkMRMLVolumeNode* vtkMRMLSliceCompositeNode::GetLayerVolume(unsigned int layerIndex)
+{
+  return vtkMRMLVolumeNode::SafeDownCast(
+        this->GetNthNodeReference(LAYER_VOLUME_REFERENCE_ROLE, layerIndex));
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::
+SetLayerVolume(unsigned int layerIndex, vtkMRMLVolumeNode* volumeNode)
+{
+  char * volumeNodeID = 0;
+  if (volumeNode)
+    {
+    volumeNodeID = volumeNode->GetID();
+    }
+  this->SetLayerVolumeID(layerIndex, volumeNodeID);
+}
+
+//----------------------------------------------------------------------------
+const char* vtkMRMLSliceCompositeNode::GetLayerVolumeID(unsigned int layerIndex)
+{
+  vtkMRMLVolumeNode* volumeNode = this->GetLayerVolume(layerIndex);
+  if (volumeNode)
+    {
+    return volumeNode->GetID();
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::
+SetLayerVolumeID(unsigned int layerIndex, const char* id)
+{
+  this->SetNthNodeReferenceID(LAYER_VOLUME_REFERENCE_ROLE, layerIndex, id);
+}
+
+//----------------------------------------------------------------------------
+const char* vtkMRMLSliceCompositeNode::GetBackgroundVolumeID()
+{
+  return this->GetLayerVolumeID(Self::BackgroundLayer);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetBackgroundVolumeID(const char* id)
+{
+  this->SetLayerVolumeID(Self::BackgroundLayer, id);
+}
+
+//----------------------------------------------------------------------------
+const char* vtkMRMLSliceCompositeNode::GetForegroundVolumeID()
+{
+  return this->GetLayerVolumeID(Self::ForegroundLayer);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetForegroundVolumeID(const char* id)
+{
+  this->SetLayerVolumeID(Self::ForegroundLayer, id);
+}
+
+//----------------------------------------------------------------------------
+const char* vtkMRMLSliceCompositeNode::GetLabelVolumeID()
+{
+  return this->GetLayerVolumeID(Self::LabelLayer);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetLabelVolumeID(const char* id)
+{
+  this->SetLayerVolumeID(Self::LabelLayer, id);
+}

@@ -17,9 +17,11 @@
 
 #include "vtkMRMLNode.h"
 
+class vtkMRMLVolumeNode;
+
 /// \brief MRML node for storing a slice through RAS space.
 ///
-/// This node stores the information about how to composite two
+/// This node stores the information about how to composite N
 /// vtkMRMLVolumes into a single display image.
 class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
 {
@@ -27,6 +29,8 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
   static vtkMRMLSliceCompositeNode *New();
   vtkTypeMacro(vtkMRMLSliceCompositeNode,vtkMRMLNode);
   void PrintSelf(ostream& os, vtkIndent indent);
+
+  typedef vtkMRMLSliceCompositeNode Self;
 
   virtual vtkMRMLNode* CreateNodeInstance();
 
@@ -44,39 +48,35 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
 
   ///
   /// Get node XML tag name (like Volume, Model)
-  virtual const char* GetNodeTagName() {return "SliceComposite";};
+  virtual const char* GetNodeTagName() {return "SliceComposite";}
 
-  /// Set the volumes as reference in the scene
-  virtual void SetSceneReferences();
+  enum
+  {
+    BackgroundLayer = 0,
+    ForegroundLayer,
+    LabelLayer
+  };
 
-  ///
-  /// Updates this node if it depends on other nodes
-  /// when the node is deleted in the scene
-  virtual void UpdateReferences();
+  vtkMRMLVolumeNode* GetLayerVolume(unsigned int layerIndex);
+  void SetLayerVolume(unsigned int layerIndex, vtkMRMLVolumeNode* volumeNode);
 
-  ///
-  /// Update the stored reference to another node in the scene
-  virtual void UpdateReferenceID(const char *oldID, const char *newID);
+  const char* GetLayerVolumeID(unsigned int layerIndex);
+  void SetLayerVolumeID(unsigned int layerIndex, const char* id);
 
   ///
   /// the ID of a MRMLVolumeNode
-  vtkGetStringMacro (BackgroundVolumeID);
+  const char* GetBackgroundVolumeID();
   void SetBackgroundVolumeID(const char* id);
-  void SetReferenceBackgroundVolumeID(const char *id) { this->SetBackgroundVolumeID(id); }
 
   ///
   /// the ID of a MRMLVolumeNode
-  /// TODO: make this an arbitrary list of layers
-  vtkGetStringMacro (ForegroundVolumeID);
+  const char* GetForegroundVolumeID();
   void SetForegroundVolumeID(const char* id);
-  void SetReferenceForegroundVolumeID(const char *id) { this->SetForegroundVolumeID(id); }
 
   ///
   /// the ID of a MRMLVolumeNode
-  /// TODO: make this an arbitrary list of layers
-  vtkGetStringMacro (LabelVolumeID);
+  const char* GetLabelVolumeID();
   void SetLabelVolumeID(const char* id);
-  void SetReferenceLabelVolumeID(const char *id) { this->SetLabelVolumeID(id); }
 
   ///
   /// Compositing mode for foreground and background can be alpha
@@ -243,9 +243,6 @@ protected:
   vtkMRMLSliceCompositeNode(const vtkMRMLSliceCompositeNode&);
   void operator=(const vtkMRMLSliceCompositeNode&);
 
-  char *BackgroundVolumeID;
-  char *ForegroundVolumeID;
-  char *LabelVolumeID;
   double ForegroundOpacity;
 
   int Compositing;

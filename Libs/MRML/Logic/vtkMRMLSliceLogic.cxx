@@ -553,7 +553,7 @@ void vtkMRMLSliceLogic::ProcessMRMLLogicsEvents()
     vtkMRMLModelDisplayNode *modelDisplayNode = this->SliceModelNode->GetModelDisplayNode();
     if ( modelDisplayNode )
       {
-      if (this->GetLayerImageDataUVW(Self::LabelLayer))
+      if (this->GetLayerImageDataUVW(vtkMRMLSliceCompositeNode::LabelLayer))
         {
         modelDisplayNode->SetInterpolateTexture(0);
         }
@@ -700,37 +700,37 @@ vtkMRMLVolumeNode* vtkMRMLSliceLogic::GetLayerVolumeNode(int layerIndex)
 //----------------------------------------------------------------------------
 vtkMRMLSliceLayerLogic* vtkMRMLSliceLogic::GetBackgroundLayer()
 {
-  return this->GetLayer(Self::BackgroundLayer);
+  return this->GetLayer(vtkMRMLSliceCompositeNode::BackgroundLayer);
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLSliceLogic::SetBackgroundLayer(vtkMRMLSliceLayerLogic *backgroundLayer)
 {
-  this->SetLayer(Self::BackgroundLayer, backgroundLayer);
+  this->SetLayer(vtkMRMLSliceCompositeNode::BackgroundLayer, backgroundLayer);
 }
 
 //----------------------------------------------------------------------------
 vtkMRMLSliceLayerLogic* vtkMRMLSliceLogic::GetForegroundLayer()
 {
-  return this->GetLayer(Self::ForegroundLayer);
+  return this->GetLayer(vtkMRMLSliceCompositeNode::ForegroundLayer);
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLSliceLogic::SetForegroundLayer(vtkMRMLSliceLayerLogic *foregroundLayer)
 {
-  this->SetLayer(Self::ForegroundLayer, foregroundLayer);
+  this->SetLayer(vtkMRMLSliceCompositeNode::ForegroundLayer, foregroundLayer);
 }
 
 //----------------------------------------------------------------------------
 vtkMRMLSliceLayerLogic* vtkMRMLSliceLogic::GetLabelLayer()
 {
-  return this->GetLayer(Self::LabelLayer);
+  return this->GetLayer(vtkMRMLSliceCompositeNode::LabelLayer);
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLSliceLogic::SetLabelLayer(vtkMRMLSliceLayerLogic *labelLayer)
 {
-  this->SetLayer(Self::LabelLayer, labelLayer);
+  this->SetLayer(vtkMRMLSliceCompositeNode::LabelLayer, labelLayer);
 }
 
 //----------------------------------------------------------------------------
@@ -738,7 +738,7 @@ void vtkMRMLSliceLogic
 ::SetBackgroundWindowLevel(double newWindow, double newLevel)
 {
   vtkMRMLScalarVolumeNode* volumeNode =
-    vtkMRMLScalarVolumeNode::SafeDownCast(this->GetLayerVolumeNode(Self::BackgroundLayer));
+    vtkMRMLScalarVolumeNode::SafeDownCast(this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer));
     // 0 is background layer, defined in this::GetLayerVolumeNode
   vtkMRMLScalarVolumeDisplayNode* volumeDisplayNode =
     volumeNode ? volumeNode->GetScalarVolumeDisplayNode() : 0;
@@ -759,7 +759,7 @@ void vtkMRMLSliceLogic
                                          double& rangeLow, double& rangeHigh)
 {
   vtkMRMLScalarVolumeNode* volumeNode =
-    vtkMRMLScalarVolumeNode::SafeDownCast( this->GetLayerVolumeNode(Self::BackgroundLayer) );
+    vtkMRMLScalarVolumeNode::SafeDownCast( this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer) );
   if (!volumeNode)
     {
     return;
@@ -905,9 +905,9 @@ void vtkMRMLSliceLogic::UpdatePipeline()
       bgnode = vtkMRMLVolumeNode::SafeDownCast (this->GetMRMLScene()->GetNodeByID(id));
       }
 
-    if (this->GetLayerVolumeNode(Self::BackgroundLayer) != bgnode)
+    if (this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer) != bgnode)
       {
-      this->SetLayerVolumeNode(Self::BackgroundLayer, bgnode);
+      this->SetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer, bgnode);
       modified = 1;
       }
 
@@ -919,9 +919,9 @@ void vtkMRMLSliceLogic::UpdatePipeline()
       fgnode = vtkMRMLVolumeNode::SafeDownCast (this->GetMRMLScene()->GetNodeByID(id));
       }
 
-    if (this->GetLayerVolumeNode(Self::ForegroundLayer) != fgnode)
+    if (this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::ForegroundLayer) != fgnode)
       {
-      this->SetLayerVolumeNode(Self::ForegroundLayer, fgnode);
+      this->SetLayerVolumeNode(vtkMRMLSliceCompositeNode::ForegroundLayer, fgnode);
       modified = 1;
       }
 
@@ -933,9 +933,9 @@ void vtkMRMLSliceLogic::UpdatePipeline()
       lbnode = vtkMRMLVolumeNode::SafeDownCast (this->GetMRMLScene()->GetNodeByID(id));
       }
 
-    if (this->GetLayerVolumeNode(Self::LabelLayer) != lbnode)
+    if (this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::LabelLayer) != lbnode)
       {
-      this->SetLayerVolumeNode(Self::LabelLayer, lbnode);
+      this->SetLayerVolumeNode(vtkMRMLSliceCompositeNode::LabelLayer, lbnode);
       modified = 1;
       }
 
@@ -965,11 +965,11 @@ void vtkMRMLSliceLogic::UpdatePipeline()
     bool alphaBlending = (sliceCompositing == vtkMRMLSliceCompositeNode::Alpha ||
                           sliceCompositing == vtkMRMLSliceCompositeNode::ReverseAlpha);
 
-    vtkImageData* backgroundImage = this->GetLayerImageData(Self::BackgroundLayer);
-    vtkImageData* foregroundImage = this->GetLayerImageData(Self::ForegroundLayer);
+    vtkImageData* backgroundImage = this->GetLayerImageData(vtkMRMLSliceCompositeNode::BackgroundLayer);
+    vtkImageData* foregroundImage = this->GetLayerImageData(vtkMRMLSliceCompositeNode::ForegroundLayer);
 
-    vtkImageData* backgroundImageUVW = this->GetLayerImageDataUVW(Self::BackgroundLayer);
-    vtkImageData* foregroundImageUVW = this->GetLayerImageDataUVW(Self::ForegroundLayer);
+    vtkImageData* backgroundImageUVW = this->GetLayerImageDataUVW(vtkMRMLSliceCompositeNode::BackgroundLayer);
+    vtkImageData* foregroundImageUVW = this->GetLayerImageDataUVW(vtkMRMLSliceCompositeNode::ForegroundLayer);
 
     if (!alphaBlending)
       {
@@ -1086,8 +1086,8 @@ void vtkMRMLSliceLogic::UpdatePipeline()
         }
       }
     // always blending the label layer
-    vtkImageData* labelImage =  this->GetLayerImageData(Self::LabelLayer);
-    vtkImageData* labelImageUVW = this->GetLayerImageDataUVW(Self::LabelLayer);
+    vtkImageData* labelImage =  this->GetLayerImageData(vtkMRMLSliceCompositeNode::LabelLayer);
+    vtkImageData* labelImageUVW = this->GetLayerImageDataUVW(vtkMRMLSliceCompositeNode::LabelLayer);
     if ( labelImage )
       {
       this->Blend->SetInput( layerIndex, labelImage );
@@ -1138,7 +1138,7 @@ void vtkMRMLSliceLogic::UpdatePipeline()
         //this->ExtractModelTexture->Update();
         displayNode->SetAndObserveTextureImageData(this->ExtractModelTexture->GetOutput());
         }
-        if (this->GetLayerImageData(Self::LabelLayer))
+        if (this->GetLayerImageData(vtkMRMLSliceCompositeNode::LabelLayer))
           {
           modelDisplayNode->SetInterpolateTexture(0);
           }
@@ -1650,7 +1650,7 @@ void vtkMRMLSliceLogic::FitSliceToVolume(vtkMRMLVolumeNode *volumeNode, int widt
 void vtkMRMLSliceLogic::GetBackgroundRASBox(double rasDimensions[3], double rasCenter[3])
 {
   vtkMRMLVolumeNode *backgroundNode = 0;
-  backgroundNode = this->GetLayerVolumeNode(Self::BackgroundLayer);
+  backgroundNode = this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   this->GetVolumeRASBox( backgroundNode, rasDimensions, rasCenter );
 }
 
@@ -1659,7 +1659,7 @@ void vtkMRMLSliceLogic::GetBackgroundRASBox(double rasDimensions[3], double rasC
 void vtkMRMLSliceLogic::GetBackgroundSliceDimensions(double sliceDimensions[3], double sliceCenter[3])
 {
   vtkMRMLVolumeNode *backgroundNode = 0;
-  backgroundNode = this->GetLayerVolumeNode(Self::BackgroundLayer);
+  backgroundNode = this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   this->GetVolumeSliceDimensions( backgroundNode, sliceDimensions, sliceCenter );
 }
 
@@ -1668,7 +1668,7 @@ void vtkMRMLSliceLogic::GetBackgroundSliceDimensions(double sliceDimensions[3], 
 double *vtkMRMLSliceLogic::GetBackgroundSliceSpacing()
 {
   vtkMRMLVolumeNode *backgroundNode = 0;
-  backgroundNode = this->GetLayerVolumeNode(Self::BackgroundLayer);
+  backgroundNode = this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   return (this->GetVolumeSliceSpacing( backgroundNode ));
 }
 
@@ -1676,7 +1676,7 @@ double *vtkMRMLSliceLogic::GetBackgroundSliceSpacing()
 void vtkMRMLSliceLogic::GetBackgroundSliceBounds(double sliceBounds[6])
 {
   vtkMRMLVolumeNode *backgroundNode = 0;
-  backgroundNode = this->GetLayerVolumeNode(Self::BackgroundLayer);
+  backgroundNode = this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   this->GetVolumeSliceBounds(backgroundNode, sliceBounds);
 }
 
@@ -1685,7 +1685,7 @@ void vtkMRMLSliceLogic::GetBackgroundSliceBounds(double sliceBounds[6])
 void vtkMRMLSliceLogic::FitSliceToBackground(int width, int height)
 {
   vtkMRMLVolumeNode *backgroundNode = 0;
-  backgroundNode = this->GetLayerVolumeNode(Self::BackgroundLayer);
+  backgroundNode = this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   this->FitSliceToVolume( backgroundNode, width, height );
 }
 
@@ -1719,7 +1719,7 @@ void vtkMRMLSliceLogic::FitSliceToAll(int width, int height)
 void vtkMRMLSliceLogic::FitFOVToBackground(double fov)
 {
   vtkMRMLScalarVolumeNode* backgroundNode =
-      vtkMRMLScalarVolumeNode::SafeDownCast(this->GetLayerVolumeNode(Self::BackgroundLayer));
+      vtkMRMLScalarVolumeNode::SafeDownCast(this->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer));
   vtkImageData *backgroundImage = backgroundNode ? backgroundNode->GetImageData() : 0;
   if (!backgroundImage)
     {

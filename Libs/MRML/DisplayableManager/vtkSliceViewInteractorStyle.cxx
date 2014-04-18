@@ -592,7 +592,7 @@ void vtkSliceViewInteractorStyle::CycleVolumeLayer(int layer, int direction)
   // first, find the current volume index for the given layer (can be NULL)
   vtkMRMLScene *scene = this->SliceLogic->GetMRMLScene();
   vtkMRMLSliceCompositeNode *sliceCompositeNode = this->SliceLogic->GetSliceCompositeNode();
-  char *volumeID = NULL;
+  const char *volumeID = NULL;
   switch (layer)
     {
     case 0: { volumeID = sliceCompositeNode->GetBackgroundVolumeID(); } break;

@@ -386,12 +386,6 @@ protected:
   vtkMRMLSliceNode *          SliceNode;
   vtkMRMLSliceCompositeNode * SliceCompositeNode;
 
-  enum
-  {
-    BackgroundLayer = 0,
-    ForegroundLayer,
-    LabelLayer
-  };
 
   LayerList Layers;
 
