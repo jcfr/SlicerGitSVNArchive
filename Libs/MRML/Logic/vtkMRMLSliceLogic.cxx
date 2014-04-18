@@ -77,8 +77,6 @@ vtkMRMLSliceLogic::vtkMRMLSliceLogic()
   this->LabelLayer = 0;
   this->SliceNode = 0;
   this->SliceCompositeNode = 0;
-  this->ForegroundOpacity = 0.5; // Start by blending fg/bg
-  this->LabelOpacity = 1.0;
   this->Blend = vtkImageBlend::New();
   this->BlendUVW = vtkImageBlend::New();
 
@@ -89,8 +87,6 @@ vtkMRMLSliceLogic::vtkMRMLSliceLogic()
   this->ActiveSliceTransform = vtkTransform::New();
   this->PolyDataCollection = vtkPolyDataCollection::New();
   this->LookupTableCollection = vtkCollection::New();
-  this->SetForegroundOpacity(this->ForegroundOpacity);
-  this->SetLabelOpacity(this->LabelOpacity);
   this->SliceModelNode = 0;
   this->SliceModelTransformNode = 0;
   this->Name = 0;
@@ -705,32 +701,6 @@ void vtkMRMLSliceLogic::SetLabelLayer(vtkMRMLSliceLayerLogic *labelLayer)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLSliceLogic::SetForegroundOpacity(double foregroundOpacity)
-{
-  this->ForegroundOpacity = foregroundOpacity;
-
-  if ( this->Blend->GetOpacity(1) != this->ForegroundOpacity )
-    {
-    this->Blend->SetOpacity(1, this->ForegroundOpacity);
-    this->BlendUVW->SetOpacity(1, this->ForegroundOpacity);
-    this->Modified();
-    }
-}
-
-//----------------------------------------------------------------------------
-void vtkMRMLSliceLogic::SetLabelOpacity(double labelOpacity)
-{
-  this->LabelOpacity = labelOpacity;
-
-  if ( this->Blend->GetOpacity(2) != this->LabelOpacity )
-    {
-    this->Blend->SetOpacity(2, this->LabelOpacity);
-    this->BlendUVW->SetOpacity(2, this->LabelOpacity);
-    this->Modified();
-    }
-}
-
-//----------------------------------------------------------------------------
 void vtkMRMLSliceLogic
 ::SetBackgroundWindowLevel(double newWindow, double newLevel)
 {
@@ -1213,9 +1183,6 @@ void vtkMRMLSliceLogic::PrintSelf(ostream& os, vtkIndent indent)
     {
     os << indent << "BlendUVW: (none)\n";
     }
-
-  os << indent << "ForegroundOpacity: " << this->ForegroundOpacity << "\n";
-  os << indent << "LabelOpacity: " << this->LabelOpacity << "\n";
 
   os << indent << "SLICE_MODEL_NODE_NAME_SUFFIX: " << this->SLICE_MODEL_NODE_NAME_SUFFIX << "\n";
 
