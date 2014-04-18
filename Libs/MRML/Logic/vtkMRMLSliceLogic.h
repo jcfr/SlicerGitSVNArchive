@@ -381,12 +381,6 @@ protected:
   vtkMRMLSliceNode *          SliceNode;
   vtkMRMLSliceCompositeNode * SliceCompositeNode;
 
-  enum
-  {
-    BackgroundLayer = 0,
-    ForegroundLayer,
-    LabelLayer
-  };
 
   typedef vtkSmartPointer<vtkMRMLSliceLayerLogic> LayerListItem;
   typedef std::vector<LayerListItem>::iterator LayerListIterator;

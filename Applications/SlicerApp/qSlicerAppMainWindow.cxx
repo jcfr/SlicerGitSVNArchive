@@ -649,9 +649,9 @@ qSlicerAppMainWindow::~qSlicerAppMainWindow()
       {
       continue;
       }
-    sliceLogic->GetSliceCompositeNode()->SetReferenceBackgroundVolumeID(0);
-    sliceLogic->GetSliceCompositeNode()->SetReferenceForegroundVolumeID(0);
-    sliceLogic->GetSliceCompositeNode()->SetReferenceLabelVolumeID(0);
+    sliceLogic->GetSliceCompositeNode()->SetBackgroundVolumeID(0);
+    sliceLogic->GetSliceCompositeNode()->SetForegroundVolumeID(0);
+    sliceLogic->GetSliceCompositeNode()->SetLabelVolumeID(0);
     }
 }
 
