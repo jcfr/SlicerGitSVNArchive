@@ -172,7 +172,6 @@ void vtkMRMLFreeSurferProceduralColorNode::Copy(vtkMRMLNode *anode)
 
   if (node != NULL)
     {
-    this->SetName(node->Name);
     this->SetLookupTable(node->LookupTable);
     this->SetType(node->Type);
     this->SetFileName(node->FileName);

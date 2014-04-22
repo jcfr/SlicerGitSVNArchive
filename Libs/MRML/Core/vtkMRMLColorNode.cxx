@@ -33,8 +33,6 @@ vtkMRMLNodeNewMacro(vtkMRMLColorNode);
 //----------------------------------------------------------------------------
 vtkMRMLColorNode::vtkMRMLColorNode()
 {
-  this->Name = NULL;
-  this->SetName("");
   this->FileName = NULL;
   this->Type = -1;
   this->HideFromEditors = 1;
@@ -175,10 +173,6 @@ void vtkMRMLColorNode::PrintSelf(ostream& os, vtkIndent indent)
 {
 
   Superclass::PrintSelf(os,indent);
-
-  os << indent << "Name: " <<
-      (this->Name ? this->Name : "(none)") << "\n";
-
 
   os << indent << "Type: (" << this->GetTypeAsString() << ")\n";
 

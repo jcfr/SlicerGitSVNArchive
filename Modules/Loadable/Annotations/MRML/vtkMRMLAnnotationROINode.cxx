@@ -166,11 +166,11 @@ void vtkMRMLAnnotationROINode::ReadXMLAttributes(const char** atts)
       {
       if (!strcmp(attValue,"true"))
         {
-        this->Selected = 1;
+        this->SetSelected(1);
         }
       else
         {
-        this->Selected = 0;
+        this->SetSelected(0);
         }
       }
     else if (!strcmp(attName, "VolumeNodeID") || !strcmp(attName, "volumeNodeID"))

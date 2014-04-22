@@ -19,14 +19,12 @@ vtkMRMLNodeNewMacro(vtkMRMLROIListNode);
 vtkMRMLROIListNode::vtkMRMLROIListNode()
 {
   this->ROIList = vtkCollection::New();
-  this->Indent = 1;
+  this->SetIndent(1);
   this->TextScale = 4.5;
   this->Visibility = 1;
   this->Color[0]=0.4; this->Color[1]=1.0; this->Color[2]=1.0;
   // from slicer 2: 1.0 0.5 0.5"
   this->SelectedColor[0]=1.0; this->SelectedColor[1]=0.5; this->SelectedColor[2]=0.5;
-  this->Name = NULL;
-  this->SetName("");
 
   this->Opacity = 1.0;
   this->Ambient = 0;
@@ -46,11 +44,6 @@ vtkMRMLROIListNode::~vtkMRMLROIListNode()
     this->ROIList->RemoveAllItems();
     this->ROIList->Delete();
     this->ROIList = NULL;
-    }
-  if (this->Name)
-    {
-    delete [] this->Name;
-    this->Name = NULL;
     }
   if (this->VolumeNodeID)
     {

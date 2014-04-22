@@ -43,8 +43,6 @@ vtkMRMLFiducialListNode::vtkMRMLFiducialListNode()
   this->Color[0]=0.4; this->Color[1]=1.0; this->Color[2]=1.0;
   // from slicer 2: 1.0 0.5 0.5"
   this->SelectedColor[0]=1.0; this->SelectedColor[1]=0.5; this->SelectedColor[2]=0.5;
-  this->Name = NULL;
-  this->SetName("");
 
   this->Opacity = 1.0;
   this->Ambient = 0;
@@ -69,11 +67,6 @@ vtkMRMLFiducialListNode::~vtkMRMLFiducialListNode()
     this->FiducialList->RemoveAllItems();
     this->FiducialList->Delete();
     this->FiducialList = NULL;
-    }
-  if (this->Name)
-    {
-    delete [] this->Name;
-    this->Name = NULL;
     }
 }
 
@@ -331,7 +324,6 @@ void vtkMRMLFiducialListNode::Copy(vtkMRMLNode *anode)
   Superclass::Copy(anode);
   vtkMRMLFiducialListNode *node = (vtkMRMLFiducialListNode *) anode;
 
-  this->SetName(node->Name);
   this->SetColor(node->Color);
   this->SetSelectedColor(node->SelectedColor);
   this->SetSymbolScale(node->SymbolScale);

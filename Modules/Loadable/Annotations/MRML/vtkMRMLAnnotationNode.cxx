@@ -239,7 +239,7 @@ void vtkMRMLAnnotationNode::PrintAnnotationInfo(ostream& os, vtkIndent indent, i
 
 
   os << indent << "ReferenceNodeID: " << ( (this->ReferenceNodeID) ? this->ReferenceNodeID : "None" ) << "\n";
-  os << indent << "Selected: " << this->Selected << "\n";
+  os << indent << "Selected: " << this->GetSelected() << "\n";
   os << indent << "Locked: " << this->Locked << "\n";
   os << indent << "textList: ";
   if  (!this->TextList || !this->GetNumberOfTexts())

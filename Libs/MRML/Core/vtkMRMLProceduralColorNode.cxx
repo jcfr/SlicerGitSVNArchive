@@ -32,8 +32,6 @@ vtkMRMLNodeNewMacro(vtkMRMLProceduralColorNode);
 //----------------------------------------------------------------------------
 vtkMRMLProceduralColorNode::vtkMRMLProceduralColorNode()
 {
-
-  this->Name = NULL;
   this->SetName("");
   this->FileName = NULL;
 

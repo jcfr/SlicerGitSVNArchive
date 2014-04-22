@@ -38,7 +38,6 @@ vtkMRMLROINode::vtkMRMLROINode()
   // so that the SetLabelText macro won't try to free memory
   this->LabelText = NULL;
   this->SetLabelText("");
-  this->Selected = 0;
   this->VolumeNodeID = NULL;
   this->Visibility = 1;
   this->InteractiveMode = 1;
@@ -53,11 +52,6 @@ vtkMRMLROINode::~vtkMRMLROINode()
     {
     delete [] this->LabelText;
     this->LabelText = NULL;
-    }
-  if (this->ID)
-    {
-    delete [] this->ID;
-    this->ID = NULL;
     }
   if (this->VolumeNodeID)
     {
@@ -141,11 +135,11 @@ void vtkMRMLROINode::ReadXMLAttributes( const char** atts)
       {
       if (!strcmp(attValue,"true"))
         {
-        this->Selected = 1;
+        this->SetSelected(1);
         }
       else
         {
-        this->Selected = 0;
+        this->SetSelected(0);
         }
       }
     else if (!strcmp(attName, "VolumeNodeID") || !strcmp(attName, "volumeNodeID"))
@@ -199,6 +193,8 @@ void vtkMRMLROINode::ReadXMLAttributes( const char** atts)
 
 void vtkMRMLROINode::ReadXMLString(const char *keyValuePairs)
 {
+  int disabledModify = this->StartModify();
+
   // used because the ROI list gloms together the point's key and
   // values into one long string, VERY dependent on the order it's written
   // out in when WriteXML is used
@@ -246,9 +242,12 @@ void vtkMRMLROINode::ReadXMLString(const char *keyValuePairs)
   ss >> this->RadiusXYZ[2];
 
   // get the selected flag
+  int selected = 0;
   ss >> keyName;
-  ss >> this->Selected;
-  return;
+  ss >> selected;
+  this->SetSelected(selected);
+
+  this->EndModify(disabledModify);
 }
 
 //----------------------------------------------------------------------------

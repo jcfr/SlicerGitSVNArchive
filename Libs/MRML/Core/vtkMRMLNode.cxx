@@ -30,74 +30,134 @@ Version:   $Revision: 1.11 $
 #include <sstream>
 
 
-//------------------------------------------------------------------------------
-vtkMRMLNode::vtkMRMLNode()
+//----------------------------------------------------------------------------
+class vtkMRMLNode::vtkInternal
 {
-  this->ID = NULL;
+public:
+  vtkInternal(vtkMRMLNode* external);
+  ~vtkInternal();
 
-  // By default nodes have no effect on indentation
-  this->Indent = 0;
+  /// Get/Set the string used to manage encoding/decoding of strings/URLs with special characters
+  void SetTempURLString(const char* value);
+  char* GetTempURLString();
 
-  // Strings
-  this->Description = NULL;
+  int Indent;
 
-  // By default all MRML nodes have a blank name
-  // Must set name to NULL first so that the SetName
-  // macro will not free memory.
-  this->Name = NULL;
+  char* Name;
+  char* Description;
+  char* SceneRootDir;
 
-  this->SingletonTag = NULL;
+  /// Variable used to manage encoded/decoded URL strings
+  char* TempURLString;
 
-  this->SceneRootDir = NULL;
-  this->Scene = NULL;
+  char* SingletonTag;
 
-  this->HideFromEditors = 0;
-  this->Selectable = 1;
-  this->Selected = 0;
+  /// Flag to avoid event loops
+  int InMRMLCallbackFlag;
 
-  this->AddToScene = 1;
+  int DisableModifiedEvent;
+  int ModifiedEventPending;
 
-  this->DisableModifiedEvent = 0;
-  this->ModifiedEventPending = 0;
+  int AddToScene;
+  int SaveWithScene;
 
-  // Set up callbacks
-  this->MRMLCallbackCommand = vtkCallbackCommand::New ( );
-  this->MRMLCallbackCommand->SetClientData( reinterpret_cast<void *>(this) );
-  this->MRMLCallbackCommand->SetCallback( vtkMRMLNode::MRMLCallback );
-  this->InMRMLCallbackFlag = 0;
-  this->SaveWithScene = true;
-
-  this->MRMLObserverManager = vtkObserverManager::New();
-  this->MRMLObserverManager->AssignOwner( this );
-  this->MRMLObserverManager->GetCallbackCommand()->SetClientData( reinterpret_cast<void *> (this) );
-  this->MRMLObserverManager->GetCallbackCommand()->SetCallback(vtkMRMLNode::MRMLCallback);
-
-
-  this->TempURLString = NULL;
-}
+  vtkMRMLNode*        External;
+};
 
 //----------------------------------------------------------------------------
-vtkMRMLNode::~vtkMRMLNode()
+// vtkInternal methods
+
+//----------------------------------------------------------------------------
+vtkMRMLNode::vtkInternal::vtkInternal(
+    vtkMRMLNode* external):External(external)
 {
-  if (this->Description)
-    {
-    delete [] this->Description;
-    this->Description = NULL;
-    }
+  this->Indent = 0; // By default nodes have no effect on indentation
+  this->Name = NULL;
+  this->Description = NULL;
+  this->SceneRootDir = NULL;
+  this->TempURLString = NULL;
+  this->SingletonTag = NULL;
+  this->InMRMLCallbackFlag = 0;
+  this->DisableModifiedEvent = 0;
+  this->ModifiedEventPending = 0;
+  this->AddToScene = 1;
+  this->SaveWithScene = 1;
+}
+
+//-----------------------------------------------------------------------------
+vtkMRMLNode::vtkInternal::~vtkInternal()
+{
   if (this->Name)
     {
     delete [] this->Name;
     this->Name = NULL;
     }
-  if (this->ID)
+  if (this->Description)
     {
-    delete [] this->ID;
-    this->ID = NULL;
+    delete [] this->Description;
+    this->Description = NULL;
     }
   if (this->SceneRootDir)
     {
     delete [] this->SceneRootDir;
     this->SceneRootDir = NULL;
+    }
+  if (this->TempURLString)
+    {
+    delete [] this->TempURLString;
+    this->TempURLString = NULL;
+    }
+  if (this->SingletonTag)
+    {
+    this->External->SetSingletonTag(NULL);
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::vtkInternal::SetTempURLString(const char* value)
+{
+  vtkSetStringNoModifiedBodyMacro(TempURLString, value)
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::vtkInternal::GetTempURLString()
+{
+  return this->TempURLString;
+}
+
+//------------------------------------------------------------------------------
+// vtkMRMLNode methods
+
+//------------------------------------------------------------------------------
+vtkMRMLNode::vtkMRMLNode()
+{
+  this->Internal = new vtkInternal(this);
+
+  this->Scene = NULL;
+
+  this->ID = NULL;
+  this->HideFromEditors = 0;
+  this->Selectable = 1;
+  this->Selected = 0;
+
+  // Set up callbacks
+  this->MRMLCallbackCommand = vtkCallbackCommand::New ( );
+  this->MRMLCallbackCommand->SetClientData( reinterpret_cast<void *>(this) );
+  this->MRMLCallbackCommand->SetCallback( vtkMRMLNode::MRMLCallback );
+
+  this->MRMLObserverManager = vtkObserverManager::New();
+  this->MRMLObserverManager->AssignOwner( this );
+  this->MRMLObserverManager->GetCallbackCommand()->SetClientData( reinterpret_cast<void *> (this) );
+  this->MRMLObserverManager->GetCallbackCommand()->SetCallback(vtkMRMLNode::MRMLCallback);
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLNode::~vtkMRMLNode()
+{
+  if (this->ID)
+    {
+    delete [] this->ID;
+    this->ID = NULL;
     }
   if (this->MRMLObserverManager)
     {
@@ -112,18 +172,9 @@ vtkMRMLNode::~vtkMRMLNode()
     this->MRMLCallbackCommand = NULL;
     }
 
-  if (this->TempURLString)
-    {
-    delete [] this->TempURLString;
-    this->TempURLString = NULL;
-    }
-
-  if (this->SingletonTag)
-    {
-    this->SetSingletonTag(NULL);
-    }
-
   this->DeleteAllReferences();
+
+  delete this->Internal;
 }
 
 //----------------------------------------------------------------------------
@@ -169,13 +220,13 @@ void vtkMRMLNode::Copy(vtkMRMLNode *node)
     this->SetName(node->GetName());
     }
   this->SetHideFromEditors( node->HideFromEditors );
-  this->SetSaveWithScene( node->SaveWithScene );
+  this->SetSaveWithScene(node->GetSaveWithScene());
   this->SetSelectable( node->Selectable );
-  this->SetAddToScene( node->AddToScene );
+  this->SetAddToScene(node->GetAddToScene());
 
   if (node->GetSingletonTag())
     {
-    this->SetSingletonTag( node->GetSingletonTag() );
+    this->SetSingletonTag(node->GetSingletonTag());
     }
   this->SetDescription(node->GetDescription());
   this->Attributes = node->Attributes;
@@ -246,23 +297,42 @@ void vtkMRMLNode::Reset()
 }
 
 //----------------------------------------------------------------------------
+int vtkMRMLNode::StartModify()
+{
+  int disabledModify = this->GetDisableModifiedEvent();
+  this->DisableModifiedEventOn();
+  return disabledModify;
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::EndModify(int previousDisableModifiedEventState)
+{
+  this->SetDisableModifiedEvent(previousDisableModifiedEventState);
+  if (!previousDisableModifiedEventState)
+    {
+    return this->InvokePendingModifiedEvent();
+    }
+  return this->Internal->ModifiedEventPending;
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->vtkObject::PrintSelf(os,indent);
 
   os << indent << "ID: " <<
-    (this->ID ? this->ID : "(none)") << "\n";
+    (this->GetID() ? this->GetID() : "(none)") << "\n";
 
-  os << indent << "Indent:      " << this->Indent << "\n";
+  os << indent << "Indent:      " << this->GetIndent() << "\n";
 
   os << indent << "Name: " <<
-    (this->Name ? this->Name : "(none)") << "\n";
+    (this->GetName() ? this->GetName() : "(none)") << "\n";
 
   os << indent << "Description: " <<
-    (this->Description ? this->Description : "(none)") << "\n";
+    (this->GetDescription() ? this->GetDescription() : "(none)") << "\n";
 
   os << indent << "SingletonTag: " <<
-    (this->SingletonTag ? this->SingletonTag : "(none)") << "\n";
+    (this->GetSingletonTag() ? this->GetSingletonTag() : "(none)") << "\n";
 
   os << indent << "HideFromEditors: " << this->HideFromEditors << "\n";
 
@@ -456,17 +526,17 @@ void vtkMRMLNode::ParseReferencesAttribute(const char *attValue,
 void vtkMRMLNode::WriteXML(ostream& of, int nIndent)
 {
   vtkIndent indent(nIndent);
-  if (this->ID != NULL)
+  if (this->GetID() != NULL)
     {
-    of << indent << " id=\"" << this->ID << "\"";
+    of << indent << " id=\"" << this->GetID() << "\"";
     }
-  if (this->Name != NULL)
+  if (this->GetName() != NULL)
     {
-    of << indent << " name=\"" << this->Name << "\"";
+    of << indent << " name=\"" << this->GetName() << "\"";
     }
-  if (this->Description != NULL)
+  if (this->GetDescription() != NULL)
     {
-    of << indent << " description=\"" << this->Description << "\"";
+    of << indent << " description=\"" << this->GetDescription() << "\"";
     }
   of << indent << " hideFromEditors=\"" << (this->HideFromEditors ? "true" : "false") << "\"";
 
@@ -568,6 +638,61 @@ void vtkMRMLNode::ProcessMRMLEvents (vtkObject *caller,
       }
     }
   return;
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::GetInMRMLCallbackFlag()
+{
+  return this->Internal->InMRMLCallbackFlag;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetInMRMLCallbackFlag(int flag)
+{
+  // Do not call modified since it will generate even more events !
+  this->Internal->InMRMLCallbackFlag = flag;
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::GetID()
+{
+  return this->ID;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetName(const char* value)
+{
+  vtkSetStringPimplBodyMacro(Internal->Name, value)
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::GetName()
+{
+  return this->Internal->Name;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetDescription(const char* value)
+{
+  vtkSetStringPimplBodyMacro(Internal->Description, value)
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::GetDescription()
+{
+  return this->Internal->Description;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetSceneRootDir(const char* value)
+{
+  vtkSetStringPimplBodyMacro(Internal->SceneRootDir, value)
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::GetSceneRootDir()
+{
+  return this->Internal->SceneRootDir;
 }
 
 //----------------------------------------------------------------------------
@@ -799,6 +924,96 @@ std::vector< std::string > vtkMRMLNode::GetAttributeNames()
 }
 
 //----------------------------------------------------------------------------
+void vtkMRMLNode::SetSingletonTag(const char* value)
+{
+  vtkSetStringPimplBodyMacro(Internal->SingletonTag, value)
+}
+
+//----------------------------------------------------------------------------
+char* vtkMRMLNode::GetSingletonTag()
+{
+  return this->Internal->SingletonTag;
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::GetIndent()
+{
+  return this->Internal->Indent;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetIndent(int value)
+{
+  if (value != this->Internal->Indent)
+    {
+    this->Internal->Indent = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::GetSaveWithScene()
+{
+  return this->Internal->SaveWithScene;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetSaveWithScene(int value)
+{
+  if (value != this->Internal->SaveWithScene)
+    {
+    this->Internal->SaveWithScene = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SaveWithSceneOn()
+{
+  this->SetSaveWithScene(1);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SaveWithSceneOff()
+{
+  this->SetSaveWithScene(0);
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::GetAddToScene()
+{
+  return this->Internal->AddToScene;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetAddToScene(int value)
+{
+  if (value != this->Internal->AddToScene)
+    {
+    this->Internal->AddToScene = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetAddToSceneNoModify(int value)
+{
+   this->Internal->AddToScene = value;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::AddToSceneOn()
+{
+  this->SetAddToScene(1);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::AddToSceneOff()
+{
+  this->SetAddToScene(0);
+}
+
+//----------------------------------------------------------------------------
 // Description:
 // the MRMLCallback is a static function to relay modified events from the
 // observed mrml node back into the gui layer for further processing
@@ -831,13 +1046,90 @@ void vtkMRMLNode::MRMLCallback(vtkObject *caller,
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLNode::SetAddToSceneNoModify(int value)
+int vtkMRMLNode::GetDisableModifiedEvent()
 {
-   this->AddToScene = value;
+  return this->Internal->DisableModifiedEvent;
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLNode::SetID (const char* _arg)
+void vtkMRMLNode::SetDisableModifiedEvent(int onOff)
+{
+  this->Internal->DisableModifiedEvent = onOff;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::DisableModifiedEventOn()
+{
+  this->SetDisableModifiedEvent(1);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::DisableModifiedEventOff()
+{
+  this->SetDisableModifiedEvent(0);
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::GetModifiedEventPending()
+{
+  return this->Internal->ModifiedEventPending;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::Modified()
+{
+  if (!this->GetDisableModifiedEvent())
+    {
+    Superclass::Modified();
+    }
+  else
+    {
+    ++this->Internal->ModifiedEventPending;
+    }
+}
+
+//----------------------------------------------------------------------------
+int vtkMRMLNode::InvokePendingModifiedEvent()
+{
+  if ( this->Internal->ModifiedEventPending )
+    {
+    int oldModifiedEventPending = this->Internal->ModifiedEventPending;
+    this->Internal->ModifiedEventPending = 0;
+    Superclass::Modified();
+    return oldModifiedEventPending;
+    }
+  return this->Internal->ModifiedEventPending;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::CopyWithSingleModifiedEvent (vtkMRMLNode *node)
+{
+  int oldMode = this->GetDisableModifiedEvent();
+  this->DisableModifiedEventOn();
+  this->Copy(node);
+  this->InvokePendingModifiedEvent();
+  this->SetDisableModifiedEvent(oldMode);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::CopyWithoutModifiedEvent (vtkMRMLNode *node)
+{
+  int oldMode = this->GetDisableModifiedEvent();
+  this->DisableModifiedEventOn();
+  this->Copy(node);
+  this->SetDisableModifiedEvent(oldMode);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::CopyWithSceneWithSingleModifiedEvent (vtkMRMLNode *node)
+{
+  int oldMode = this->StartModify();
+  this->CopyWithScene(node);
+  this->EndModify(oldMode);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::SetID(const char* _arg)
 {
   // Mostly copied from vtkSetStringMacro() in vtkSetGet.cxx
   vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting ID to " << (_arg?_arg:"(null)") );
@@ -894,9 +1186,9 @@ const char * vtkMRMLNode::URLEncodeString(const char *inString)
                                      "\"", "%22");
 
   this->DisableModifiedEventOn();
-  this->SetTempURLString(kwInString.c_str());
+  this->Internal->SetTempURLString(kwInString.c_str());
   this->DisableModifiedEventOff();
-  return (this->GetTempURLString());
+  return (this->Internal->GetTempURLString());
 }
 
 //----------------------------------------------------------------------------
@@ -934,9 +1226,9 @@ const char * vtkMRMLNode::URLDecodeString(const char *inString)
                                      "%25", "%");
 
   this->DisableModifiedEventOn();
-  this->SetTempURLString(kwInString.c_str());
+  this->Internal->SetTempURLString(kwInString.c_str());
   this->DisableModifiedEventOff();
-  return (this->GetTempURLString());
+  return (this->Internal->GetTempURLString());
 }
 
 //// Reference API
@@ -961,6 +1253,18 @@ void vtkMRMLNode::UpdateReferences()
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::UpdateScene(vtkMRMLScene *)
+{
+  this->UpdateNodeReferences();
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::OnNodeAddedToScene()
+{
+  this->UpdateNodeReferences();
 }
 
 //----------------------------------------------------------------------------
@@ -1451,6 +1755,24 @@ void vtkMRMLNode::RemoveAllReferencedNodes()
       (*it1)->ReferencedNode = 0;
       }
     }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::OnNodeReferenceAdded(vtkMRMLNodeReference *reference)
+{
+  this->InvokeEvent(vtkMRMLNode::ReferenceAddedEvent, reference);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::OnNodeReferenceModified(vtkMRMLNodeReference *reference)
+{
+  this->InvokeEvent(vtkMRMLNode::ReferenceModifiedEvent, reference);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNode::OnNodeReferenceRemoved(vtkMRMLNodeReference *reference)
+{
+  this->InvokeEvent(vtkMRMLNode::ReferenceRemovedEvent, reference);
 }
 
 //----------------------------------------------------------------------------

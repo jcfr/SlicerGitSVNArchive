@@ -238,7 +238,7 @@ void vtkMRMLStorableNode::UpdateScene(vtkMRMLScene *scene)
 {
   Superclass::UpdateScene(scene);
 
-  if (!this->AddToScene)
+  if (!this->GetAddToScene())
     {
     return;
     }
