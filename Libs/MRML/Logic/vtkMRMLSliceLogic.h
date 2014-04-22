@@ -18,6 +18,9 @@
 // MRMLLogic includes
 #include "vtkMRMLAbstractLogic.h"
 
+// VTK includes
+#include <vtkSmartPointer.h>
+
 // STD includes
 #include <vector>
 
@@ -58,6 +61,8 @@ public:
   vtkTypeRevisionMacro(vtkMRMLSliceLogic,vtkMRMLAbstractLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  typedef vtkMRMLSliceLogic Self;
+
   /// Convenient methods allowing to initialize SliceLogic given \a newSliceNode
   /// \note This method should be used when the Logic is "shared" between two widgets
   void Initialize(vtkMRMLSliceNode* newSliceNode);
@@ -79,21 +84,31 @@ public:
 
   ///
   /// The background slice layer
-  /// TODO: this will eventually be generalized to a list of layers
-  vtkGetObjectMacro (BackgroundLayer, vtkMRMLSliceLayerLogic);
+  vtkMRMLSliceLayerLogic* GetBackgroundLayer();
   void SetBackgroundLayer (vtkMRMLSliceLayerLogic *BackgroundLayer);
 
   ///
   /// The forground slice layer
-  /// TODO: this will eventually be generalized to a list of layers
-  vtkGetObjectMacro (ForegroundLayer, vtkMRMLSliceLayerLogic);
+  vtkMRMLSliceLayerLogic* GetForegroundLayer();
   void SetForegroundLayer (vtkMRMLSliceLayerLogic *ForegroundLayer);
 
   ///
   /// The Label slice layer
-  /// TODO: this will eventually be generalized to a list of layers
-  vtkGetObjectMacro (LabelLayer, vtkMRMLSliceLayerLogic);
+  vtkMRMLSliceLayerLogic* GetLabelLayer();
   void SetLabelLayer (vtkMRMLSliceLayerLogic *LabelLayer);
+
+  vtkMRMLSliceLayerLogic* GetLayer(unsigned int layerIndex);
+  void SetLayer(unsigned int layerIndex, vtkMRMLSliceLayerLogic *layer);
+
+  vtkImageData* GetLayerImageData(unsigned int layerIndex);
+  vtkImageData* GetLayerImageDataUVW(unsigned int layerIndex);
+
+  /// Set volume associated with a layer
+  void SetLayerVolumeNode(int layerIndex, vtkMRMLVolumeNode* volumeNode);
+
+  /// Get the volume node corresponding to layer
+  /// (0=background, 1=foreground, 2=label)
+  vtkMRMLVolumeNode* GetLayerVolumeNode(int layerIndex);
 
   ///
   /// Helper to set the background layer Window/Level
@@ -106,15 +121,15 @@ public:
 
   ///
   /// Model slice plane
-  vtkGetObjectMacro(SliceModelNode, vtkMRMLModelNode);
+  vtkMRMLModelNode* GetSliceModelNode();
 
   ///
   /// Model slice plane display props
-  vtkGetObjectMacro(SliceModelDisplayNode, vtkMRMLModelDisplayNode);
+  vtkMRMLModelDisplayNode* GetSliceModelDisplayNode();
 
   ///
   /// Model slice plane transform from xy to RAS
-  vtkGetObjectMacro(SliceModelTransformNode, vtkMRMLLinearTransformNode);
+  vtkMRMLLinearTransformNode* GetSliceModelTransformNode();
 
   ///
   /// The compositing filter
@@ -144,6 +159,10 @@ public:
   /// -- returns NULL if none of the inputs exist
   vtkImageData *GetImageData();
 
+  /// Return True if at least one layer has an image data
+  /// \sa vtkMRMLSliceLayerLogic::GetImageData()
+  bool HasInputs();
+
   ///
   /// update the pipeline to reflect the current state of the nodes
   void UpdatePipeline();
@@ -166,11 +185,6 @@ public:
   ///
   /// Manage and syncronise the SliceCompositeNode
   void UpdateSliceCompositeNode();
-
-  ///
-  /// Get the volume node corresponding to layer
-  /// (0=background, 1=foreground, 2=label)
-  vtkMRMLVolumeNode *GetLayerVolumeNode(int layer);
 
   ///
   /// Get the size of the volume, transformed to RAS space
@@ -366,9 +380,17 @@ protected:
   char *                      Name;
   vtkMRMLSliceNode *          SliceNode;
   vtkMRMLSliceCompositeNode * SliceCompositeNode;
-  vtkMRMLSliceLayerLogic *    BackgroundLayer;
-  vtkMRMLSliceLayerLogic *    ForegroundLayer;
-  vtkMRMLSliceLayerLogic *    LabelLayer;
+
+  enum
+  {
+    BackgroundLayer = 0,
+    ForegroundLayer,
+    LabelLayer
+  };
+
+  typedef vtkSmartPointer<vtkMRMLSliceLayerLogic> LayerListItem;
+  typedef std::vector<LayerListItem>::iterator LayerListIterator;
+  std::vector<LayerListItem> Layers;
 
 
   vtkImageBlend *   Blend;
