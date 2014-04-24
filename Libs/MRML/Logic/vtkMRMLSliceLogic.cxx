@@ -143,35 +143,6 @@ vtkMRMLSliceLogic::~vtkMRMLSliceLogic()
 }
 
 //----------------------------------------------------------------------------
-// TODO: Remove from API
-bool vtkMRMLSliceLogic::IsInitialized()
-{
-  return this->Initialized;
-}
-
-//----------------------------------------------------------------------------
-// TODO: Remove from API
-void vtkMRMLSliceLogic::Initialize(vtkMRMLSliceNode* newSliceNode)
-{
-  if (this->Initialized)
-    {
-    vtkWarningMacro(<< "vtkMRMLSliceLogic already initialized");
-    return;
-    }
-
-  // Sanity checks
-  if (!newSliceNode)
-    {
-    vtkWarningMacro(<< "Initialize - newSliceNode is NULL");
-    return;
-    }
-
-  this->SetSliceNode(newSliceNode);
-
-  this->Initialized = true;
-}
-
-//----------------------------------------------------------------------------
 void vtkMRMLSliceLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
 {
   // Sanity checks
