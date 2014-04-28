@@ -163,8 +163,27 @@ public:
   /// Update the stored reference to another node in the scene
   virtual void UpdateReferenceID(const char *oldID, const char *newID);
 
-  /// Reset the clipping range just based on its position and focal point
+  /// Set the clipping range of the camera.
+  /// \sa ResetClippingRange()
+  void SetClippingRange(double near, double far);
+  double* GetClippingRange();
+
+  /// Reset the clipping range just based on its position and focal point:
+  /// Far = distance * 10, Near = Far / 1000
+  /// \sa SetClippingRange
   void ResetClippingRange();
+
+  /// Set the AutoAdjustCameraClippingRange property value.
+  /// \sa AutoAdjustCameraClippingRange, GetAutoAdjustCameraClippingRange(),
+  /// AutoAdjustCameraClippingRangeOn(), AutoAdjustCameraClippingRangeOff(),
+  /// SetClippingRange(), ResetClippingRange()
+  vtkSetMacro(AutoAdjustCameraClippingRange, bool);
+  /// Get the AutoAdjustCameraClippingRange property.
+  /// \sa AutoAdjustCameraClippingRange, SetAutoAdjustCameraClippingRange(),
+  /// AutoAdjustCameraClippingRangeOn(), AutoAdjustCameraClippingRangeOff(),
+  /// SetClippingRange(), ResetClippingRange()
+  vtkGetMacro(AutoAdjustCameraClippingRange, bool);
+  vtkBooleanMacro(AutoAdjustCameraClippingRange, bool);
 
   enum Direction{
     Right = 0,
@@ -230,6 +249,11 @@ protected:
   char *InternalActiveTag;
 
   vtkMatrix4x4 *AppliedTransform;
+  /// This property controls whether the camera clipping range is
+  /// automatically adjusted by the renderer anytime the user interacts
+  /// with the camera.
+  /// \sa vtkInteractorStyle::AutoAdjustCameraClippingRange
+  bool AutoAdjustCameraClippingRange;
 };
 
 //---------------------------------------------------------------------------
