@@ -35,8 +35,6 @@ vtkMRMLSliceCompositeNode::vtkMRMLSliceCompositeNode()
   this->HideFromEditors = 1;
 
   this->Compositing = 0;
-  this->ForegroundOpacity = 0.0; // start by showing only the background volume
-  this->LabelOpacity = 1.0; // Show the label if there is one
   this->LinkedControl = 0;
   this->FiducialVisibility = 1;
   this->FiducialLabelVisibility = 1;
@@ -63,8 +61,8 @@ void vtkMRMLSliceCompositeNode::WriteXML(ostream& of, int nIndent)
   vtkIndent indent(nIndent);
 
   of << indent << " compositing=\"" << this->Compositing << "\"";
-  of << indent << " foregroundOpacity=\"" << this->ForegroundOpacity << "\"";
-  of << indent << " labelOpacity=\"" << this->LabelOpacity << "\"";
+  of << indent << " foregroundOpacity=\"" << this->GetLayerOpacity(Self::ForegroundLayer) << "\"";
+  of << indent << " labelOpacity=\"" << this->GetLayerOpacity(Self::LabelLayer) << "\"";
   of << indent << " linkedControl=\"" << this->LinkedControl << "\"";
   of << indent << " fiducialVisibility=\"" << this->FiducialVisibility << "\"";
   of << indent << " fiducialLabelVisibility=\"" << this->FiducialLabelVisibility << "\"";
@@ -279,8 +277,12 @@ void vtkMRMLSliceCompositeNode::Copy(vtkMRMLNode *anode)
   vtkMRMLSliceCompositeNode *node = vtkMRMLSliceCompositeNode::SafeDownCast(anode);
 
   this->SetCompositing(node->GetCompositing());
-  this->SetForegroundOpacity(node->GetForegroundOpacity());
-  this->SetLabelOpacity(node->GetLabelOpacity());
+  for(unsigned int layerIndex = Self::ForegroundLayer;
+      layerIndex < node->GetNumberOfNodeReferences(LAYER_VOLUME_REFERENCE_ROLE);
+      ++layerIndex)
+    {
+    this->SetLayerOpacity(layerIndex, node->GetLayerOpacity(layerIndex));
+    }
   this->SetLinkedControl (node->GetLinkedControl());
   this->SetHotLinkedControl (node->GetHotLinkedControl());
   this->SetFiducialVisibility ( node->GetFiducialVisibility ( ) );
@@ -298,8 +300,8 @@ void vtkMRMLSliceCompositeNode::PrintSelf(ostream& os, vtkIndent indent)
   Superclass::PrintSelf(os,indent);
 
   os << indent << "Compositing: " << this->Compositing << "\n";
-  os << indent << "ForegroundOpacity: " << this->ForegroundOpacity << "\n";
-  os << indent << "LabelOpacity: " << this->LabelOpacity << "\n";
+  os << indent << "ForegroundOpacity: " << this->GetLayerOpacity(Self::ForegroundLayer)<< "\n";
+  os << indent << "LabelOpacity: " << this->GetLayerOpacity(Self::LabelLayer) << "\n";
   os << indent << "LinkedControl: " << this->LinkedControl << "\n";
   os << indent << "HotLinkedControl: " << this->HotLinkedControl << "\n";
   os << indent << "FiducialVisibility: " << this->FiducialVisibility << "\n";
@@ -383,4 +385,52 @@ const char* vtkMRMLSliceCompositeNode::GetLabelVolumeID()
 void vtkMRMLSliceCompositeNode::SetLabelVolumeID(const char* id)
 {
   this->SetLayerVolumeID(Self::LabelLayer, id);
+}
+
+//----------------------------------------------------------------------------
+double vtkMRMLSliceCompositeNode::GetLayerOpacity(unsigned int layerIndex)
+{
+  if (layerIndex < this->LayerOpacities.size())
+    {
+    return this->LayerOpacities.at(layerIndex);
+    }
+  return 0.0;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetLayerOpacity(unsigned int layerIndex, double value)
+{
+  if (layerIndex >= this->LayerOpacities.size())
+    {
+    this->LayerOpacities.resize(layerIndex + 1);
+    }
+  if (this->LayerOpacities.at(layerIndex) != value)
+    {
+    this->LayerOpacities.at(layerIndex) = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
+double vtkMRMLSliceCompositeNode::GetForegroundOpacity()
+{
+  return this->GetLayerOpacity(Self::ForegroundLayer);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetForegroundOpacity(double value)
+{
+  this->SetLayerOpacity(Self::ForegroundLayer, value);
+}
+
+//----------------------------------------------------------------------------
+double vtkMRMLSliceCompositeNode::GetLabelOpacity()
+{
+  return this->GetLayerOpacity(Self::LabelLayer);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetLabelOpacity(double value)
+{
+  this->SetLayerOpacity(Self::LabelLayer, value);
 }

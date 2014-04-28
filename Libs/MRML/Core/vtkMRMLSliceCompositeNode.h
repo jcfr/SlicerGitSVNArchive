@@ -84,19 +84,24 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
   vtkGetMacro (Compositing, int);
   vtkSetMacro (Compositing, int);
 
+  /// Opacity of layer N over layer N-1
+  /// \note Only Foreground and Label opacity are saved into the MRML Scene
+  double GetLayerOpacity(unsigned int layerIndex);
+  void SetLayerOpacity(unsigned int layerIndex, double value);
+
   ///
   /// opacity of the Foreground for rendering over background
-  /// TODO: make this an arbitrary list of layers
   /// TODO: make different composite types (checkerboard, etc)
-  vtkGetMacro (ForegroundOpacity, double);
-  vtkSetMacro (ForegroundOpacity, double);
+  /// \sa GetLayerOpacity, SetLayerOpacity
+  double GetForegroundOpacity();
+  void SetForegroundOpacity(double value);
 
   ///
   /// opacity of the Label for rendering over background
-  /// TODO: make this an arbitrary list of layers
   /// TODO: make different composite types (checkerboard, etc)
-  vtkGetMacro (LabelOpacity, double);
-  vtkSetMacro (LabelOpacity, double);
+  /// \sa GetLayerOpacity, SetLayerOpacity
+  double GetLabelOpacity();
+  void SetLabelOpacity(double value);
 
   ///
   /// toggle that gangs control of slice viewers
@@ -243,11 +248,10 @@ protected:
   vtkMRMLSliceCompositeNode(const vtkMRMLSliceCompositeNode&);
   void operator=(const vtkMRMLSliceCompositeNode&);
 
-  double ForegroundOpacity;
+  std::vector<double> LayerOpacities;
 
   int Compositing;
 
-  double LabelOpacity;
   int LinkedControl;
   int HotLinkedControl;
 
