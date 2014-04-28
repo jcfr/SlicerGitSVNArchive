@@ -503,7 +503,12 @@ void vtkThreeDViewInteractorStyle::Rotate()
   camera->Elevation(ryf);
   camera->OrthogonalizeViewUp();
 
-  if (this->AutoAdjustCameraClippingRange)
+  bool adjustClippingRange = this->AutoAdjustCameraClippingRange;
+  if (this->CameraNode)
+    {
+    adjustClippingRange = this->CameraNode->GetAutoAdjustCameraClippingRange();
+    }
+  if (adjustClippingRange)
     {
     this->CurrentRenderer->ResetCameraClippingRange();
     }
