@@ -70,7 +70,6 @@ vtkStandardNewMacro(vtkMRMLSliceLogic);
 //----------------------------------------------------------------------------
 vtkMRMLSliceLogic::vtkMRMLSliceLogic()
 {
-  this->Initialized = false;
   this->Name = 0;
   this->SliceNode = 0;
   this->SliceCompositeNode = 0;

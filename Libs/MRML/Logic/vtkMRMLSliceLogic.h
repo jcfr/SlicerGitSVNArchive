@@ -375,7 +375,6 @@ protected:
                                                           const char* layoutName);
 
   bool                        AddingSliceModelNodes;
-  bool                        Initialized;
 
   char *                      Name;
   vtkMRMLSliceNode *          SliceNode;
