@@ -80,7 +80,6 @@ vtkMRMLSliceLogic::vtkMRMLSliceLogic()
   this->ExtractModelTexture->SetOutputDimensionality (2);
   this->ExtractModelTexture->SetInput(BlendUVW->GetOutput());
 
-  this->ActiveSliceTransform = vtkTransform::New();
   this->PolyDataCollection = vtkPolyDataCollection::New();
   this->LookupTableCollection = vtkCollection::New();
   this->SliceModelNode = 0;
@@ -119,11 +118,6 @@ vtkMRMLSliceLogic::~vtkMRMLSliceLogic()
     {
     this->ExtractModelTexture->Delete();
     this->ExtractModelTexture = 0;
-    }
-  if (this->ActiveSliceTransform)
-    {
-    this->ActiveSliceTransform->Delete();
-    this->ActiveSliceTransform = 0;
     }
   this->PolyDataCollection->Delete();
   this->LookupTableCollection->Delete();
@@ -829,11 +823,6 @@ void vtkMRMLSliceLogic::UpdateImageData ()
       //  }
       //this->ImageData->DeepCopy( this->Blend->GetOutput());
       this->ImageData = this->Blend->GetOutput();
-      //this->ExtractModelTexture->SetInput( this->ImageData );
-      // Doesn't seem needed, not sure though.
-      //this->ActiveSliceTransform->Identity();
-      //this->ActiveSliceTransform->Translate(0, 0, this->SliceNode->GetActiveSlice() );
-      //this->ExtractModelTexture->SetResliceTransform( this->ActiveSliceTransform );
       }
     }
   else
