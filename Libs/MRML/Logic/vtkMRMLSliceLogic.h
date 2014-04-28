@@ -38,7 +38,6 @@ class vtkImageBlend;
 class vtkTransform;
 class vtkImageData;
 class vtkImageReslice;
-class vtkPolyDataCollection;
 class vtkTransform;
 
 /// \brief Slicer logic class for slice manipulation.
@@ -136,14 +135,6 @@ public:
   /// TODO: this will eventually be generalized to a per-layer compositing function
   vtkGetObjectMacro(Blend, vtkImageBlend);
   vtkGetObjectMacro(BlendUVW, vtkImageBlend);
-
-  ///
-  /// All the PolyData objects to render
-  vtkGetObjectMacro(PolyDataCollection, vtkPolyDataCollection);
-
-  ///
-  /// All the LookupTable objects to color the PolyData object
-  vtkGetObjectMacro(LookupTableCollection, vtkCollection);
 
   ///
   /// An image reslice instance to pull a single slice from the volume that
@@ -384,9 +375,6 @@ protected:
   vtkImageBlend *   BlendUVW;
   vtkImageReslice * ExtractModelTexture;
   vtkImageData *    ImageData;
-
-  vtkPolyDataCollection * PolyDataCollection;
-  vtkCollection *         LookupTableCollection;
 
   vtkMRMLModelNode *            SliceModelNode;
   vtkMRMLModelDisplayNode *     SliceModelDisplayNode;
