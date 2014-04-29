@@ -388,6 +388,22 @@ void vtkMRMLSliceCompositeNode::SetLabelVolumeID(const char* id)
 }
 
 //----------------------------------------------------------------------------
+int vtkMRMLSliceCompositeNode::GetCompositing()
+{
+  return this->Compositing;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetCompositing(int value)
+{
+  if (this->Compositing != value)
+    {
+    this->Compositing = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
 double vtkMRMLSliceCompositeNode::GetLayerOpacity(unsigned int layerIndex)
 {
   if (layerIndex < this->LayerOpacities.size())

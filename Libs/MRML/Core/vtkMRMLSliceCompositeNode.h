@@ -81,8 +81,8 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
   ///
   /// Compositing mode for foreground and background can be alpha
   /// blending, reverse alpha blending, addition, or subtraction
-  vtkGetMacro (Compositing, int);
-  vtkSetMacro (Compositing, int);
+  int GetCompositing();
+  void SetCompositing(int value);
 
   /// Opacity of layer N over layer N-1
   /// \note Only Foreground and Label opacity are saved into the MRML Scene
