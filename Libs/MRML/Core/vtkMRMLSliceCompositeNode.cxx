@@ -278,7 +278,7 @@ void vtkMRMLSliceCompositeNode::Copy(vtkMRMLNode *anode)
 
   this->SetCompositing(node->GetCompositing());
   for(unsigned int layerIndex = Self::ForegroundLayer;
-      layerIndex < node->GetNumberOfNodeReferences(LAYER_VOLUME_REFERENCE_ROLE);
+      layerIndex < static_cast<unsigned int>(node->GetNumberOfNodeReferences(LAYER_VOLUME_REFERENCE_ROLE));
       ++layerIndex)
     {
     this->SetLayerOpacity(layerIndex, node->GetLayerOpacity(layerIndex));
