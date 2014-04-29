@@ -410,7 +410,7 @@ double vtkMRMLSliceCompositeNode::GetLayerOpacity(unsigned int layerIndex)
     {
     return this->LayerOpacities.at(layerIndex);
     }
-  return 0.0;
+  return 1.0;
 }
 
 //----------------------------------------------------------------------------
