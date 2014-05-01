@@ -40,13 +40,15 @@
 #include "qMRMLSliderWidget.h"
 
 // MRMLLogic includes
-#include <vtkMRMLSliceLayerLogic.h>
+#include <vtkMRMLSliceLogic.h>
 
 // MRML includes
 #include <vtkMRMLLayoutNode.h>
 #include <vtkMRMLScalarVolumeDisplayNode.h>
 #include <vtkMRMLScene.h>
 #include <vtkMRMLSliceCompositeNode.h>
+#include <vtkMRMLSliceNode.h>
+#include <vtkMRMLVolumeNode.h>
 
 // VTK includes
 #include <vtkNew.h>
@@ -1160,7 +1162,7 @@ void qMRMLSliceControllerWidgetPrivate::setForegroundInterpolation(vtkMRMLSliceL
 {
   Q_Q(qMRMLSliceControllerWidget);
   // TODO, update the QAction when the display node is modified
-  vtkMRMLVolumeNode* volumeNode = sliceLogic->GetForegroundLayer()->GetVolumeNode();
+  vtkMRMLVolumeNode* volumeNode = sliceLogic->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::ForegroundLayer);
   vtkMRMLScalarVolumeDisplayNode *displayNode = volumeNode ? vtkMRMLScalarVolumeDisplayNode::SafeDownCast(
     volumeNode->GetVolumeDisplayNode()) : 0;
   if (displayNode)
@@ -1175,7 +1177,7 @@ void qMRMLSliceControllerWidgetPrivate::setForegroundInterpolation(vtkMRMLSliceL
   //   {
   //   q->mrmlScene()->SaveStateForUndo(displayNode);
   //   displayNode->SetInterpolate(interpolate);
-  //   vtkMRMLVolumeNode* volumeNode = sliceLogic->GetForegroundLayer()->GetVolumeNode();
+  //   vtkMRMLVolumeNode* volumeNode = sliceLogic->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::ForegroundLayer);
   //   if (volumeNode)
   //     {
   //     volumeNode->Modified();
@@ -1188,7 +1190,7 @@ void qMRMLSliceControllerWidgetPrivate::setBackgroundInterpolation(vtkMRMLSliceL
 {
   Q_Q(qMRMLSliceControllerWidget);
   // TODO, update the QAction when the display node is modified
-  vtkMRMLVolumeNode* volumeNode = sliceLogic->GetBackgroundLayer()->GetVolumeNode();
+  vtkMRMLVolumeNode* volumeNode = sliceLogic->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   vtkMRMLScalarVolumeDisplayNode *displayNode = volumeNode ? vtkMRMLScalarVolumeDisplayNode::SafeDownCast(
     volumeNode->GetVolumeDisplayNode()) : 0;
   if (displayNode)
@@ -1203,7 +1205,7 @@ void qMRMLSliceControllerWidgetPrivate::setBackgroundInterpolation(vtkMRMLSliceL
   //   {
   //   q->mrmlScene()->SaveStateForUndo(displayNode);
   //   displayNode->SetInterpolate(interpolate);
-  //   vtkMRMLVolumeNode* volumeNode = sliceLogic->GetBackgroundLayer()->GetVolumeNode();
+  //   vtkMRMLVolumeNode* volumeNode = sliceLogic->GetLayerVolumeNode(vtkMRMLSliceCompositeNode::BackgroundLayer);
   //   if (volumeNode)
   //     {
   //     volumeNode->Modified();
