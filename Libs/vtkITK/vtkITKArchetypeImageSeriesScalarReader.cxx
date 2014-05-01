@@ -15,6 +15,7 @@
 #include "vtkITKArchetypeImageSeriesScalarReader.h"
 
 #include "vtkDataArray.h"
+#include <vtkDataArrayTemplate.h>
 #include "vtkImageData.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
@@ -96,7 +97,9 @@ void vtkITKArchetypeImageSeriesScalarReader::ExecuteData(vtkDataObject *output)
       itk::ImportImageContainer<unsigned long, type>::Pointer PixelContainer##typeN;\
       PixelContainer##typeN = filter->GetOutput()->GetPixelContainer();\
       void *ptr = static_cast<void *> (PixelContainer##typeN->GetBufferPointer());\
-      (dynamic_cast<vtkImageData *>( output))->GetPointData()->GetScalars()->SetVoidArray(ptr, PixelContainer##typeN->Size(), 0);\
+      dynamic_cast<vtkDataArrayTemplate<type>* >(data->GetPointData()->GetScalars())\
+          ->SetVoidArray(ptr, PixelContainer##typeN->Size(), 0,\
+                         vtkDataArrayTemplate<type>::VTK_DATA_ARRAY_DELETE);\
       PixelContainer##typeN->ContainerManageMemoryOff();\
     }\
     break
@@ -128,7 +131,9 @@ void vtkITKArchetypeImageSeriesScalarReader::ExecuteData(vtkDataObject *output)
       itk::ImportImageContainer<unsigned long, type>::Pointer PixelContainer2##typeN;\
       PixelContainer2##typeN = filter->GetOutput()->GetPixelContainer();\
       void *ptr = static_cast<void *> (PixelContainer2##typeN->GetBufferPointer());\
-      (dynamic_cast<vtkImageData *>( output))->GetPointData()->GetScalars()->SetVoidArray(ptr, PixelContainer2##typeN->Size(), 0);\
+      dynamic_cast<vtkDataArrayTemplate<type>*>(data->GetPointData()->GetScalars())\
+         ->SetVoidArray(ptr, PixelContainer2##typeN->Size(), 0,\
+                        vtkDataArrayTemplate<type>::VTK_DATA_ARRAY_DELETE);\
       PixelContainer2##typeN->ContainerManageMemoryOff();\
     }\
     break
