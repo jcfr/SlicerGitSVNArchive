@@ -34,7 +34,6 @@ vtkMRMLSliceCompositeNode::vtkMRMLSliceCompositeNode()
 {
   this->HideFromEditors = 1;
 
-  this->Compositing = 0;
   this->LinkedControl = 0;
   this->FiducialVisibility = 1;
   this->FiducialLabelVisibility = 1;
@@ -60,7 +59,7 @@ void vtkMRMLSliceCompositeNode::WriteXML(ostream& of, int nIndent)
 
   vtkIndent indent(nIndent);
 
-  of << indent << " compositing=\"" << this->Compositing << "\"";
+  of << indent << " compositing=\"" << this->GetCompositing() << "\"";
   of << indent << " foregroundOpacity=\"" << this->GetLayerOpacity(Self::ForegroundLayer) << "\"";
   of << indent << " labelOpacity=\"" << this->GetLayerOpacity(Self::LabelLayer) << "\"";
   of << indent << " linkedControl=\"" << this->LinkedControl << "\"";
@@ -149,40 +148,7 @@ void vtkMRMLSliceCompositeNode::ReadXMLAttributes(const char** atts)
     {
     attName = *(atts++);
     attValue = *(atts++);
-    if (!strcmp(attName, "backgroundVolumeID"))
-      {
-      if (attValue && *attValue == '\0')
-        {
-        this->SetBackgroundVolumeID(NULL);
-        }
-      else
-        {
-        this->SetBackgroundVolumeID(attValue);
-        }
-      }
-    else if (!strcmp(attName, "foregroundVolumeID"))
-      {
-      if (attValue && *attValue == '\0')
-        {
-        this->SetForegroundVolumeID(NULL);
-        }
-      else
-        {
-        this->SetForegroundVolumeID(attValue);
-        }
-      }
-    else if (!strcmp(attName, "labelVolumeID"))
-      {
-      if (attValue && *attValue == '\0')
-        {
-        this->SetLabelVolumeID(NULL);
-        }
-      else
-        {
-        this->SetLabelVolumeID(attValue);
-        }
-      }
-    else if (!strcmp(attName, "compositing"))
+    if (!strcmp(attName, "compositing"))
       {
       this->SetCompositing( atoi(attValue) );
       }
@@ -276,11 +242,11 @@ void vtkMRMLSliceCompositeNode::Copy(vtkMRMLNode *anode)
   this->Superclass::Copy(anode);
   vtkMRMLSliceCompositeNode *node = vtkMRMLSliceCompositeNode::SafeDownCast(anode);
 
-  this->SetCompositing(node->GetCompositing());
   for(unsigned int layerIndex = Self::ForegroundLayer;
       layerIndex < static_cast<unsigned int>(node->GetNumberOfNodeReferences(LAYER_VOLUME_REFERENCE_ROLE));
       ++layerIndex)
     {
+    this->SetLayerCompositing(layerIndex, node->GetLayerCompositing(layerIndex));
     this->SetLayerOpacity(layerIndex, node->GetLayerOpacity(layerIndex));
     }
   this->SetLinkedControl (node->GetLinkedControl());
@@ -299,7 +265,7 @@ void vtkMRMLSliceCompositeNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os,indent);
 
-  os << indent << "Compositing: " << this->Compositing << "\n";
+  os << indent << "Compositing: " << this->GetCompositing() << "\n";
   os << indent << "ForegroundOpacity: " << this->GetLayerOpacity(Self::ForegroundLayer)<< "\n";
   os << indent << "LabelOpacity: " << this->GetLayerOpacity(Self::LabelLayer) << "\n";
   os << indent << "LinkedControl: " << this->LinkedControl << "\n";
@@ -388,19 +354,43 @@ void vtkMRMLSliceCompositeNode::SetLabelVolumeID(const char* id)
 }
 
 //----------------------------------------------------------------------------
+int vtkMRMLSliceCompositeNode::GetLayerCompositing(unsigned int layerIndex)
+{
+  if (layerIndex < this->LayerCompositingModes.size())
+    {
+    return this->LayerCompositingModes.at(layerIndex);
+    }
+  return Self::Alpha;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLSliceCompositeNode::SetLayerCompositing(unsigned int layerIndex, int value)
+{
+  if (layerIndex >= this->LayerCompositingModes.size())
+    {
+    this->LayerCompositingModes.resize(layerIndex + 1);
+    }
+  if (this->LayerCompositingModes.at(layerIndex) != value)
+    {
+    this->LayerCompositingModes.at(layerIndex) = value;
+    this->Modified();
+    }
+}
+
+//----------------------------------------------------------------------------
 int vtkMRMLSliceCompositeNode::GetCompositing()
 {
-  return this->Compositing;
+  return this->GetLayerCompositing(Self::BackgroundLayer);
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLSliceCompositeNode::SetCompositing(int value)
 {
-  if (this->Compositing != value)
-    {
-    this->Compositing = value;
-    this->Modified();
-    }
+  int disabledModify = this->StartModify();
+  this->SetLayerCompositing(Self::BackgroundLayer, value);
+  this->SetLayerCompositing(Self::ForegroundLayer, value);
+  this->SetLayerCompositing(Self::LabelLayer, value);
+  this->EndModify(disabledModify);
 }
 
 //----------------------------------------------------------------------------

@@ -78,9 +78,15 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
   const char* GetLabelVolumeID();
   void SetLabelVolumeID(const char* id);
 
-  ///
+  /// Compositing mode for layer N over layer N-1
+  /// \sa CompositingMode
+  /// \note Only Foreground and Label compositing are saved into the MRML Scene
+  int GetLayerCompositing(unsigned int layerIndex);
+  void SetLayerCompositing(unsigned int layerIndex, int value);
+
   /// Compositing mode for foreground and background can be alpha
   /// blending, reverse alpha blending, addition, or subtraction
+  /// \sa CompositingMode, GetLayerCompositing, SetLayerCompositing
   int GetCompositing();
   void SetCompositing(int value);
 
@@ -184,7 +190,7 @@ class VTK_MRML_EXPORT vtkMRMLSliceCompositeNode : public vtkMRMLNode
     };
 
   /// Modes for compositing
-  enum
+  enum CompositingMode
     {
       Alpha = 0,
       ReverseAlpha,
@@ -249,8 +255,7 @@ protected:
   void operator=(const vtkMRMLSliceCompositeNode&);
 
   std::vector<double> LayerOpacities;
-
-  int Compositing;
+  std::vector<int> LayerCompositingModes;
 
   int LinkedControl;
   int HotLinkedControl;

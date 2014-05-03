@@ -432,7 +432,6 @@ void vtkMRMLSliceLogic::vtkInternal::ClearPipeline(
 void vtkMRMLSliceLogic::vtkInternal::TruncatePipeline(
     PipelineType& pipelineList, unsigned int position = 0)
 {
-  std::cout << "TruncatePipeline " << position << " -> " << pipelineList.size() << std::endl;
   while(pipelineList.size() > position)
     {
     PipelineIteratorType it = pipelineList.end() - 1;

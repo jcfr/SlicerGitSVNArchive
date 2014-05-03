@@ -121,12 +121,6 @@ public:
   vtkMRMLLinearTransformNode* GetSliceModelTransformNode();
 
   ///
-  /// The compositing filter
-  /// TODO: this will eventually be generalized to a per-layer compositing function
-  vtkImageBlend* GetBlend();
-  vtkImageBlend* GetBlendUVW();
-
-  ///
   /// An image reslice instance to pull a single slice from the volume that
   /// represents the filmsheet display output
   vtkImageReslice* GetExtractModelTexture();
@@ -143,13 +137,6 @@ public:
   ///
   /// update the pipeline to reflect the current state of the nodes
   void UpdatePipeline();
-
-  /// Internally used by UpdatePipeline
-  void UpdateImageData();
-
-  /// Reimplemented to avoir calling ProcessMRMLSceneEvents when we are added the
-  /// MRMLModelNode into the scene
-  virtual bool EnterMRMLCallback()const;
 
   ///
   /// Manage and syncronise the SliceNode

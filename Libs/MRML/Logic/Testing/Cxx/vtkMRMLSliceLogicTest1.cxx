@@ -69,7 +69,6 @@ int vtkMRMLSliceLogicTest1(int , char * [] )
   TEST_GET_OBJECT(node1, SliceModelNode);
   TEST_GET_OBJECT(node1, SliceModelDisplayNode);
   TEST_GET_OBJECT(node1, SliceModelTransformNode);
-  TEST_GET_OBJECT(node1, Blend);
 
   node1->Print(std::cout);
   return EXIT_SUCCESS;
