@@ -59,9 +59,8 @@ class vtkCallbackCommand;
 #define vtkUnObserveMRMLObjectMacro(node)  {this->MRMLObserverManager->RemoveObjectEvents ( (node) );};
 #endif
 
-#ifndef vtkSetReferenceStringBodyMacro
-#define vtkSetReferenceStringBodyMacro(name) \
-  vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting " << #name " to " << (_arg?_arg:"(null)") ); \
+#ifndef vtkSetStringNoModifiedBodyMacro
+#define vtkSetStringNoModifiedBodyMacro(name, _arg) \
   if ( this->name == NULL && _arg == NULL) { return;} \
   if ( this->name && _arg && (!strcmp(this->name,_arg))) { return;} \
   std::string oldValue; \
@@ -77,7 +76,21 @@ class vtkCallbackCommand;
    else \
     { \
     this->name = NULL; \
-    } \
+    }
+#endif
+
+#ifndef vtkSetStringPimplBodyMacro
+#define vtkSetStringPimplBodyMacro(name, _arg) \
+  vtkDebugMacro(<< this->GetClassName() \
+    << " (" << this << "): setting " << #name " to " << (_arg?_arg:"(null)") ); \
+  vtkSetStringNoModifiedBodyMacro(name, _arg) \
+  this->Modified();
+#endif
+
+#ifndef vtkSetReferenceStringBodyMacro
+#define vtkSetReferenceStringBodyMacro(name) \
+  vtkDebugMacro(<< this->GetClassName() << " (" << this << "): setting " << #name " to " << (_arg?_arg:"(null)") ); \
+  vtkSetStringNoModifiedBodyMacro(name, _arg) \
   this->Modified(); \
   if (this->Scene && this->name) \
     { \

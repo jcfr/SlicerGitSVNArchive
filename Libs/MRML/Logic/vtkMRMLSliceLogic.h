@@ -63,38 +63,28 @@ public:
   typedef vtkMRMLSliceLogic Self;
 
   /// Set / Get SliceLogic name
-  vtkSetStringMacro(Name);
-  vtkGetStringMacro(Name);
+  void SetName(const char* value);
+  char* GetName();
 
-  ///
   /// The MRML slice node for this slice logic
-  vtkGetObjectMacro (SliceNode, vtkMRMLSliceNode);
-  void SetSliceNode (vtkMRMLSliceNode * newSliceNode);
+  vtkMRMLSliceNode* GetSliceNode();
+  void SetSliceNode(vtkMRMLSliceNode * newSliceNode);
 
-  ///
   /// The MRML slice node for this slice logic
-  vtkGetObjectMacro (SliceCompositeNode, vtkMRMLSliceCompositeNode);
-  void SetSliceCompositeNode (vtkMRMLSliceCompositeNode *SliceCompositeNode);
+  vtkMRMLSliceCompositeNode* GetSliceCompositeNode();
+  void SetSliceCompositeNode(vtkMRMLSliceCompositeNode *SliceCompositeNode);
 
-  ///
   /// The background slice layer
   vtkMRMLSliceLayerLogic* GetBackgroundLayer();
   void SetBackgroundLayer (vtkMRMLSliceLayerLogic *BackgroundLayer);
 
-  ///
   /// The forground slice layer
   vtkMRMLSliceLayerLogic* GetForegroundLayer();
   void SetForegroundLayer (vtkMRMLSliceLayerLogic *ForegroundLayer);
 
-  ///
   /// The Label slice layer
   vtkMRMLSliceLayerLogic* GetLabelLayer();
   void SetLabelLayer (vtkMRMLSliceLayerLogic *LabelLayer);
-
-  typedef vtkSmartPointer<vtkMRMLSliceLayerLogic> LayerListItem;
-  typedef std::vector<LayerListItem> LayerList;
-  typedef std::vector<LayerListItem>::iterator LayerListIterator;
-  typedef std::vector<LayerListItem>::const_iterator LayerListConstIterator;
 
   vtkMRMLSliceLayerLogic* GetLayer(unsigned int layerIndex);
   void SetLayer(unsigned int layerIndex, vtkMRMLSliceLayerLogic *layer);
@@ -133,13 +123,13 @@ public:
   ///
   /// The compositing filter
   /// TODO: this will eventually be generalized to a per-layer compositing function
-  vtkGetObjectMacro(Blend, vtkImageBlend);
-  vtkGetObjectMacro(BlendUVW, vtkImageBlend);
+  vtkImageBlend* GetBlend();
+  vtkImageBlend* GetBlendUVW();
 
   ///
   /// An image reslice instance to pull a single slice from the volume that
   /// represents the filmsheet display output
-  vtkGetObjectMacro(ExtractModelTexture, vtkImageReslice);
+  vtkImageReslice* GetExtractModelTexture();
 
   ///
   /// the tail of the pipeline
@@ -361,30 +351,14 @@ protected:
   static vtkMRMLSliceCompositeNode* GetSliceCompositeNode(vtkMRMLScene* scene,
                                                           const char* layoutName);
 
-  bool                        AddingSliceModelNodes;
-
-  char *                      Name;
-  vtkMRMLSliceNode *          SliceNode;
-  vtkMRMLSliceCompositeNode * SliceCompositeNode;
-
-
-  LayerList Layers;
-
-
-  vtkImageBlend *   Blend;
-  vtkImageBlend *   BlendUVW;
-  vtkImageReslice * ExtractModelTexture;
-  vtkImageData *    ImageData;
-
-  vtkMRMLModelNode *            SliceModelNode;
-  vtkMRMLModelDisplayNode *     SliceModelDisplayNode;
-  vtkMRMLLinearTransformNode *  SliceModelTransformNode;
-  double                        SliceSpacing[3];
-
 private:
 
   vtkMRMLSliceLogic(const vtkMRMLSliceLogic&);
   void operator=(const vtkMRMLSliceLogic&);
+
+  class vtkInternal;
+  vtkInternal * Internal;
+  friend class vtkInternal;
 
 };
 
