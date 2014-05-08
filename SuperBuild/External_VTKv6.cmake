@@ -63,15 +63,6 @@ if((NOT DEFINED VTK_DIR OR NOT DEFINED VTK_SOURCE_DIR) AND NOT ${CMAKE_PROJECT_N
       #-DVTK_USE_RPATH:BOOL=ON # Unused
       )
   endif()
-  if(UNIX AND NOT APPLE)
-    find_package(FontConfig QUIET)
-    if(FONTCONFIG_FOUND)
-      list(APPEND EXTERNAL_PROJECT_OPTIONAL_ARGS
-        -DModule_vtkRenderingFreeTypeFontConfig:BOOL=ON
-        )
-    endif()
-  endif()
-
 
   # Disable Tk when Python wrapping is enabled
   if(Slicer_USE_PYTHONQT)
@@ -123,6 +114,7 @@ if((NOT DEFINED VTK_DIR OR NOT DEFINED VTK_SOURCE_DIR) AND NOT ${CMAKE_PROJECT_N
       -DZLIB_ROOT:PATH=${ZLIB_ROOT}
       -DZLIB_INCLUDE_DIR:PATH=${ZLIB_INCLUDE_DIR}
       -DZLIB_LIBRARY:FILEPATH=${ZLIB_LIBRARY}
+      -DModule_vtkRenderingFreeTypeFontConfig:BOOL=OFF
       ${EXTERNAL_PROJECT_OPTIONAL_ARGS}
     INSTALL_COMMAND ""
     DEPENDS
