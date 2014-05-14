@@ -358,7 +358,6 @@ vtkImageData* vtkMRMLSliceLogic::vtkInternal::PipelineItem::GetOutput()
     }
   if (!this->AlphaBlending)
     {
-    this->Math->GetOutput()->SetScalarType(VTK_SHORT);
     this->Cast->SetInput(this->Math->GetOutput());
     this->Cast->SetOutputScalarTypeToUnsignedChar();
     return this->Cast->GetOutput();
@@ -520,6 +519,7 @@ void vtkMRMLSliceLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
   this->GetBackgroundLayer()->SetMRMLScene(newScene);
   this->GetForegroundLayer()->SetMRMLScene(newScene);
   this->GetLabelLayer()->SetMRMLScene(newScene);
+  // XXX Set scene for all layers
 
   this->ProcessMRMLSceneEvents(newScene, vtkMRMLScene::EndBatchProcessEvent, 0);
 }

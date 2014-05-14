@@ -1155,15 +1155,7 @@ void vtkMRMLNode::UpdateNthNodeReference(const char* referenceRole, int n)
   // No event
   //
 
-  NodeReferenceListType referencedNodes;
-  if (referenceRole)
-    {
-    referencedNodes = this->NodeReferences[std::string(referenceRole)];
-    }
-  else
-    {
-    // TODO maybe create a dummy role?
-    }
+  NodeReferenceListType referencedNodes = this->NodeReferences[std::string(referenceRole)];
 
   std::string newReferencedNodeID;
 
@@ -1286,15 +1278,7 @@ void vtkMRMLNode::UpdateNthNodeReference(const char* referenceRole, int n)
     events = NodeReferenceEvents[referenceRole];
     }
 
-  NodeReferenceListType referencedNodes;
-  if (referenceRole)
-    {
-    referencedNodes = this->NodeReferences[std::string(referenceRole)];
-    }
-  else
-    {
-    // TODO maybe create a dummy role?
-    }
+  NodeReferenceListType referencedNodes = this->NodeReferences[std::string(referenceRole)];
 
   std::string newReferencedNodeID;
 
