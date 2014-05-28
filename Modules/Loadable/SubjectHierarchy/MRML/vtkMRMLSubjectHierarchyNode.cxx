@@ -365,28 +365,57 @@ void vtkMRMLSubjectHierarchyNode::GetAssociatedChildrenNodes(vtkCollection *chil
     vtkMRMLHierarchyNode* currentHierarchyNode = vtkMRMLHierarchyNode::SafeDownCast(currentNode);
     if (currentHierarchyNode && currentHierarchyNode->GetAssociatedNodeID())
       {
+      std::cout << "\nSKIP [" << n << "]:" << currentNode->GetID() << "|"
+                << "|" << currentNode->GetName() << std::endl;
       continue;
+      }
+    else
+      {
+      std::cout << "\nCONSIDER [" << n << "]:" << currentNode->GetID() << "|"
+                << "|" << currentNode->GetName() << std::endl;
       }
 
     // Check for a hierarchy node for this node
-    vtkMRMLHierarchyNode* hierarchyNode = this->GetAssociatedHierarchyNode(this->Scene, currentNode->GetID());
+    vtkMRMLHierarchyNode* hierarchyNode =
+        this->GetAssociatedHierarchyNode(this->Scene, currentNode->GetID(), /* nestedHierarchy= */ false);
+
+    std::cout << "0 - [" << n << "] current node: "<< currentNode->GetID()
+              << " - hierarchyNode:"
+              << (hierarchyNode ? hierarchyNode->GetID() : "<null>")
+              << "|" << (hierarchyNode ? hierarchyNode->GetName() : "<null>")
+              << std::endl;
 
     // See if there is a nested association (only check here because nesting is only allowed for leaves)
     if (hierarchyNode)
       {
-      vtkMRMLHierarchyNode* secondHierarchyNode = this->GetAssociatedHierarchyNode(this->Scene, hierarchyNode->GetID());
+      vtkMRMLHierarchyNode* secondHierarchyNode =
+          this->GetAssociatedHierarchyNode(this->Scene, hierarchyNode->GetID(), /* nestedHierarchy= */ false);
       if (secondHierarchyNode)
         {
         hierarchyNode = secondHierarchyNode;
         }
       }
 
+    std::cout << "1 - [" << n << "] current node: "<< currentNode->GetID()
+              << " - secondHierarchyNode:"
+              << (hierarchyNode ? hierarchyNode->GetID() : "<null>")
+              << "|" << (hierarchyNode ? hierarchyNode->GetName() : "<null>")
+              << std::endl;
+
+    std::cout << "1 - hierarchyNode-assoc: " << (hierarchyNode ? hierarchyNode->GetAssociatedNodeID() : "<null>") << std::endl;
     while (hierarchyNode)
       {
       if (hierarchyNode == this)
         {
+        std::cout << "-----> Adding node:" << currentNode->GetID() << " | " << currentNode->GetName() << std::endl;
         children->AddItem(currentNode);
         break;
+        }
+      else
+        {
+        std::cout << "-----> NOT Adding node:" << currentNode->GetClassName()
+                  << "hierarchyNode:" << hierarchyNode->GetID() << " | " << hierarchyNode->GetName()
+                  << " - this:" << this->GetID() << " | " << this->GetName() << std::endl;
         }
 
       // The hierarchy node for this node may not be the one we're checking against, go up the tree
@@ -754,13 +783,20 @@ void vtkMRMLSubjectHierarchyNode::TransformBranch(vtkMRMLTransformNode* transfor
   vtkNew<vtkCollection> childTransformableNodes;
   this->GetAssociatedChildrenNodes(childTransformableNodes.GetPointer(), "vtkMRMLTransformableNode");
 
+  std::cout << "TransformBranch:" << childTransformableNodes->GetNumberOfItems() << std::endl;
+
   childTransformableNodes->InitTraversal();
   for (int childNodeIndex = 0;
        childNodeIndex < childTransformableNodes->GetNumberOfItems();
        ++childNodeIndex)
     {
     vtkMRMLTransformableNode* transformableNode = vtkMRMLTransformableNode::SafeDownCast(
-      childTransformableNodes->GetItemAsObject(childNodeIndex) );
+          childTransformableNodes->GetItemAsObject(childNodeIndex));
+    std::cout << "[" << childNodeIndex << "] - transformableNode:"
+              << (transformableNode ? transformableNode->GetID() : "<null>")
+              << " | "
+              << (transformableNode ? transformableNode->GetName() : "<null>")
+              << std::endl;
     if (!transformableNode)
       {
       vtkWarningMacro("TransformBranch: Non-transformable node found in a collection of transformable nodes!");
@@ -770,16 +806,26 @@ void vtkMRMLSubjectHierarchyNode::TransformBranch(vtkMRMLTransformNode* transfor
     vtkMRMLTransformNode* parentTransformNode = transformableNode->GetParentTransformNode();
     if (parentTransformNode)
       {
+      std::cout << "[" << childNodeIndex << "] - "
+                <<"parentTransformNode:" << parentTransformNode << " - "
+                << (parentTransformNode ? parentTransformNode->GetID() : "<null>")
+                << " | "
+                << (parentTransformNode ? parentTransformNode->GetName() : "<null>")
+                << std::endl;
       // Do nothing if the parent transform matches the specified transform to apply
       if (parentTransformNode == transformNode)
         {
-        vtkDebugMacro("TransformBranch: Specified transform " << transformNode->GetName() << " already applied on data node belonging to subject hierarchy node " << this->Name);
+        std::cout << "TransformBranch: Specified transform " << transformNode->GetName()
+                  << " already applied on data node belonging to subject hierarchy node "
+                  << this->Name << std::endl;
         continue;
         }
       // Harden existing parent transform if this option was chosen
       if (hardenExistingTransforms)
         {
-        vtkDebugMacro("TransformBranch: Hardening transform " << transformNode->GetName() << " on node " << transformableNode->GetName());
+        std::cout << "TransformBranch: Hardening transform "
+                  << parentTransformNode->GetName() << " on node "
+                  << transformableNode->GetName() << std::endl;
         vtkSlicerTransformLogic::hardenTransform(transformableNode);
         }
       }

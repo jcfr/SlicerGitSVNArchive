@@ -96,6 +96,7 @@ bool vtkSlicerTransformLogic::hardenTransform(vtkMRMLTransformableNode* transfor
     vtkNew<vtkMatrix4x4> hardeningMatrix;
     transformNode->GetMatrixTransformToWorld(hardeningMatrix.GetPointer());
     transformableNode->ApplyTransformMatrix(hardeningMatrix.GetPointer());
+    std::cout << "Applying " << transformNode->GetName() << " on " << transformableNode->GetName() << std::endl;
     }
   else
     {

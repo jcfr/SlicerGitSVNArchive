@@ -709,6 +709,7 @@ vtkMRMLHierarchyNode* vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(vtkMRMLSc
   if (iter != siter->second.end())
     {
     return iter->second;
+//    std::cout << "GetAssociatedHierarchyNode:" << hierarchyNode << std::endl;
     }
   else
     {
