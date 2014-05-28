@@ -182,7 +182,7 @@ namespace
     vtkNew<vtkMRMLModelHierarchyNode> model21ModelHierarchyNode;
     model21ModelHierarchyNode->SetName("Model21_Hierarchy");
     model21ModelHierarchyNode->SetDisplayableNodeID(model21Node->GetID());
-    //model21ModelHierarchyNode->SetParentNodeID(modelHierarchyRootNode->GetID()); // No parent node needed to test nested associations
+    model21ModelHierarchyNode->SetParentNodeID(study2ShNode->GetID());
     scene->AddNode(model21ModelHierarchyNode.GetPointer());
     std::cout << "model21ModelHierarchyNode: " << model21ModelHierarchyNode->GetID() << " | " << model21ModelHierarchyNode->GetName() << std::endl;
 
@@ -204,7 +204,7 @@ namespace
     vtkNew<vtkMRMLModelHierarchyNode> model22ModelHierarchyNode;
     model22ModelHierarchyNode->SetName("Model22_Hierarchy");
     model22ModelHierarchyNode->SetDisplayableNodeID(model22Node->GetID());
-    //model22ModelHierarchyNode->SetParentNodeID(modelHierarchyRootNode->GetID()); // No parent node needed to test nested associations
+    model22ModelHierarchyNode->SetParentNodeID(study2ShNode->GetID());
     scene->AddNode(model22ModelHierarchyNode.GetPointer());
     std::cout << "model22ModelHierarchyNode: " << model22ModelHierarchyNode->GetID() << " | " << model22ModelHierarchyNode->GetName() << std::endl;
 

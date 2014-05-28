@@ -680,7 +680,8 @@ void vtkMRMLHierarchyNode::GetAssociatedChildrenNodes(vtkCollection *children,
 
 //---------------------------------------------------------------------------
 vtkMRMLHierarchyNode* vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(vtkMRMLScene *scene,
-                                                                       const char *associatedNodeID)
+                                                                       const char *associatedNodeID,
+                                                                       bool nestedHierarchy)
 {
   if (associatedNodeID == 0)
     {
@@ -708,8 +709,17 @@ vtkMRMLHierarchyNode* vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(vtkMRMLSc
   iter = siter->second.find(associatedNodeID);
   if (iter != siter->second.end())
     {
-    return iter->second;
+    vtkMRMLHierarchyNode * hierarchyNode = iter->second;
 //    std::cout << "GetAssociatedHierarchyNode:" << hierarchyNode << std::endl;
+    if (nestedHierarchy && hierarchyNode && hierarchyNode->IsA("vtkMRMLSubjectHierarchyNode"))
+      {
+      vtkMRMLHierarchyNode * secondHierarchyNode = vtkMRMLHierarchyNode::SafeDownCast(hierarchyNode->vtkMRMLHierarchyNode::GetAssociatedNode());
+      if (secondHierarchyNode)
+        {
+        return secondHierarchyNode;
+        }
+      }
+    return hierarchyNode;
     }
   else
     {

@@ -148,7 +148,8 @@ public:
   ///
   /// Get Hierarchy node for a given associated node
   static vtkMRMLHierarchyNode* GetAssociatedHierarchyNode(vtkMRMLScene *scene,
-                                                          const char *associatedNodeID);
+                                                          const char *associatedNodeID,
+                                                          bool nestedHierarchy = true);
   ///
   /// Node's Sorting Value
   //vtkSetMacro(SortingValue, double);
