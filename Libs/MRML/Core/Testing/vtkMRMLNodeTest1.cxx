@@ -1845,8 +1845,10 @@ bool TestClearScene_CheckNumberOfEvents(const char* description,
                                         bool referencedNodeIsSingleton,
                                         int expectedTotalNumberOfEventsForReferencingNode,
                                         int expectedNumberOfReferenceRemovedEventsForReferencingNode,
+                                        int expectedNumberOfModifiedEventsForReferencingNode,
                                         int expectedTotalNumberOfEventsForReferencedNode,
-                                        int expectedNumberOfReferenceRemovedEventsForReferencedNode)
+                                        int expectedNumberOfReferenceRemovedEventsForReferencedNode,
+                                        int expectedNumberOfModifiedEventsForReferencedNode)
 {
   vtkNew<vtkMRMLScene> scene;
   scene->RegisterNodeClass(vtkSmartPointer<vtkMRMLNodeTestHelper1>::New());
@@ -1917,9 +1919,17 @@ bool TestClearScene_CheckNumberOfEvents(const char* description,
     }
 
   if (!CheckInt(__LINE__,
+                std::string("TestClearScene-NumberOfModifiedEvents-for-ReferencingNode_") + description,
+                referencingNodeSpy->GetNumberOfModified(),
+                expectedNumberOfModifiedEventsForReferencingNode))
+    {
+    referencingNodeSpy->Print(std::cerr);
+    return false;
+    }
 
   // ReferencedNode
 
+  if (!CheckInt(__LINE__,
                 std::string("TestClearScene-TotalNumberOfEvents-for-ReferencedNode_") + description,
                 referencedNodeSpy->GetTotalNumberOfEvents(),
                 expectedTotalNumberOfEventsForReferencedNode))
@@ -1932,6 +1942,15 @@ bool TestClearScene_CheckNumberOfEvents(const char* description,
                 std::string("TestClearScene-NumberOfReferenceRemovedEvents-for-ReferencedNode_") + description,
                 referencedNodeSpy->GetNumberOfEvents(vtkMRMLNode::ReferenceRemovedEvent),
                 expectedNumberOfReferenceRemovedEventsForReferencedNode))
+    {
+    referencedNodeSpy->Print(std::cerr);
+    return false;
+    }
+
+  if (!CheckInt(__LINE__,
+                std::string("TestClearScene-NumberOfModifiedEvents-for-ReferencedNode_") + description,
+                referencedNodeSpy->GetNumberOfModified(),
+                expectedNumberOfModifiedEventsForReferencedNode))
     {
     referencedNodeSpy->Print(std::cerr);
     return false;
@@ -1960,8 +1979,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ false,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -1975,8 +1996,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ true,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -1991,8 +2014,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ false,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 1,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 1,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -2006,8 +2031,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ true,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 1,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 1,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -2024,8 +2051,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ false,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -2039,8 +2068,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ true,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -2055,8 +2086,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ false,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
@@ -2070,8 +2103,10 @@ bool TestClearScene()
         /* referencedNodeIsSingleton = */ true,
         /* expectedTotalNumberOfEventsForReferencingNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
-        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
+        /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
+        /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
         ))
     {
     return false;
