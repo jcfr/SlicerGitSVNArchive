@@ -2012,9 +2012,9 @@ bool TestClearScene()
         /* removeSingleton = */ removeSingleton,
         /* referencingNodeIsSingleton = */ true,
         /* referencedNodeIsSingleton = */ false,
-        /* expectedTotalNumberOfEventsForReferencingNode= */ 1,
+        /* expectedTotalNumberOfEventsForReferencingNode= */ 2,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 1,
-        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 1,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
         /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
@@ -2029,9 +2029,9 @@ bool TestClearScene()
         /* removeSingleton = */ removeSingleton,
         /* referencingNodeIsSingleton = */ true,
         /* referencedNodeIsSingleton = */ true,
-        /* expectedTotalNumberOfEventsForReferencingNode= */ 1,
+        /* expectedTotalNumberOfEventsForReferencingNode= */ 2,
         /* expectedNumberOfReferenceRemovedEventsForReferencingNode= */ 1,
-        /* expectedNumberOfModifiedEventsForReferencingNode = */ 0,
+        /* expectedNumberOfModifiedEventsForReferencingNode = */ 1,
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0,
         /* expectedNumberOfModifiedEventsForReferencedNode = */ 0
