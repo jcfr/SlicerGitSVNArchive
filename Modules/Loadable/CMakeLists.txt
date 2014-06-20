@@ -1,6 +1,37 @@
 
+project(SlicerModulesLoadable)
+
 include(${Slicer_CMAKE_DIR}/SlicerMacroBuildQtModule.cmake)
 
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkFiltersExtraction
+    vtkFiltersSources
+    vtkIOImage
+    vtkIOXML
+    vtkInteractionWidgets
+    vtkRenderingFreeTypeOpenGL
+    vtkRenderingVolumeOpenGL
+    )
+  if(UNIX AND NOT APPLE)
+    find_package(FontConfig QUIET)
+    if (FONTCONFIG_FOUND)
+      list(APPEND ${PROJECT_NAME}_VTK_COMPONENTS vtkRenderingFreeTypeFontConfig)
+    endif()
+  endif()
+  if(BUILD_TESTING)
+    list(APPEND ${CMAKE_PROJECT_NAME}_COMPONENTS
+      vtkTestingRendering
+      )
+  endif()
+  find_package(VTK COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+# --------------------------------------------------------------------------
 set(qtmodules
   AtlasCreator
   Cameras

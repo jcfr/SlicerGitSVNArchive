@@ -11,22 +11,42 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 OLD)
 endif()
 
-set(${CMAKE_PROJECT_NAME}_ITK_COMPONENTS
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
+if(NOT DEFINED BUILD_SHARED_LIBS)
+  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+endif()
+
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# ITK
+#
+set(${PROJECT_NAME}_ITK_COMPONENTS
   ITKCommon
   ITKIOImageBase
   )
-find_package(ITK 4.5 COMPONENTS ${${CMAKE_PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+find_package(ITK 4.5 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
 set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
 list(APPEND ITK_LIBRARIES ITKFactoryRegistration)
 list(APPEND ITK_INCLUDE_DIRS ${ITKFactoryRegistration_INCLUDE_DIRS})
 include(${ITK_USE_FILE})
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
-
-if(NOT DEFINED BUILD_SHARED_LIBS)
-  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonDataModel
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
 endif()
+include(${VTK_USE_FILE})
 
 # --------------------------------------------------------------------------
 # Include dirs

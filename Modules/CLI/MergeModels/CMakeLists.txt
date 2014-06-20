@@ -3,20 +3,33 @@
 set(MODULE_NAME MergeModels)
 
 #-----------------------------------------------------------------------------
+
+#
+# SlicerExecutionModel
+#
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+
+#
+# VTK
+#
 if(${VTK_VERSION_MAJOR} GREATER 5)
-  set(VTK_LIBRARIES
+  set(${PROJECT_NAME}_VTK_COMPONENTS
     vtkCommonCore
     vtkFiltersCore
     vtkIOLegacy
     vtkIOXML
-    vtksys
     )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
 else()
   set(VTK_LIBRARIES
     vtkIO
     vtkGraphics
     )
 endif()
+
+#-----------------------------------------------------------------------------
 SEMMacroBuildCLI(
   NAME ${MODULE_NAME}
   LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/NAMICLogo.h

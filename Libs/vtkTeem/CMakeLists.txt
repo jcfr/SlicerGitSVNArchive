@@ -12,12 +12,40 @@ if(POLICY CMP0017)
 endif()
 
 # --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
+
+if(NOT DEFINED BUILD_SHARED_LIBS)
+  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+endif()
+
+# --------------------------------------------------------------------------
 # Dependencies
 # --------------------------------------------------------------------------
 
-find_package(VTK REQUIRED)
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkFiltersFlowPaths
+    vtkIOImage
+    vtkIOLegacy
+    vtkImagingCore
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
+endif()
 include(${VTK_USE_FILE})
+if(Slicer_USE_PYTHONQT AND NOT VTK_WRAP_PYTHON)
+  message(FATAL_ERROR "Since Slicer_USE_PYTHONQT is ON, VTK_WRAP_PYTHON is expected to be ON. "
+                      "Re-configure VTK with python wrapping.")
+endif()
 
+#
+# teem
+#
 find_package(Teem REQUIRED NO_MODULE)
 # XXX Since no TeemConfigVersion.cmake is configured, let's check the version explicitly
 if(${Teem_VERSION_MAJOR}.${Teem_VERSION_MINOR}.${Teem_VERSION_PATCH} VERSION_LESS 1.10)
@@ -29,10 +57,6 @@ include(${Teem_USE_FILE})
 # XXX Teem 1.11.0 or Teem >= 4168 - This variable won't be needed anymore.
 #     See http://sourceforge.net/p/teem/code/4168/
 set(Teem_LIBRARIES teem)
-
-if(NOT DEFINED BUILD_SHARED_LIBS)
-  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
-endif()
 
 # --------------------------------------------------------------------------
 # Configure headers

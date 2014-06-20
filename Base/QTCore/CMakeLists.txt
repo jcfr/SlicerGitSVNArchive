@@ -1,12 +1,59 @@
 project(qSlicerBaseQTCore)
 
 #
-# Third party library
+# Dependencies
 #
 
+#
+# DCMTK
+#
+if(Slicer_BUILD_DICOM_SUPPORT)
+  find_package(DCMTK REQUIRED)
+endif()
+
+#
+# ModuleDescriptionParser - Required to define ModuleDescriptionParser_INCLUDE_DIRS
+#
 if(Slicer_BUILD_CLI_SUPPORT)
-  # Required to define ModuleDescriptionParser_INCLUDE_DIRS
   find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
+
+  #
+  # ITK
+  #
+  set(${PROJECT_NAME}_ITK_COMPONENTS
+    # Import ITK targets required by ModuleDescriptionParser
+    ${ModuleDescriptionParser_ITK_COMPONENTS}
+    # Import ITK targets required by CTKImageProcessingITKCore
+    ITKCommon
+    )
+  find_package(ITK 4.5 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+  set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
+  include(${ITK_USE_FILE})
+endif()
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkIOImage
+    vtkIOXMLParser
+    )
+  if(Slicer_USE_PYTHONQT)
+    list(APPEND ${PROJECT_NAME}_VTK_COMPONENTS
+      vtkWrappingPythonCore
+      )
+  endif()
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+#
+# qRestAPI
+#
+if(Slicer_BUILD_EXTENSIONMANAGER_SUPPORT)
+  find_package(qRestAPI REQUIRED)
+  include(${qRestAPI_USE_FILE})
 endif()
 
 #
@@ -126,15 +173,19 @@ endif()
 
 # Additional Target libraries (QT libs already included)
 set(KIT_target_libraries
+  ${QT_LIBRARIES}
   SlicerBaseLogic
   MRMLDisplayableManager
   CTKCore
   CTKImageProcessingITKCore
   CTKVisualizationVTKCore
+  ${ITK_LIBRARIES}
+  # ${VTK_LIBRARIES} # Not needed: All dependencies are transitively satisfied by other targets
   )
 
 if(Slicer_BUILD_DICOM_SUPPORT)
   list(APPEND KIT_target_libraries
+    ${DCMTK_LIBRARIES}
     CTKDICOMCore
     )
 endif()
@@ -147,6 +198,7 @@ endif()
 
 if(Slicer_BUILD_CLI_SUPPORT)
   list(APPEND KIT_target_libraries
+    ${ITK_LIBRARIES}
     ModuleDescriptionParser
     )
 endif()

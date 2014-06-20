@@ -11,8 +11,35 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 OLD)
 endif()
 
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
 if(NOT DEFINED BUILD_SHARED_LIBS)
   option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+endif()
+
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkFiltersCore
+    vtkFiltersSources
+    vtkImagingGeneral
+    vtkImagingMath
+    vtkInteractionImage
+    vtkRenderingOpenGL
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+if(Slicer_USE_PYTHONQT AND NOT VTK_WRAP_PYTHON)
+  message(FATAL_ERROR "Since Slicer_USE_PYTHONQT is ON, VTK_WRAP_PYTHON is expected to be ON. "
+                      "Re-configure VTK with python wrapping.")
 endif()
 
 # --------------------------------------------------------------------------
@@ -89,12 +116,7 @@ set(srcs ${MRMLLogic_SRCS})
 add_library(${lib_name} ${srcs})
 
 if(${VTK_VERSION_MAJOR} GREATER 5)
-  set(VTK_LIBRARIES
-    vtkImagingGeneral
-    vtkInteractionImage
-    vtkRenderingFreeType
-    vtkRenderingVolumeOpenGL
-    )
+  # Minimum set of libraries already specified using components
 else()
   set(VTK_LIBRARIES
     "" # Since no direct dependency to VTK libraries are required, let's explicitly set
@@ -145,6 +167,8 @@ install(TARGETS ${lib_name}
 # Python Wrapping
 # --------------------------------------------------------------------------
 if(VTK_WRAP_PYTHON)
+  include(vtkMacroKitPythonWrap)
+
   vtkMacroKitPythonWrap(
     KIT_NAME ${lib_name}
     KIT_SRCS ${MRMLLogic_SRCS}

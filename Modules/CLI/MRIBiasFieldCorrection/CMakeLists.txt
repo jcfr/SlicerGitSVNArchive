@@ -3,6 +3,51 @@
 set(MODULE_NAME MRIBiasFieldCorrection)
 
 #-----------------------------------------------------------------------------
+
+#
+# SlicerExecutionModel
+#
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+
+#
+# ITK
+#
+set(${PROJECT_NAME}_ITK_COMPONENTS
+  ITKCommon
+  ITKIOImageBase
+  ITKImageGrid
+  ITKImageIntensity
+  ITKOptimizers
+  ITKTestKernel
+  ITKThresholding
+  ITKVTK
+  ITKVtkGlue
+  )
+find_package(ITK 4.5 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
+include(${ITK_USE_FILE})
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkIOImage
+    vtkImagingGeneral
+    vtkImagingStatistics
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+else()
+  set(VTK_LIBRARIES
+    vtkIO
+    vtkImaging
+    )
+endif()
+
+#-----------------------------------------------------------------------------
 # Disable MSVC 8 warnings
 
 if(WIN32)
@@ -13,7 +58,7 @@ endif()
 SEMMacroBuildCLI(
   NAME ${MODULE_NAME}
   LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/MIT_NAMIC_Logo.h
-  TARGET_LIBRARIES ${ITK_LIBRARIES} vtkIO vtkImaging
+  TARGET_LIBRARIES ${ITK_LIBRARIES} ${VTK_LIBRARIES}
   )
 
 #-----------------------------------------------------------------------------

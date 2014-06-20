@@ -1,6 +1,24 @@
 project(qSlicerBaseQTGUI)
 
 #
+# Dependencies
+#
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkCommonDataModel
+    vtkRenderingAnnotation
+    vtkRenderingOpenGL
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+#
 # See CMake/SlicerMacroBuildBaseQtLibrary.cmake for details
 #
 
@@ -280,14 +298,8 @@ endif()
 set(KIT_target_libraries
   qSlicerBaseQTCore
   qMRMLWidgets
+  # ${VTK_LIBRARIES} # Not needed: All dependencies are transitively satisfied by other targets
   )
-
-# Python wrap
-if(Slicer_USE_PYTHONQT)
-  list(APPEND KIT_target_libraries
-    CTKScriptingPythonWidgets
-    )
-endif()
 
 # Resources
 set(KIT_resources
@@ -326,12 +338,18 @@ SlicerMacroBuildBaseQtLibrary(
 #-----------------------------------------------------------------------------
 # Slicer icon engine
 #-----------------------------------------------------------------------------
+
+#
+# CTK
+#
+set(CTK_LIBRARIES CTKWidgets)
+
 ctkMacroBuildQtIconEnginesPlugin(
   NAME qSlicerIconEnginePlugin
   EXPORT_DIRECTIVE "Q_SLICER_BASE_QTGUI_ICON_ENGINE_EXPORT"
   SRCS qSlicerIconEnginePlugin.cxx qSlicerIconEnginePlugin.h
   MOC_SRCS qSlicerIconEnginePlugin.h
-  TARGET_LIBRARIES ${QT_LIBRARIES} ${CTK_LIBRARIES} ${VTK_LIBRARIES}
+  TARGET_LIBRARIES ${QT_LIBRARIES} ${CTK_LIBRARIES}
   )
 
 # Qt Plugins

@@ -12,7 +12,7 @@ ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj
 
 if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
   unset(ITK_DIR CACHE)
-  find_package(ITK 4 COMPONENTS ${${CMAKE_PROJECT_NAME}_ITK_COMPONENTS} REQUIRED NO_MODULE)
+  find_package(ITK 4.5 REQUIRED NO_MODULE)
 endif()
 
 # Sanity checks
@@ -27,7 +27,7 @@ if(NOT DEFINED ITK_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
   endif()
 
   set(ITKv4_REPOSITORY ${git_protocol}://github.com/Slicer/ITK.git)
-  set(ITKv4_GIT_TAG 184b1257ade2963b0d39a7c114712f2abbe2af96) # v4.5.2 with Slice patches
+  set(ITKv4_GIT_TAG 184b1257ade2963b0d39a7c114712f2abbe2af96) # v4.5.2 with Slicer patches
 
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}

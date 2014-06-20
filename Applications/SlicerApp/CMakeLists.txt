@@ -31,6 +31,22 @@ if(WIN32)
 endif()
 
 # --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkCommonDataModel
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+# --------------------------------------------------------------------------
 # Sources
 # --------------------------------------------------------------------------
 set(SlicerApp_SRCS
@@ -71,6 +87,7 @@ set(SlicerApp_INCLUDE_DIRECTORIES
   ${qSlicerModulesCore_SOURCE_DIR}
   ${qSlicerModulesCore_BINARY_DIR}
   ${ITKFactoryRegistration_INCLUDE_DIRS}
+  # ${VTK_LIBRARIES} # Not needed: All dependencies are transitively satisfied by other targets
   )
 include_directories(${SlicerApp_INCLUDE_DIRECTORIES})
 

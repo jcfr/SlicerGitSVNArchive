@@ -11,14 +11,9 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 OLD)
 endif()
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
-
-find_package(CURL REQUIRED)
-
-if(Slicer_USE_PYTHONQT_WITH_OPENSSL)
-  find_package(OpenSSL REQUIRED)
-endif()
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
 
 # Disable MSVC 8 warnings
 if(WIN32)
@@ -32,6 +27,35 @@ endif(WIN32)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
   option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+endif()
+
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
+endif()
+include(${VTK_USE_FILE})
+
+#
+# CURL
+#
+find_package(CURL REQUIRED)
+
+#
+# OpenSSL
+#
+if(Slicer_USE_PYTHONQT_WITH_OPENSSL)
+  find_package(OpenSSL REQUIRED)
 endif()
 
 # --------------------------------------------------------------------------
