@@ -42,6 +42,11 @@ if(Slicer_USE_PYTHONQT AND NOT VTK_WRAP_PYTHON)
                       "Re-configure VTK with python wrapping.")
 endif()
 
+#
+# LibArchive
+#
+find_package(LibArchive REQUIRED MODULE)
+
 # --------------------------------------------------------------------------
 # Include dirs
 # --------------------------------------------------------------------------

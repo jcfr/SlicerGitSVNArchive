@@ -58,6 +58,11 @@ if(Slicer_USE_PYTHONQT_WITH_OPENSSL)
   find_package(OpenSSL REQUIRED)
 endif()
 
+#
+# CURL
+#
+find_package(CURL REQUIRED)
+
 # --------------------------------------------------------------------------
 # Include dirs
 # --------------------------------------------------------------------------

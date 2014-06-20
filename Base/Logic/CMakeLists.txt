@@ -50,6 +50,11 @@ list(APPEND ITK_INCLUDE_DIRS
   )
 include(${ITK_USE_FILE})
 
+#
+# LibArchive
+#
+find_package(LibArchive REQUIRED MODULE)
+
 # --------------------------------------------------------------------------
 # Subdirectories
 # --------------------------------------------------------------------------
