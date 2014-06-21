@@ -39,6 +39,10 @@ set(MODULE_UI_SRCS
 set(MODULE_TARGET_LIBRARIES
   vtkSlicer${MODULE_NAME}ModuleLogic
   )
+# XXX Instead find_package(VTK COMPONENT ...) shoulld be called for each module library.
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  list(APPEND MODULE_TARGET_LIBRARIES vtkRenderingVolumeOpenGL)
+endif()
 
 set(MODULE_RESOURCES
   Resources/qSlicer${MODULE_NAME}Module.qrc

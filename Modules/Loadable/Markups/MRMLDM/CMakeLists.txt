@@ -42,6 +42,8 @@ if(${VTK_VERSION_MAJOR} GREATER 5)
     vtkSlicer${MODULE_NAME}ModuleLogic
     vtkSlicer${MODULE_NAME}ModuleMRML
     vtkSlicer${MODULE_NAME}ModuleVTKWidgets
+    # XXX Instead find_package(VTK COMPONENT ...) shoulld be called for each module library.
+    vtkRenderingVolumeOpenGL
   )
 else()
   set(${KIT}_TARGET_LIBRARIES
