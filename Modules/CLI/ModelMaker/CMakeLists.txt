@@ -3,11 +3,33 @@
 set(MODULE_NAME ModelMaker)
 
 #-----------------------------------------------------------------------------
+
+#
+# SlicerExecutionModel
+#
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkIOImage
+    vtkImagingGeneral
+    vtkImagingStatistics
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+#-----------------------------------------------------------------------------
 # TODO: Remove SlicerBaseLogic once pass in color node information
 SEMMacroBuildCLI(
   NAME ${MODULE_NAME}
   LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/NAMICLogo.h
-  TARGET_LIBRARIES vtkITK ModuleDescriptionParser MRMLCore SlicerBaseLogic SlicerBaseCLI
+  TARGET_LIBRARIES vtkITK ModuleDescriptionParser MRMLCore SlicerBaseLogic SlicerBaseCLI ${VTK_LIBRARIES}
   INCLUDE_DIRECTORIES
     ${vtkITK_INCLUDE_DIRS}
     ${MRMLCore_INCLUDE_DIRS}

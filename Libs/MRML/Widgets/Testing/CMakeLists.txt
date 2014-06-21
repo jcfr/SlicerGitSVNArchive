@@ -1,4 +1,18 @@
 
+#
+# Dependencies
+#
+
+#
+# CTK
+#
+set(CTK_LIBRARIES )
+if(Slicer_USE_QtTesting)
+  list(APPEND CTK_LIBRARIES
+    CTKQtTesting
+    )
+endif()
+
 set(KIT ${PROJECT_NAME})
 set(CMAKE_TESTDRIVER_AFTER_TESTMAIN  "DEBUG_LEAKS_ENABLE_EXIT_ERROR();")
 set(TEST_SOURCES
@@ -126,7 +140,7 @@ QT4_GENERATE_MOCS(
 include_directories( ${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(${KIT}CxxTests ${Tests} ${Tests_MOC_CXX} ${Tests_UtilityFiles})
-target_link_libraries(${KIT}CxxTests ${KIT})
+target_link_libraries(${KIT}CxxTests ${KIT} ${CTK_LIBRARIES})
 
 macro(SCENE_TEST TESTNAME SCENEFILENAME)
   add_test(

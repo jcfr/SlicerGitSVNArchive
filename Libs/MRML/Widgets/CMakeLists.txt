@@ -12,7 +12,9 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 OLD)
 endif()
 
-
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
 if(NOT DEFINED BUILD_SHARED_LIBS)
   option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
 endif(NOT DEFINED BUILD_SHARED_LIBS)
@@ -20,13 +22,63 @@ endif(NOT DEFINED BUILD_SHARED_LIBS)
 include(CheckIncludeFiles)
 check_include_files("stdint.h" HAVE_STDINT_H)
 
+# CMake module
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${MRMLWidgets_SOURCE_DIR}/CMake")
+
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkFiltersCore
+    vtkRenderingOpenGL
+    vtkRenderingQt
+    # Import VTK targets required by CTKVisualizationVTKWidgets
+    vtkChartsCore
+    vtkFiltersCore
+    vtkFiltersSources
+    vtkIOImage
+    vtkImagingStatistics
+    vtkInteractionWidgets
+    vtkRenderingOpenGL
+    vtkTestingRendering
+    vtkViewsContext2D
+    )
+  if(Slicer_USE_PYTHONQT)
+    list(APPEND ${PROJECT_NAME}_VTK_COMPONENTS
+      vtkWrappingPythonCore
+      )
+  endif()
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+#
+# CTK
+#
+set(CTK_LIBRARIES CTKVisualizationVTKWidgets)
+if(Slicer_USE_PYTHONQT)
+  list(APPEND CTK_LIBRARIES
+    CTKScriptingPythonWidgets
+    )
+endif()
+if(Slicer_USE_QtTesting)
+  list(APPEND CTK_LIBRARIES
+    CTKQtTesting
+    )
+endif()
+
+# --------------------------------------------------------------------------
+# Configure headers
+# --------------------------------------------------------------------------
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/qMRMLWidgetsConfigure.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/qMRMLWidgetsConfigure.h
   )
-
-# CMake module
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${MRMLWidgets_SOURCE_DIR}/CMake")
 
 #-----------------------------------------------------------------------------
 # Sources
@@ -378,16 +430,10 @@ add_library(${lib_name}
 set(MRMLWidgets_LIBRARIES
   ${QT_LIBRARIES}
   ${CTK_LIBRARIES}
-  ${CTK_EXTERNAL_LIBRARIES}
+  ${VTK_LIBRARIES}
   MRMLLogic
   MRMLDisplayableManager
   )
-if(${VTK_VERSION_MAJOR} GREATER 5)
-  list(APPEND MRMLWidgets_LIBRARIES
-    vtkRenderingQt
-    )
-endif()
-
 target_link_libraries(${lib_name} ${MRMLWidgets_LIBRARIES})
 
 # Apply user-defined properties to the library target.

@@ -2,18 +2,33 @@
 #-----------------------------------------------------------------------------
 set(MODULE_NAME DiffusionWeightedVolumeMasking)
 
-# HACK until each project find_package's required projects.
-include_directories(BEFORE ${vtkTeem_INCLUDE_DIRS})
+#-----------------------------------------------------------------------------
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
+#
+# SlicerExecutionModel
+#
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
 
-set(VTK_LIBRARIES)
+#
+# VTK
+#
 if(${VTK_VERSION_MAJOR} GREATER 5)
-  list(APPEND VTK_LIBRARIES
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkImagingMath
     vtkImagingMorphological
     )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
 endif()
+include(${VTK_USE_FILE})
+
+#-----------------------------------------------------------------------------
+set(${MODULE_NAME}_TARGET_LIBRARIES
+  MRMLCore vtkTeem vtkSlicerEditorLibModuleLogic ${VTK_LIBRARIES}
+  )
 
 #-----------------------------------------------------------------------------
 SEMMacroBuildCLI(
@@ -21,11 +36,11 @@ SEMMacroBuildCLI(
   LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/ITKLogo.h
   INCLUDE_DIRECTORIES
     ${vtkITK_INCLUDE_DIRS}
-    ${MRMLCore_INCLUDE_DIRS}
     ${vtkTeem_INCLUDE_DIRS}
+    ${MRMLCore_INCLUDE_DIRS}
     ${vtkSlicerEditorLibModuleLogic_SOURCE_DIR}
     ${vtkSlicerEditorLibModuleLogic_BINARY_DIR}
-  TARGET_LIBRARIES MRMLCore vtkTeem vtkSlicerEditorLibModuleLogic ${VTK_LIBRARIES}
+  TARGET_LIBRARIES ${${MODULE_NAME}_TARGET_LIBRARIES}
   EXECUTABLE_ONLY
   )
 

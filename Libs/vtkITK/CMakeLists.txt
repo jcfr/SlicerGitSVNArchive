@@ -11,20 +11,37 @@ if(POLICY CMP0017)
   cmake_policy(SET CMP0017 OLD)
 endif()
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
+if(NOT DEFINED BUILD_SHARED_LIBS)
+  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
+endif()
 
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# VTK
+#
 if(${VTK_VERSION_MAJOR} GREATER 5)
-  set(VTK_LIBRARIES
-    vtkCommonCore
-    vtkCommonDataModel
-    vtkCommonExecutionModel
-    vtkCommonMath
-    vtkCommonTransforms
+  set(${PROJECT_NAME}_VTK_COMPONENTS
     vtkIOImage
     vtkImagingCore
-    vtksys
     )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
+endif()
+include(${VTK_USE_FILE})
+if(Slicer_USE_PYTHONQT AND NOT VTK_WRAP_PYTHON)
+  message(FATAL_ERROR "Since Slicer_USE_PYTHONQT is ON, VTK_WRAP_PYTHON is expected to be ON. "
+                      "Re-configure VTK with python wrapping.")
+endif()
+
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  # Minimum set of libraries already specified using components
 else()
   set(VTK_LIBRARIES
     vtkCommon
@@ -33,83 +50,33 @@ else()
     )
 endif()
 
-set(ITK_IO_MODULES_USED
-  ITKIOJPEG
-  ITKIOGDCM
-  ITKIOBMP
-  ITKIOLSM
-  ITKIOPNG
-  ITKIOTIFF
-  ITKIOVTK
-  ITKIOStimulate
-  ITKIOBioRad
-  ITKIOMeta
-  ITKIONIFTI
-  ITKIONRRD
-  ITKIOGIPL
-  )
-set(${CMAKE_PROJECT_NAME}_ITK_COMPONENTS
+#
+# ITK
+#
+set(${PROJECT_NAME}_ITK_COMPONENTS
   ITKAnisotropicSmoothing
-  ITKAntiAlias
-  ITKBiasCorrection
-  ITKBinaryMathematicalMorphology
   ITKCommon
   ITKConnectedComponents
-  ITKCurvatureFlow
   ITKDeprecated
-  ITKDiffusionTensorImage
-  ITKDisplacementField
   ITKDistanceMap
-  ITKFastMarching
-  ITKHDF5
+  ITKIOGDCM
+  ITKIOGE
   ITKIOImageBase
-  ITKIOSpatialObjects
-  ITKIOStimulate
-  ITKIOTransformBase
-  ITKImageAdaptors
-  ITKImageCompare
   ITKImageCompose
-  ITKImageFeature
   ITKImageFilterBase
   ITKImageFunction
-  ITKImageFusion
-  ITKImageGradient
   ITKImageGrid
-  ITKImageIntensity
-  ITKImageSources
-  ITKImageStatistics
-  ITKLabelVoting
-  ITKLevelSets
-  ITKMathematicalMorphology
-  ITKMesh
-  ITKOptimizers
-  ITKPDEDeformableRegistration
+  ITKLabelMap
   ITKPath
-  ITKQuadEdgeMesh
-  ITKQuadEdgeMeshFiltering
   ITKRegionGrowing
-  ITKRegistrationCommon
-  ITKSmoothing
-  ITKSpatialObjects
-  ITKStatistics
-  ITKTestKernel
   ITKThresholding
-  ITKTransform
-  ITKV3Compatibility
   ITKVTK
-  ITKVtkGlue
-  ITKZLIB
-  ${ITK_IO_MODULES_USED}
   )
-find_package(ITK 4.5 COMPONENTS ${${CMAKE_PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+find_package(ITK 4.5 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
 set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
 list(APPEND ITK_LIBRARIES ITKFactoryRegistration)
 list(APPEND ITK_INCLUDE_DIRS ${ITKFactoryRegistration_INCLUDE_DIRS})
 include(${ITK_USE_FILE})
-
-if(NOT DEFINED BUILD_SHARED_LIBS)
-  option(BUILD_SHARED_LIBS "Build with shared libraries." ON)
-endif()
 
 # --------------------------------------------------------------------------
 # Include dirs
@@ -239,6 +206,8 @@ install(TARGETS ${lib_name}
 # Python Wrapping
 # --------------------------------------------------------------------------
 if(VTK_WRAP_PYTHON)
+  include(vtkMacroKitPythonWrap)
+
   vtkMacroKitPythonWrap(
     KIT_NAME ${lib_name}
     KIT_SRCS ${vtkITK_SRCS}

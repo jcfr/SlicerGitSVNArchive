@@ -1,9 +1,34 @@
 project(SlicerBaseCLI)
 
 # --------------------------------------------------------------------------
-# Third party library
+# Dependencies
 # --------------------------------------------------------------------------
 find_package(SlicerExecutionModel REQUIRED ModuleDescriptionParser)
+
+
+#
+# ITK - Import ITK targets required by ModuleDescriptionParser
+#
+set(${PROJECT_NAME}_ITK_COMPONENTS
+  ${ModuleDescriptionParser_ITK_COMPONENTS}
+  )
+find_package(ITK 4.5 COMPONENTS ${${PROJECT_NAME}_ITK_COMPONENTS} REQUIRED)
+
+#
+# VTK - Note that it is an optional dependency
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    vtkCommonExecutionModel
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS})
+else()
+  find_package(VTK REQUIRED)
+endif()
+if(VTK_FOUND)
+  include(${VTK_USE_FILE})
+endif()
 
 # --------------------------------------------------------------------------
 # Include dirs
@@ -73,12 +98,10 @@ endif()
 set(SlicerBaseCLI_SRCS
   )
 set(SlicerBaseCLI_LIBS
-  ModuleDescriptionParser
+  ModuleDescriptionParser ${ITK_LIBRARIES}
   )
 
-find_package(VTK)
 if(VTK_FOUND)
-  include(${VTK_USE_FILE})
   list(APPEND SlicerBaseCLI_SRCS vtkPluginFilterWatcher.cxx)
   list(APPEND SlicerBaseCLI_LIBS ${VTK_LIBRARIES})
 endif()

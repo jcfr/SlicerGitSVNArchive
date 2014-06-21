@@ -2,14 +2,37 @@
 #-----------------------------------------------------------------------------
 set(MODULE_NAME ProbeVolumeWithModel)
 
-# HACK until each project find_package's required projects.
-include_directories(BEFORE ${vtkTeem_INCLUDE_DIRS})
+#-----------------------------------------------------------------------------
+
+#
+# SlicerExecutionModel
+#
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+
+#
+# VTK
+#
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkFiltersGeneral
+    vtkIOLegacy
+    vtkIOXML
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+  include(${VTK_USE_FILE})
+endif()
+
+#-----------------------------------------------------------------------------
+set(${MODULE_NAME}_TARGET_LIBRARIES
+  MRMLCore vtkTeem ${VTK_LIBRARIES}
+  )
 
 #-----------------------------------------------------------------------------
 SEMMacroBuildCLI(
   NAME ${MODULE_NAME}
   LOGO_HEADER ${Slicer_SOURCE_DIR}/Resources/ITKLogo.h
-  TARGET_LIBRARIES MRMLCore vtkTeem
+  TARGET_LIBRARIES ${${MODULE_NAME}_TARGET_LIBRARIES}
   INCLUDE_DIRECTORIES
     ${vtkITK_INCLUDE_DIRS}
     ${vtkTeem_INCLUDE_DIRS}

@@ -512,117 +512,6 @@ if(Slicer_BUILD_CLI_SUPPORT)
 endif()
 
 #-----------------------------------------------------------------------------
-# ITKv4 - Slicer_ITK_COMPONENTS
-#-----------------------------------------------------------------------------
-set(ITK_IO_MODULES_USED
-  ITKIOJPEG
-  ITKIOGDCM
-  ITKIOBMP
-  ITKIOLSM
-  ITKIOPNG
-  ITKIOTIFF
-  ITKIOVTK
-  ITKIOStimulate
-  ITKIOBioRad
-  ITKIOMeta
-  ITKIONIFTI
-  ITKIONRRD
-  ITKIOGIPL
-  )
-if(Slicer_BUILD_DICOM_SUPPORT)
-  list(APPEND ITK_IO_MODULES_USED ITKIODCMTK)
-endif()
-set(Slicer_ITK_COMPONENTS
-  ITKAnisotropicSmoothing
-  ITKAntiAlias
-  ITKBiasCorrection
-  ITKBinaryMathematicalMorphology
-  ITKCommon
-  ITKConnectedComponents
-  ITKCurvatureFlow
-  ITKDeprecated
-  ITKDiffusionTensorImage
-  ITKDisplacementField
-  ITKDistanceMap
-  ITKFastMarching
-  ITKHDF5
-  ITKIOImageBase
-  ITKIOSpatialObjects
-  ITKIOStimulate
-  ITKIOTransformBase
-  ITKImageAdaptors
-  ITKImageCompare
-  ITKImageCompose
-  ITKImageFeature
-  ITKImageFilterBase
-  ITKImageFunction
-  ITKImageFusion
-  ITKImageGradient
-  ITKImageGrid
-  ITKImageIntensity
-  ITKImageSources
-  ITKImageStatistics
-  ITKLabelVoting
-  ITKLevelSets
-  ITKMathematicalMorphology
-  ITKMesh
-  ITKOptimizers
-  ITKPDEDeformableRegistration
-  ITKPath
-  ITKQuadEdgeMesh
-  ITKQuadEdgeMeshFiltering
-  ITKRegionGrowing
-  ITKRegistrationCommon
-  ITKReview
-  ITKSmoothing
-  ITKSpatialObjects
-  ITKStatistics
-  ITKTestKernel
-  ITKThresholding
-  ITKTransform
-  ITKV3Compatibility
-  ITKVTK
-  #    ITKVtkGlue
-  ITKZLIB
-  ${ITK_IO_MODULES_USED}
-  )
-
-#-----------------------------------------------------------------------------
-# VTKv6 - Slicer_VTK_COMPONENTS
-#-----------------------------------------------------------------------------
-if(${VTK_VERSION_MAJOR} GREATER 5)
-  set(Slicer_VTK_COMPONENTS
-    vtkFiltersExtraction
-    vtkFiltersFlowPaths
-    vtkFiltersGeometry
-    vtkIOImage
-    vtkIOLegacy
-    vtkIOPLY
-    vtkIOXML
-    vtkImagingMath
-    vtkImagingMorphological
-    vtkImagingStatistics
-    vtkImagingStencil
-    vtkInteractionImage
-    vtkRenderingFreeTypeOpenGL
-    vtkRenderingQt
-    vtkRenderingVolumeOpenGL
-    vtkTestingRendering
-    vtkzlib
-    )
-  if(Slicer_USE_PYTHONQT)
-    list(APPEND Slicer_VTK_COMPONENTS
-      vtkWrappingPythonCore
-      )
-  endif()
-  if(UNIX AND NOT APPLE)
-    list(APPEND Slicer_VTK_COMPONENTS
-      vtkRenderingFreeTypeFontConfig
-      )
-  endif()
-endif()
-
-#-----------------------------------------------------------------------------
 # Qt - Slicer_REQUIRED_QT_MODULES
 #-----------------------------------------------------------------------------
 # Module name should be specified as they appear in FindQt4.cmake
@@ -699,13 +588,8 @@ foreach(dep QT ${Slicer_DEPENDENCIES})
 endforeach()
 
 #-----------------------------------------------------------------------------
-# CMake Function(s) and Macro(s)
-#-----------------------------------------------------------------------------
-if(Slicer_BUILD_CLI_SUPPORT)
-  include(SlicerMacroBuildCLI)
-endif()
-
 # Clear SlicerTargets.cmake
+#-----------------------------------------------------------------------------
 file(WRITE "${Slicer_BINARY_DIR}/SlicerTargets.cmake" "")
 
 #-----------------------------------------------------------------------------
@@ -784,29 +668,20 @@ if(BUILD_TESTING)
 endif()
 
 #-----------------------------------------------------------------------------
-# ITK
+# NOTE: How to include dependent packages ?
 #-----------------------------------------------------------------------------
-find_package(ITK 4.5 COMPONENTS ${Slicer_ITK_COMPONENTS} REQUIRED)
-set(ITK_NO_IO_FACTORY_REGISTER_MANAGER 1) # See Libs/ITKFactoryRegistration/CMakeLists.txt
-list(APPEND ITK_LIBRARIES ITKFactoryRegistration)
-list(APPEND ITK_INCLUDE_DIRS
-  ${CMAKE_CURRENT_SOURCE_DIR}/Libs/ITKFactoryRegistration
-  ${CMAKE_CURRENT_BINARY_DIR}/Libs/ITKFactoryRegistration
-  )
-include(${ITK_USE_FILE})
+
+# Every Slicer sub project, library or module is responsible
+# to call find_package (optionally specifying a list of components)
+# and (if it applies) include the associated "use file".
+#
+# This means that moving forward most of the find_package calls listed below
+# will be removed.
 
 #-----------------------------------------------------------------------------
-# VTK
+# VTKv5
 #-----------------------------------------------------------------------------
-if(${VTK_VERSION_MAJOR} STREQUAL "6")
-  find_package(VTK 6.1 COMPONENTS ${Slicer_VTK_COMPONENTS} REQUIRED NO_MODULE)
-  if(NOT TARGET vtkGUISupportQt)
-    message(FATAL_ERROR "error: VTK was not configured to use QT, you probably need "
-                      "to recompile it with VTK_USE_GUISUPPORT ON, VTK_Group_Qt ON, "
-                      "DESIRED_QT_VERSION 4 and QT_QMAKE_EXECUTABLE set appropriatly. "
-                      "Note that Qt >= ${Slicer_REQUIRED_QT_VERSION} is *required*")
-  endif()
-else()
+if(${VTK_VERSION_MAJOR} STREQUAL "5")
   find_package(VTK REQUIRED)
   if(NOT VTK_USE_QVTK)
     message(FATAL_ERROR "error: VTK was not configured to use QT, you probably need "
@@ -814,8 +689,8 @@ else()
                       "DESIRED_QT_VERSION 4 and QT_QMAKE_EXECUTABLE set appropriatly. "
                       "Note that Qt >= ${Slicer_REQUIRED_QT_VERSION} is *required*")
   endif()
+  include(${VTK_USE_FILE})
 endif()
-include(${VTK_USE_FILE})
 
 #-----------------------------------------------------------------------------
 # CTK
@@ -836,7 +711,6 @@ endif()
 # Update CMake module path
 #-----------------------------------------------------------------------------
 set(CMAKE_MODULE_PATH
-  ${VTK_CMAKE_DIR}
   ${CTK_CMAKE_DIR}
   ${CMAKE_MODULE_PATH}
   ${CTK_CMAKE_UTILITIES_DIR})
@@ -868,12 +742,6 @@ endif()
 # PythonQt
 #-----------------------------------------------------------------------------
 if(Slicer_USE_PYTHONQT)
-  if(NOT VTK_WRAP_PYTHON)
-    message(FATAL_ERROR "Since Slicer_USE_PYTHONQT is ON, VTK_WRAP_PYTHON is expected to be ON. "
-                        "Re-configure VTK with python wrapping.")
-  endif()
-
-  include(vtkMacroKitPythonWrap)
 
   set(PYTHONQT_INSTALL_DIR ${CTK_PYTHONQT_INSTALL_DIR})
   # Find PythonQt package so that PYTHONQT_USE_RELEASE_PYTHON_FALLBACK is defined

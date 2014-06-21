@@ -36,7 +36,14 @@ endif()
 #
 # VTK
 #
-find_package(VTK REQUIRED)
+if(${VTK_VERSION_MAJOR} GREATER 5)
+  set(${PROJECT_NAME}_VTK_COMPONENTS
+    vtkCommonCore
+    )
+  find_package(VTK 6.1 COMPONENTS ${${PROJECT_NAME}_VTK_COMPONENTS} REQUIRED)
+else()
+  find_package(VTK REQUIRED)
+endif()
 include(${VTK_USE_FILE})
 
 #
