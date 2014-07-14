@@ -1555,6 +1555,7 @@ int vtkMRMLNode::GetNumberOfNodeReferences(const char* referenceRole)
         n++;
         }
       }
+    assert(n == references.size());
     }
   return n;
 }
