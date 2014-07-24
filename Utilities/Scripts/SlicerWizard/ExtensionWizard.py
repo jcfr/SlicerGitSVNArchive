@@ -474,7 +474,7 @@ class ExtensionWizard(object):
           oldRef = None
 
       # Write the extension description and prepare to commit
-      xd.write(os.path.join(xiRepo.working_tree_dir, xdf))
+      xd.write(os.path.join(xiRepo.working_tree_dir, xdf), encoding="utf-8")
       xiRepo.index.add([xdf])
 
       # Commit and push the new/updated extension description

@@ -3,6 +3,7 @@ import os
 import re
 
 from .ExtensionProject import ExtensionProject
+from .Utilities import detectEncoding
 
 #=============================================================================
 class ExtensionDescription(object):
@@ -19,7 +20,7 @@ class ExtensionDescription(object):
   _reParam = re.compile(r"([a-zA-Z][a-zA-Z0-9_]*)\s+(.+)")
 
   #---------------------------------------------------------------------------
-  def __init__(self, repo=None, filepath=None, sourcedir=None):
+  def __init__(self, repo=None, filepath=None, sourcedir=None, encoding=None):
     """
     :param repo:
       Extension repository from which to create the description.
@@ -34,6 +35,13 @@ class ExtensionDescription(object):
       Path to an extension source directory.
     :type sourcedir:
       :class:`basestring` or ``None``.
+    :param encoding:
+      Encoding of the extension description file.
+    :type encoding:
+      :class:`basestring` or ``None``.
+
+    If ``encoding`` is ``None``, the encoding will be guessed using
+    :meth:`~SlicerWizard.Utilities.detectEncoding`.
 
     :raises:
       * :exc:`~exceptions.KeyError` if the extension description is missing a
@@ -55,8 +63,7 @@ class ExtensionDescription(object):
                       type(self).__name__)
 
     if filepath is not None:
-      with open(filepath) as fp:
-        self._read(fp)
+      self.encoding = self._readFile(filepath, encoding)
 
     elif repo is not None:
       # Handle git repositories
@@ -122,7 +129,7 @@ class ExtensionDescription(object):
       setattr(self, "scmrevision", "NA")
 
     if sourcedir is not None:
-      p = ExtensionProject(sourcedir)
+      p = ExtensionProject(sourcedir, encoding=encoding)
       self._setProjectAttribute("homepage", p, required=True)
       self._setProjectAttribute("category", p, required=True)
       self._setProjectAttribute("description", p)
@@ -140,9 +147,32 @@ class ExtensionDescription(object):
         self._setProjectAttribute("svnusername", p, elideempty=True)
         self._setProjectAttribute("svnpassword", p, elideempty=True)
 
+      self._encoding = p.encoding
+
   #---------------------------------------------------------------------------
   def __repr__(self):
     return repr(self.__dict__)
+
+  #---------------------------------------------------------------------------
+  @property
+  def encoding(self):
+    """Character encoding of the extension description file.
+
+    :type: :class:`str` or ``None``
+
+    This provides the character encoding of the description file from which
+    the description instance was created. If the encoding cannot be determined,
+    the property will have the value ``None``.
+
+    .. 'note' directive needs '\' to span multiple lines!
+    .. note:: If ``encoding`` is ``None``, the description information is \
+              stored as raw bytes using :class:`str`. In such case, passing a \
+              non-ASCII :class:`unicode` to  any method or property \
+              assignment that modifies the description may  make it \
+              impossible to write the description file back to disk.
+    """
+
+    return self._encoding
 
   #---------------------------------------------------------------------------
   @staticmethod
@@ -191,14 +221,38 @@ class ExtensionDescription(object):
       delattr(self, key)
 
   #---------------------------------------------------------------------------
-  def _read(self, fp):
-    for l in fp:
-      m = self._reParam.match(l)
-      if m is not None:
-        setattr(self, m.group(1), m.group(2).strip())
+  def _readFile(self, filepath, encoding):
+
+    with open(filepath) as fp:
+      contents = fp.read()
+
+      if encoding is None:
+        encoding, confidence = detectEncoding(contents)
+
+        if encoding is not None:
+          if confidence < 0.5:
+            logging.warning("%s: encoding detection confidence is %f:"
+                            " description file contents might be corrupt" %
+                            (filepath, confidence))
+
+      if encoding is not None:
+        # If unable to determine encoding, skip unicode conversion... users
+        # must not feed any unicode into the script or things will likely break
+        # later (e.g. when trying to save the description file)
+        pass
+      else:
+        # Otherwise, decode the contents into unicode
+        contents = contents.decode(encoding)
+
+      for l in contents.splitlines():
+        m = self._reParam.match(l)
+        if m is not None:
+          setattr(self, m.group(1), m.group(2).strip())
+
+    return encoding
 
   #---------------------------------------------------------------------------
-  def read(self, path):
+  def read(self, path, encoding=None):
     """Read extension description from directory.
 
     :param path: Directory containing extension description.
@@ -222,16 +276,34 @@ class ExtensionDescription(object):
     if len(descriptionFiles) > 1:
       raise IOError("multiple extension description files found")
 
-    with open(descriptionFiles[0]) as fp:
-      self._read(fp)
+    self.encoding = self._readFile(descriptionFiles[0], encoding)
 
   #---------------------------------------------------------------------------
-  def _write(self, fp):
+  def _write(self, fp, encoding):
+
+    if encoding is None:
+      encoding = self._encoding
+
+    if encoding is None and self.encoding is not None:
+      encoding = self.encoding if self.encoding.lower() != "ascii" else "utf-8"
+
     for key in sorted(self.__dict__):
-      fp.write(("%s %s" % (key, getattr(self, key))).strip() + "\n")
+      if key.startswith("_"):
+        continue
+      content = (u"%s %s" % (key, getattr(self, key))).strip() + "\n"
+
+      if encoding is None:
+        # If no encoding is specified and we don't know the original encoding,
+        # perform no conversion and hope for the best (will only work if there
+        # are no unicode instances in the script)
+        fp.write(str(content))
+
+      else:
+        # Otherwise, write the file using full encoding conversion
+        fp.write(content.encode(encoding))
 
   #---------------------------------------------------------------------------
-  def write(self, out):
+  def write(self, out, encoding=None):
     """Write extension description to a file or stream.
 
     :param out: Stream or path to which to write the description.
@@ -243,8 +315,8 @@ class ExtensionDescription(object):
     """
 
     if hasattr(out, "write") and callable(out.write):
-      self._write(out)
+      self._write(out, encoding)
 
     else:
       with open(out, "w") as fp:
-        self._write(fp)
+        self._write(fp, encoding)
