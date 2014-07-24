@@ -547,7 +547,7 @@ class ExtensionWizard(object):
     except SystemExit:
       raise
     except:
-      die("failed to register extension: %s" % sys.exc_info()[1])
+      die("failed to contribute extension: %s" % sys.exc_info()[1])
 
   #---------------------------------------------------------------------------
   def _execute(self, args):
