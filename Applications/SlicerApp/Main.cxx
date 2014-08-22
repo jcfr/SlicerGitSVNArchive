@@ -130,6 +130,7 @@ int SlicerAppMain(int argc, char* argv[])
     {
     qSlicerApplicationHelper::initializePythonConsole(&pythonConsole);
     }
+  pythonConsole.setObjectName("PythonInteractor");
 #endif
 
   bool enableMainWindow = !app.commandOptions()->noMainWindow();

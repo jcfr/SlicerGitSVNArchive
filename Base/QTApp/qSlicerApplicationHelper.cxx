@@ -185,15 +185,6 @@ void qSlicerApplicationHelper::initializePythonConsole(ctkPythonConsole* pythonC
 
   qSlicerApplication::application()->settingsDialog()->addPanel(
     "Python", new qSlicerSettingsPythonPanel);
-
-  // Show pythonConsole if required
-  qSlicerCommandOptions * options = qSlicerApplication::application()->commandOptions();
-  if(options->showPythonInteractor() && !options->runPythonAndExit())
-    {
-    pythonConsole->show();
-    pythonConsole->activateWindow();
-    pythonConsole->raise();
-    }
 #else
   Q_UNUSED(pythonConsole);
 #endif

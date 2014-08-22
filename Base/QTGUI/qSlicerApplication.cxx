@@ -446,6 +446,26 @@ void qSlicerApplication::handleCommandLineArguments()
   this->Superclass::handleCommandLineArguments();
 
   this->setToolTipsEnabled(!options->disableToolTips());
+
+  // Show pythonConsole if required
+  if(options->showPythonInteractor() && !options->runPythonAndExit())
+    {
+    QWidget * interactor = 0;
+    foreach(QWidget* widget, this->topLevelWidgets())
+      {
+      if (widget->objectName() == "PythonInteractor")
+        {
+        interactor = widget;
+        }
+      }
+    if (interactor)
+      {
+      qDebug() << "Showing interactor";
+      interactor->show();
+      interactor->activateWindow();
+      interactor->raise();
+      }
+    }
 }
 
 //-----------------------------------------------------------------------------
