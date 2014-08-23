@@ -35,7 +35,7 @@ if((NOT DEFINED PYTHON_INCLUDE_DIR
    OR NOT DEFINED PYTHON_LIBRARY
    OR NOT DEFINED PYTHON_EXECUTABLE) AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
-  set(python_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python-2.7.3")
+  set(python_SOURCE_DIR "${CMAKE_BINARY_DIR}/Python-2.7.8")
 
   set(EXTERNAL_PROJECT_OPTIONAL_ARGS)
   if(MSVC)
@@ -47,8 +47,8 @@ if((NOT DEFINED PYTHON_INCLUDE_DIR
   endif()
 
   ExternalProject_Add(python-source
-    URL "https://www.python.org/ftp/python/2.7.3/Python-2.7.3.tgz"
-    URL_MD5 "2cf641732ac23b18d139be077bd906cd"
+    URL "https://www.python.org/ftp/python/2.7.8/Python-2.7.8.tgz"
+    URL_MD5 "d4bca0159acb0b44a781292b5231936f"
     DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
     SOURCE_DIR ${python_SOURCE_DIR}
     ${EXTERNAL_PROJECT_OPTIONAL_ARGS}
@@ -99,8 +99,8 @@ if((NOT DEFINED PYTHON_INCLUDE_DIR
 
   ExternalProject_Add(${proj}
     ${${proj}_EP_ARGS}
-    GIT_REPOSITORY "${git_protocol}://github.com/davidsansome/python-cmake-buildsystem.git"
-    GIT_TAG "47845c553b3eee6676a0e671a9786135da2b1039"
+    GIT_REPOSITORY "${git_protocol}://github.com/jcfr/python-cmake-buildsystem.git"
+    GIT_TAG "2230ca81b8f51a6d6462d2fe52a67ed7e83fbd7b"
     SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj}
     BINARY_DIR ${proj}-build
     CMAKE_CACHE_ARGS
