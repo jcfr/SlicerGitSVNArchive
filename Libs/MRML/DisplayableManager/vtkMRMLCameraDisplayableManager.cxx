@@ -465,10 +465,9 @@ void vtkMRMLCameraDisplayableManager::UpdateCameraNode()
       if (unassignedCamera != NULL)
         {
         // swap!
-        //vtkDebugMacro("Stealing an unasigned camera node " << unassignedCamera->GetID() << " for view node " << viewNode->GetID());
-        vtkDebugMacro("why am I here?  I have a camera node already!" << unassignedCamera->GetID() << " for view node " << viewNode->GetID());
-        //unassignedCamera->SetActiveTag(viewNode->GetID());
-        //this->SetAndObserveCameraNode(unassignedCamera);
+        vtkDebugMacro("Stealing an unasigned camera node " << unassignedCamera->GetID() << " for view node " << viewNode->GetID());
+        unassignedCamera->SetActiveTag(viewNode->GetID());
+        this->SetAndObserveCameraNode(unassignedCamera);
         }
       else
         {
