@@ -260,7 +260,7 @@ void qMRMLNodeComboBoxPrivate::updateActionItems(bool resetRootIndex)
       }
     if (this->RenameEnabled && this->AddEnabled)
       {
-      extraItems.append(QObject::tr("Create and rename new ") + this->nodeTypeLabel());
+      extraItems.append(QObject::tr("Create new ") + this->nodeTypeLabel() + QString(" as..."));
       }
     if (this->RemoveEnabled)
       {
@@ -376,7 +376,13 @@ void qMRMLNodeComboBox::activateExtraItem(const QModelIndex& index)
   Q_D(qMRMLNodeComboBox);
   // FIXME: check the type of the item on a different role instead of the display role
   QString data = this->model()->data(index, Qt::DisplayRole).toString();
-  if (data.startsWith(QObject::tr("Create new ")))
+  if (data.startsWith(QObject::tr("Create new ")) && data.endsWith(QObject::tr(" as...")))
+      {
+      d->ComboBox->hidePopup();
+      this->addNode();
+      this->renameCurrentNode();
+      }
+  else if (data.startsWith(QObject::tr("Create new ")))
     {
     d->ComboBox->hidePopup();
     this->addNode();
@@ -394,12 +400,6 @@ void qMRMLNodeComboBox::activateExtraItem(const QModelIndex& index)
   else if (data.startsWith(QObject::tr("Rename current ")))
     {
     d->ComboBox->hidePopup();
-    this->renameCurrentNode();
-    }
-  else if (data.startsWith(QObject::tr("Create and rename")))
-    {
-    d->ComboBox->hidePopup();
-    this->addNode();
     this->renameCurrentNode();
     }
   else
@@ -1022,8 +1022,7 @@ void qMRMLNodeComboBox::addMenuAction(QAction *newAction)
   if (newAction->text().startsWith(QObject::tr("Create new ")) ||
       newAction->text().startsWith(QObject::tr("Delete current ")) ||
       newAction->text().startsWith(QObject::tr("Edit current ")) ||
-      newAction->text().startsWith(QObject::tr("Rename current ")) ||
-      newAction->text().startsWith(QObject::tr("Create and rename ")))
+      newAction->text().startsWith(QObject::tr("Rename current ")))
     {
     qDebug() << "addMenuAction: warning: the text on this action, "
              << newAction->text()
