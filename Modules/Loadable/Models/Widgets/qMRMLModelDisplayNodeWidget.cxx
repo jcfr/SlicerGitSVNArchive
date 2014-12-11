@@ -181,7 +181,9 @@ void qMRMLModelDisplayNodeWidget::setMRMLModelOrHierarchyNode(vtkMRMLNode* node)
   vtkMRMLModelDisplayNode *modelDisplayNode = 0;
   if (modelNode)
     {
-    vtkMRMLSelectionNode* selectionNode = this->getSelectionNode(modelNode->GetScene());
+    vtkMRMLSelectionNode* selectionNode =
+      vtkMRMLSelectionNode::GetSelectionNode(modelNode->GetScene());
+
     std::string displayNodeName;
     if (selectionNode)
       {
@@ -586,25 +588,5 @@ void qMRMLModelDisplayNodeWidget::updateWidgetFromMRML()
         d->MRMLModelDisplayNode->GetColorNodeID());
       }
     }
-}
-
-vtkMRMLSelectionNode* qMRMLModelDisplayNodeWidget::getSelectionNode(vtkMRMLScene *mrmlScene)
-{
-  Q_D(qMRMLModelDisplayNodeWidget);
-
-  if (d->MRMLSelectionNode.GetPointer() == 0)
-    {
-    std::vector<vtkMRMLNode *> selectionNodes;
-    if (mrmlScene)
-      {
-      mrmlScene->GetNodesByClass("vtkMRMLSelectionNode", selectionNodes);
-      }
-
-    if (selectionNodes.size() > 0)
-      {
-      d->MRMLSelectionNode = vtkMRMLSelectionNode::SafeDownCast(selectionNodes[0]);
-      }
-    }
-  return d->MRMLSelectionNode;
 }
 

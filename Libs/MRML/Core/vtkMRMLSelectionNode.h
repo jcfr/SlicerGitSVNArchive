@@ -62,6 +62,10 @@ class VTK_MRML_EXPORT vtkMRMLSelectionNode : public vtkMRMLNode
   /// when the node is deleted in the scene
   virtual void UpdateReferences();
 
+  /// Get singleton selection node associated with \a mrmlScene
+  /// \sa vtkMRMLScene::GetSingletonNode(const char* singletonTag, const char* className)
+  static vtkMRMLSelectionNode* GetSelectionNode(vtkMRMLScene* mrmlScene);
+
   /// the ID of a MRMLVolumeNode (typically background)
   vtkGetStringMacro (ActiveVolumeID);
   void SetActiveVolumeID(const char* id);

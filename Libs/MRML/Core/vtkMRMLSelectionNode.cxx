@@ -268,6 +268,18 @@ void vtkMRMLSelectionNode::UpdateReferences()
     this->SetActiveCameraID(NULL);
     }
 }
+
+//----------------------------------------------------------------------------
+vtkMRMLSelectionNode* vtkMRMLSelectionNode::GetSelectionNode(vtkMRMLScene* mrmlScene)
+{
+  if (mrmlScene == NULL)
+    {
+    return NULL;
+    }
+  return vtkMRMLSelectionNode::SafeDownCast(
+        mrmlScene->GetSingletonNode("Singleton", "vtkMRMLSelectionNode"));
+}
+
 //----------------------------------------------------------------------------
 void vtkMRMLSelectionNode::ReadXMLAttributes(const char** atts)
 {

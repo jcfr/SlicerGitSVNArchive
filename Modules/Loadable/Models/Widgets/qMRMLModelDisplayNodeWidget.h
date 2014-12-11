@@ -35,7 +35,6 @@ class vtkMRMLScene;
 class vtkMRMLNode;
 class vtkMRMLModelDisplayNode;
 class vtkMRMLColorNode;
-class vtkMRMLSelectionNode;
 
 class Q_SLICER_QTMODULES_MODELS_WIDGETS_EXPORT qMRMLModelDisplayNodeWidget : public QWidget
 {
@@ -109,7 +108,6 @@ public slots:
 
 protected slots:
   void updateWidgetFromMRML();
-  vtkMRMLSelectionNode* getSelectionNode(vtkMRMLScene *mrmlScene);
 
 protected:
   QScopedPointer<qMRMLModelDisplayNodeWidgetPrivate> d_ptr;

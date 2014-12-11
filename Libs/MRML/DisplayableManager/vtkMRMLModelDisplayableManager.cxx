@@ -122,8 +122,6 @@ public:
   double       PickedRAS[3];
   vtkIdType    PickedCellID;
   vtkIdType    PickedPointID;
-
-  vtkMRMLSelectionNode*   SelectionNode;
 };
 
 //---------------------------------------------------------------------------
@@ -136,7 +134,6 @@ vtkMRMLModelDisplayableManager::vtkInternal::vtkInternal()
   this->RedSliceNode = 0;
   this->GreenSliceNode = 0;
   this->YellowSliceNode = 0;
-  this->SelectionNode = 0;
 
   this->ModelHierarchiesPresent = false;
   this->UpdateHierachyRequested = false;
@@ -204,7 +201,6 @@ vtkMRMLModelDisplayableManager::~vtkMRMLModelDisplayableManager()
   vtkSetMRMLNodeMacro(this->Internal->RedSliceNode, 0);
   vtkSetMRMLNodeMacro(this->Internal->GreenSliceNode, 0);
   vtkSetMRMLNodeMacro(this->Internal->YellowSliceNode, 0);
-  vtkSetMRMLNodeMacro(this->Internal->SelectionNode, 0);
 
   // release the DisplayedModelActors
   this->Internal->DisplayedActors.clear();
@@ -1537,14 +1533,17 @@ void vtkMRMLModelDisplayableManager::SetModelDisplayProperty(vtkMRMLDisplayableN
       if (hierarchyDisplayNode)
         {
         // process selection display node filter
-        if (this->GetSelectionNode())
+        vtkMRMLSelectionNode *selectionNode =
+          vtkMRMLSelectionNode::GetSelectionNode(this->GetMRMLScene());
+        if (!selectionNode)
           {
-          std::string displayNode = this->GetSelectionNode()->GetModelHierarchyDisplayNodeClassName(
-                                    model->GetClassName());
-          if (!displayNode.empty() && !mrmlDisplayNode->IsA(displayNode.c_str()) )
-            {
-            continue;
-            }
+          continue;
+          }
+        std::string displayNode = selectionNode->GetModelHierarchyDisplayNodeClassName(
+                                  model->GetClassName());
+        if (!displayNode.empty() && !mrmlDisplayNode->IsA(displayNode.c_str()) )
+          {
+          continue;
           }
 
         mrmlDisplayNode = hierarchyDisplayNode;
@@ -2347,20 +2346,3 @@ void vtkMRMLModelDisplayableManager::OnInteractorStyleEvent(int eventid)
   return;
 }
 
-vtkMRMLSelectionNode* vtkMRMLModelDisplayableManager::GetSelectionNode()
-{
-  if (this->Internal->SelectionNode == 0)
-    {
-    std::vector<vtkMRMLNode *> selectionNodes;
-    if (this->GetMRMLScene())
-      {
-      this->GetMRMLScene()->GetNodesByClass("vtkMRMLSelectionNode", selectionNodes);
-      }
-
-    if (selectionNodes.size() > 0)
-      {
-      this->Internal->SelectionNode = vtkMRMLSelectionNode::SafeDownCast(selectionNodes[0]);
-      }
-    }
-  return this->Internal->SelectionNode;
-}

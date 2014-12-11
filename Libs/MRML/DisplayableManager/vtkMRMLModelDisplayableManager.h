@@ -29,7 +29,6 @@ class vtkMRMLDisplayableNode;
 class vtkMRMLModelHierarchyLogic;
 class vtkMRMLModelHierarchyNode;
 class vtkMRMLModelNode;
-class vtkMRMLSelectionNode;
 
 // VTK includes
 #include "vtkRenderWindow.h"
@@ -198,8 +197,6 @@ protected:
   vtkMRMLDisplayNode*  GetHierarchyDisplayNode(vtkMRMLDisplayableNode *model);
 
   void RemoveDispalyedID(std::string &id);
-
-  vtkMRMLSelectionNode* GetSelectionNode();
 
 private:
 

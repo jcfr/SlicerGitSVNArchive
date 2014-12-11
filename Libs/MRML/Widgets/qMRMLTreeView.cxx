@@ -851,6 +851,13 @@ bool qMRMLTreeView::clickDecoration(const QModelIndex& index)
 //------------------------------------------------------------------------------
 void qMRMLTreeView::toggleVisibility(const QModelIndex& index)
 {
+  vtkMRMLSelectionNode* selectionNode =
+    vtkMRMLSelectionNode::GetSelectionNode(this->mrmlScene());
+  if (!selectionNode)
+    {
+    return;
+    }
+
   vtkMRMLNode* node = this->sortFilterProxyModel()->mrmlNodeFromIndex(index);
   vtkMRMLDisplayNode* displayNode =
     vtkMRMLDisplayNode::SafeDownCast(node);
@@ -859,16 +866,7 @@ void qMRMLTreeView::toggleVisibility(const QModelIndex& index)
   vtkMRMLDisplayableHierarchyNode* displayableHierarchyNode =
       vtkMRMLDisplayableHierarchyNode::SafeDownCast(node);
 
-  std::vector<vtkMRMLNode *> selectionNodes;
-  this->mrmlScene()->GetNodesByClass("vtkMRMLSelectionNode", selectionNodes);
-
-  vtkMRMLSelectionNode* selectionNode = 0;
-  if (selectionNodes.size() > 0)
-    {
-    selectionNode = vtkMRMLSelectionNode::SafeDownCast(selectionNodes[0]);
-    }
-
-  if (selectionNode && displayableHierarchyNode)
+  if (displayableHierarchyNode)
     {
     vtkMRMLDisplayNode *hierDisplayNode = displayableHierarchyNode->GetDisplayNode();
     int visibility = 1;
@@ -891,11 +889,11 @@ void qMRMLTreeView::toggleVisibility(const QModelIndex& index)
                                               displayableType.c_str(), displayType.c_str(), visibility);
       }
     }
-  else if (selectionNode && displayNode)
+  else if (displayNode)
     {
     displayNode->SetVisibility(displayNode->GetVisibility() ? 0 : 1);
     }
-  else if (selectionNode && displayableNode)
+  else if (displayableNode)
     {
     char *displayableType = (char *)node->GetClassName();
     char *displayType = 0;
