@@ -58,6 +58,7 @@ public:
   QAction *RenameMultipleNodesAction;
   QStringList HideChildNodeTypes;
   QString FiberDisplayClass;
+  QString DefaultFiberDisplayClass;
   vtkSmartPointer<vtkCallbackCommand> CallBack;
 };
 
@@ -71,7 +72,7 @@ qSlicerModelsModuleWidgetPrivate::qSlicerModelsModuleWidgetPrivate()
   this->DeleteMultipleNodesAction = 0;
   this->RenameMultipleNodesAction = 0;
   this->HideChildNodeTypes = (QStringList() << "vtkMRMLFiberBundleNode" << "vtkMRMLAnnotationNode");
-  this->FiberDisplayClass = "vtkMRMLFiberBundleLineDisplayNode";
+  this->DefaultFiberDisplayClass = "vtkMRMLFiberBundleLineDisplayNode";
   this->CallBack = vtkSmartPointer<vtkCallbackCommand>::New();
 }
 
@@ -436,11 +437,18 @@ void qSlicerModelsModuleWidget::includeFiberBundles(bool include)
     {
     return;
     }
-  selectionNode->ClearModelHierarchyDisplayNodeClassNames();
   if (include)
     {
+    if (d->FiberDisplayClass.isEmpty())
+      {
+      d->FiberDisplayClass = d->DefaultFiberDisplayClass;
+      }
     selectionNode->SetModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
                                                         d->FiberDisplayClass.toStdString());
+    }
+  else
+    {
+    selectionNode->SetModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode", "");
     }
   this->updateWidgetFromSelectionNode();
 }
@@ -450,31 +458,28 @@ void qSlicerModelsModuleWidget::onDisplayClassChanged(int index)
 {
   Q_D(qSlicerModelsModuleWidget);
 
-  std::string name;
-  if (index == 0)
-    {
-    name = std::string("vtkMRMLFiberBundleLineDisplayNode");
-    }
-  else if (index == 1)
-    {
-    name = std::string("vtkMRMLFiberBundleTubeDisplayNode");
-    }
-  else if (index == 2)
-    {
-    name = std::string("vtkMRMLFiberBundleGlyphDisplayNode");
-    }
-
-  d->FiberDisplayClass = QString::fromStdString(name);
-
   vtkMRMLSelectionNode* selectionNode =
     vtkMRMLSelectionNode::GetSelectionNode(this->mrmlScene());
   if (!selectionNode)
     {
     return;
     }
-  selectionNode->ClearModelHierarchyDisplayNodeClassNames();
+
+  if (index == 0)
+    {
+    d->FiberDisplayClass = "vtkMRMLFiberBundleLineDisplayNode";
+    }
+  else if (index == 1)
+    {
+    d->FiberDisplayClass = "vtkMRMLFiberBundleTubeDisplayNode";
+    }
+  else if (index == 2)
+    {
+    d->FiberDisplayClass = "vtkMRMLFiberBundleGlyphDisplayNode";
+    }
+
   selectionNode->SetModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
-                                                       name);
+                                                       d->FiberDisplayClass.toStdString());
   this->updateWidgetFromSelectionNode();
 }
 
