@@ -527,7 +527,7 @@ void qSlicerModelsModuleWidget::updateWidgetFromSelectionNode()
   std::vector<vtkMRMLNode *> nodes;
   vtkMRMLScene *scene = this->mrmlScene();
   scene->GetNodesByClass(d->FiberDisplayClass.toLatin1(), nodes);
-  for (int i=0; i<nodes.size(); i++)
+  for (unsigned int i = 0; i < nodes.size(); i++)
     {
     nodes[i]->InvokeEvent(vtkCommand::ModifiedEvent);
     }
