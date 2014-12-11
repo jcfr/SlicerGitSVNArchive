@@ -439,7 +439,7 @@ void qSlicerModelsModuleWidget::includeFiberBundles(bool include)
   selectionNode->ClearModelHierarchyDisplayNodeClassNames();
   if (include)
     {
-    selectionNode->AddModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
+    selectionNode->SetModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
                                                         d->FiberDisplayClass.toStdString());
     }
   this->updateWidgetFromSelectionNode();
@@ -473,7 +473,7 @@ void qSlicerModelsModuleWidget::onDisplayClassChanged(int index)
     return;
     }
   selectionNode->ClearModelHierarchyDisplayNodeClassNames();
-  selectionNode->AddModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
+  selectionNode->SetModelHierarchyDisplayNodeClassName("vtkMRMLFiberBundleNode",
                                                        name);
   this->updateWidgetFromSelectionNode();
 }

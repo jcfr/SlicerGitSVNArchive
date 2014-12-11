@@ -379,7 +379,7 @@ void vtkMRMLSelectionNode::ReadXMLAttributes(const char** atts)
     for (std::vector<std::string>::const_iterator it = modelHierarchyDisplayNodeClassName.begin();
         it != modelHierarchyDisplayNodeClassName.end(); it++)
       {
-      this->AddModelHierarchyDisplayNodeClassName(*it1, *it);
+      this->SetModelHierarchyDisplayNodeClassName(*it1, *it);
       it1++;
       }
     }
@@ -728,7 +728,7 @@ vtkMRMLSelectionNode::GetModelHierarchyDisplayNodeClassNames()const
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLSelectionNode::AddModelHierarchyDisplayNodeClassName(const std::string& dispayableNodeClass,
+void vtkMRMLSelectionNode::SetModelHierarchyDisplayNodeClassName(const std::string& dispayableNodeClass,
                                                                  const std::string& dispayNodeClass)
 {
   this->ModelHierarchyDisplayNodeClassName[dispayableNodeClass] = dispayNodeClass;
