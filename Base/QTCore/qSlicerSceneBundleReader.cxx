@@ -77,6 +77,20 @@ bool qSlicerSceneBundleReader::load(const qSlicerIO::IOProperties& properties)
 
   qDebug() << "Unpacking bundle to " << unpackPath;
 
+#if (VTK_MAJOR_VERSION >= 6 && VTK_MINOR_VERSION >= 2)
+  if (vtksys::SystemTools::FileIsDirectory(unpackPath.toStdString()))
+    {
+    if ( !vtksys::SystemTools::RemoveADirectory(unpackPath.toStdString()) )
+      {
+      return false;
+      }
+    }
+
+  if ( !vtksys::SystemTools::MakeDirectory(unpackPath.toStdString()) )
+    {
+    return false;
+    }
+#else
   if (vtksys::SystemTools::FileIsDirectory(unpackPath.toLatin1()))
     {
     if ( !vtksys::SystemTools::RemoveADirectory(unpackPath.toLatin1()) )
@@ -89,6 +103,7 @@ bool qSlicerSceneBundleReader::load(const qSlicerIO::IOProperties& properties)
     {
     return false;
     }
+#endif
 
   vtkNew<vtkMRMLApplicationLogic> appLogic;
   appLogic->SetMRMLScene( this->mrmlScene() );
@@ -112,7 +127,11 @@ bool qSlicerSceneBundleReader::load(const qSlicerIO::IOProperties& properties)
     res = this->mrmlScene()->Import();
     }
 
+#if (VTK_MAJOR_VERSION >= 6 && VTK_MINOR_VERSION >= 2)
+  if ( !vtksys::SystemTools::RemoveADirectory(unpackPath.toStdString()) )
+#else
   if ( !vtksys::SystemTools::RemoveADirectory(unpackPath.toLatin1()) )
+#endif
     {
     return false;
     }

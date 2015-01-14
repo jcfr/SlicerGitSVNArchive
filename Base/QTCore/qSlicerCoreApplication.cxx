@@ -697,7 +697,11 @@ void qSlicerCoreApplication::setEnvironmentVariable(const QString& key, const QS
   // Since QProcessEnvironment can't be used to update the environment of the
   // current process, let's use 'putenv()'.
   // See http://doc.qt.nokia.com/4.6/qprocessenvironment.html#details
+#if (VTK_MAJOR_VERSION >= 6 && VTK_MINOR_VERSION >= 2)
+  vtksys::SystemTools::PutEnv(QString("%1=%2").arg(key).arg(value).toStdString());
+#else
   vtksys::SystemTools::PutEnv(QString("%1=%2").arg(key).arg(value).toLatin1());
+#endif
 
 #ifdef Slicer_USE_PYTHONQT
   d->setPythonOsEnviron(key, value);
