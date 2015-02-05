@@ -24,7 +24,7 @@ See <a>http://www.slicer.org</a> for details.  Module implemented by Steve Piepe
     # TODO: need a DataProbe icon
     #parent.icon = qt.QIcon(':Icons/XLarge/SlicerDownloadMRHead.png')
     self.parent = parent
-    self.infoWidget = 0
+    self.infoWidget = None
 
     if slicer.mrmlScene.GetTagByClassName( "vtkMRMLScriptedModuleNode" ) != 'ScriptedModule':
       slicer.mrmlScene.RegisterNodeClass(vtkMRMLScriptedModuleNode())
@@ -406,8 +406,9 @@ class DataProbeWidget:
     self.layout.addWidget(settingsCollapsibleButton)
     settingsVBoxLayout = qt.QVBoxLayout(settingsCollapsibleButton)
     dataProbeInstance = slicer.modules.DataProbeInstance
-    sliceAnnotationsFrame = dataProbeInstance.infoWidget.sliceAnnotationsFrame
-    settingsVBoxLayout.addWidget(sliceAnnotationsFrame)
+    if dataProbeInstance.infoWidget:
+      sliceAnnotationsFrame = dataProbeInstance.infoWidget.sliceAnnotationsFrame
+      settingsVBoxLayout.addWidget(sliceAnnotationsFrame)
 
     self.parent.layout().addStretch(1)
 
