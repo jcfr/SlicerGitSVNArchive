@@ -44,8 +44,8 @@ if((NOT DEFINED OPENSSL_LIBRARIES
 
   #------------------------------------------------------------------------------
   if(UNIX)
-    set(OpenSSL_URL http://packages.kitware.com/download/item/6172/openssl-1.0.1e.tar.gz)
-    set(OpenSSL_MD5 66bf6f10f060d561929de96f9dfe5b8c)
+    set(OpenSSL_URL http://packages.kitware.com/download/item/7669/openssl-1.0.1l.tar.gz)
+    set(OpenSSL_MD5 cdb22925fc9bc97ccbf1e007661f2aa6)
 
     #------------------------------------------------------------------------------
     set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
@@ -55,7 +55,7 @@ if((NOT DEFINED OPENSSL_LIBRARIES
     # environment
     set(_env_script ${CMAKE_BINARY_DIR}/${proj}_Env.cmake)
     ExternalProject_Write_SetBuildEnv_Commands(${_env_script})
-    file(WRITE ${_env_script}
+    file(APPEND ${_env_script}
 "#------------------------------------------------------------------------------
 # Added by '${CMAKE_CURRENT_LIST_FILE}'
 include(\"${${CMAKE_PROJECT_NAME}_CMAKE_DIR}/ExternalProjectForNonCMakeProject.cmake\")
@@ -80,7 +80,9 @@ set(ENV{VS_UNICODE_OUTPUT} \"\")
     file(WRITE ${_configure_script}
 "include(\"${_env_script}\")
 set(${proj}_WORKING_DIR \"${EP_SOURCE_DIR}\")
-ExternalProject_Execute(${proj} \"configure\" sh config zlib -lzlib -L${_zlib_library_dir} shared
+ExternalProject_Execute(${proj} \"configure-zlib\" cp ${ZLIB_LIBRARY} ${_zlib_library_dir}/libz.a
+  )
+ExternalProject_Execute(${proj} \"configure\" sh config --with-zlib-lib=${_zlib_library_dir} --with-zlib-include=${ZLIB_INCLUDE_DIR} threads zlib shared
   )
 ")
 
@@ -163,13 +165,13 @@ this version of visual studio [${MSVC_VERSION}]. You could either:
     #--------------------
     if(CMAKE_SIZEOF_VOID_P EQUAL 4) # 32-bit
 
-      # OpenSSL 1.0.1h
+      # OpenSSL 1.0.1l
       if(MSVC_VERSION VERSION_EQUAL "1500")
-        set(OpenSSL_URL http://packages.kitware.com/download/item/6093/OpenSSL_1_0_1h-install-msvc1500-32.tar.gz)
-        set(OpenSSL_MD5 8b110bb48063223c3b9f3a99f1fa9067)
+        set(OpenSSL_URL http://packages.kitware.com/download/item/7806/OpenSSL_1_0_1l-install-msvc1500-32.tar.gz)
+        set(OpenSSL_MD5 85218e0ea7bd15457f66cc04170560d5)
       elseif(MSVC_VERSION VERSION_EQUAL "1600")
-        set(OpenSSL_URL http://packages.kitware.com/download/item/6096/OpenSSL_1_0_1h-install-msvc1600-32.tar.gz)
-        set(OpenSSL_MD5 e80269ae7969276977a342cccc1df5c5)
+        set(OpenSSL_URL http://packages.kitware.com/download/item/7809/OpenSSL_1_0_1l-install-msvc1600-32.tar.gz)
+        set(OpenSSL_MD5 3f756fc731fb95f919ea24f2ec979732)
       else()
         message(FATAL_ERROR ${_error_msg})
       endif()
@@ -177,13 +179,13 @@ this version of visual studio [${MSVC_VERSION}]. You could either:
     #--------------------
     elseif(CMAKE_SIZEOF_VOID_P EQUAL 8) # 64-bit
 
-      # OpenSSL 1.0.1h
+      # OpenSSL 1.0.1l
       if(MSVC_VERSION VERSION_EQUAL "1500")
-        set(OpenSSL_URL http://packages.kitware.com/download/item/6090/OpenSSL_1_0_1h-install-msvc1500-64.tar.gz)
-        set(OpenSSL_MD5 dab0c026ab56fd0fbfe2843d14218fad)
+        set(OpenSSL_URL http://packages.kitware.com/download/item/7803/OpenSSL_1_0_1l-install-msvc1500-64.tar.gz)
+        set(OpenSSL_MD5 ce819931504f8e7c5d9024215b2cc9cf)
       else(MSVC_VERSION VERSION_EQUAL "1600")
-        set(OpenSSL_URL http://packages.kitware.com/download/item/6099/OpenSSL_1_0_1h-install-msvc1600-64.tar.gz)
-        set(OpenSSL_MD5 b54a0a4b396397fdf96e55f0f7345dd1)
+        set(OpenSSL_URL http://packages.kitware.com/download/item/7700/OpenSSL_1_0_1l-install-msvc1600-64.tar.gz)
+        set(OpenSSL_MD5 07d259e1a467d9c7a7d9cddfd77e8915)
       else()
         message(FATAL_ERROR ${_error_msg})
       endif()
