@@ -47,7 +47,6 @@ class HelperBox(object):
     # qt model/view classes to track per-structure volumes
     self.structures = qt.QStandardItemModel()
     self.items = []
-    self.brushes = []
     # pseudo signals
     # - python callable that gets True or False
     self.mergeValidCommand = None
@@ -583,7 +582,6 @@ class HelperBox(object):
     self.setMergeButton.setDisabled(not self.master)
 
     # reset to a fresh model
-    self.brushes = []
     self.items = []
     self.structures = qt.QStandardItemModel()
     self.structuresView.setModel(self.structures)
@@ -618,11 +616,8 @@ class HelperBox(object):
       structureName = vName[start:end]
       structureIndex = colorNode.GetColorIndexByName( structureName )
       structureColor = lut.GetTableValue(structureIndex)[0:3]
-      brush = qt.QBrush()
-      self.brushes.append(brush)
       color = qt.QColor()
       color.setRgb(structureColor[0]*255,structureColor[1]*255,structureColor[2]*255)
-      brush.setColor(color)
 
       # label index
       item = qt.QStandardItem()
