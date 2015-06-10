@@ -5,7 +5,7 @@ from __main__ import ctk
 from __main__ import vtk
 from __main__ import slicer
 import ColorBox
-import EditUtil
+from EditUtil import EditUtil
 from LabelCreateDialog import LabelCreateDialog
 
 #########################################################
@@ -24,8 +24,6 @@ comment = """
 class HelperBox(object):
 
   def __init__(self, parent=None):
-
-    self.editUtil = EditUtil.EditUtil()
 
     # mrml volume node instances
     self.master = None
@@ -134,7 +132,7 @@ class HelperBox(object):
         selectionNode.SetReferenceActiveVolumeID( self.master.GetID() )
         selectionNode.SetReferenceActiveLabelVolumeID( merge.GetID() )
 
-        self.editUtil.propagateVolumeSelection()
+        EditUtil.propagateVolumeSelection()
         self.mergeSelector.setCurrentNode(merge)
 
     self.updateStructures()
@@ -147,7 +145,7 @@ class HelperBox(object):
 
     # trigger a modified event on the parameter node so that other parts of the GUI
     # (such as the EditColor) will know to update and enable themselves
-    self.editUtil.getParameterNode().Modified()
+    EditUtil.getParameterNode().Modified()
 
     # make sure the selector is up to date
     self.masterSelector.setCurrentNode(self.master)
@@ -386,7 +384,7 @@ class HelperBox(object):
     selectionNode = self.applicationLogic.GetSelectionNode()
     selectionNode.SetReferenceActiveVolumeID( self.master.GetID() )
     selectionNode.SetReferenceActiveLabelVolumeID( merge.GetID() )
-    self.editUtil.propagateVolumeSelection()
+    EditUtil.propagateVolumeSelection()
 
     self.statusText( "Finished merging." )
 
@@ -434,7 +432,7 @@ class HelperBox(object):
           self.addStructure( i, "noEdit" )
         structureVolume = self.structureVolume( labelName )
         structureVolume.GetImageData().DeepCopy( thresholder.GetOutput() )
-        self.editUtil.markVolumeNodeAsModified(structureVolume)
+        EditUtil.markVolumeNodeAsModified(structureVolume)
 
     self.statusText( "Finished splitting." )
 
@@ -536,9 +534,9 @@ class HelperBox(object):
     selectionNode.SetReferenceActiveVolumeID(self.master.GetID())
     if structureVolume:
       selectionNode.SetReferenceActiveLabelVolumeID( structureVolume.GetID() )
-    self.editUtil.propagateVolumeSelection()
+    EditUtil.propagateVolumeSelection()
 
-    self.editUtil.setLabel(label)
+    EditUtil.setLabel(label)
 
   def structureVolumes(self):
     """return a list of volumeNodes that are per-structure
