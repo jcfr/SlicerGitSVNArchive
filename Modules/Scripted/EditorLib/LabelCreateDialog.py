@@ -21,6 +21,22 @@ class _ui_LabelCreateDialog(object):
   def __init__(self, parent):
     vLayout = qt.QVBoxLayout(parent)
 
+    self.mergeTypeSelectorFrame = qt.QFrame()
+    self.mergeTypeSelectorFrame.objectName = 'MergeTypeSelectorFrame'
+    self.mergeTypeSelectorFrame.setLayout( qt.QVBoxLayout() )
+    vLayout.addWidget( self.mergeTypeSelectorFrame )
+
+    self.nodeTypeLabel = qt.QLabel()
+    self.nodeTypeLabel.text = 'Create a node of type'
+    self.mergeTypeSelectorFrame.layout().addWidget( self.nodeTypeLabel )
+    self.segmentationRadioButton = qt.QRadioButton('segmentation')
+    self.labelMapRadioButton = qt.QRadioButton('label map volume')
+    self.mergeTypeSelectorFrame.layout().addWidget(self.segmentationRadioButton)
+    self.mergeTypeSelectorFrame.layout().addWidget(self.labelMapRadioButton)
+
+    self.mergeNodeNameLabel = qt.QLabel()
+    self.mergeTypeSelectorFrame.layout().addWidget( self.mergeNodeNameLabel )
+
     self.colorPromptLabel = qt.QLabel()
     vLayout.addWidget( self.colorPromptLabel )
 
@@ -63,9 +79,10 @@ class LabelCreateDialog(object):
   colorNodeID = _map_property(lambda self: self.ui.colorSelector, "currentNodeID")
 
   #---------------------------------------------------------------------------
-  def __init__(self, parent, master, mergeVolumePostfix):
+  def __init__(self, parent, master, mergeVolumePostfix, segmentationPostfix):
     self._master = master
     self._mergeVolumePostfix = mergeVolumePostfix
+    self._segmentationPostfix = segmentationPostfix
 
     self.dialog = qt.QDialog(parent)
     self.dialog.objectName = 'EditorLabelCreateDialog'
@@ -73,12 +90,23 @@ class LabelCreateDialog(object):
 
     self.ui.colorPromptLabel.text = """
     Create a merge label map or a segmentation for selected master volume %s.
-    New volume will be %s.
     Select the color table node that will be used for segmentation labels.
-    """ %(self._master.GetName(), self.master.GetName()+self.mergeVolumePostfix)
+    """ %(self._master.GetName())
+
+    self.ui.segmentationRadioButton.connect("toggled(bool)", self._onMergeTypeChanged)
+    self.ui.segmentationRadioButton.checked = True
 
     self.ui.buttonBox.connect("accepted()", self.accept)
     self.ui.buttonBox.connect("rejected()", self.dialog, "reject()")
+
+
+  #---------------------------------------------------------------------------
+  def _onMergeTypeChanged(self, state):
+    if state == True:
+      mergeNodeName = self._master.GetName() + self._segmentationPostfix
+    else:
+      mergeNodeName = self._master.GetName() + self._mergeVolumePostfix
+    self.ui.mergeNodeNameLabel.text = 'named %s' % (mergeNodeName)
 
   #---------------------------------------------------------------------------
   def accept(self):

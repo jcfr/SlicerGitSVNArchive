@@ -39,6 +39,7 @@ class HelperBox(object):
     # string
     self.createMergeOptions = ""
     self.mergeVolumePostfix = "-label"
+    self.segmentationPostfix = "-segmentation"
     # pairs of (node instance, observer tag number)
     self.observerTags = []
     # slicer helper class
@@ -298,7 +299,7 @@ class HelperBox(object):
 
   def labelCreateDialog(self):
     """label create dialog"""
-    dlg = LabelCreateDialog(slicer.util.mainWindow(), self.master, self.mergeVolumePostfix)
+    dlg = LabelCreateDialog(slicer.util.mainWindow(), self.master, self.mergeVolumePostfix, self.segmentationPostfix)
     colorLogic = slicer.modules.colors.logic()
     dlg.colorNodeID = colorLogic.GetDefaultEditorColorNodeID()
 
