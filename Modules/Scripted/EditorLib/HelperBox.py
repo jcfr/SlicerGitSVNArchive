@@ -38,7 +38,6 @@ class HelperBox(object):
     # instance of a ColorBox
     self.colorBox = None
     # slicer helper class
-    self.applicationLogic = slicer.app.applicationLogic()
     self.volumesLogic = slicer.modules.volumes.logic()
     # qt model/view classes to track per-structure volumes
     self.structures = qt.QStandardItemModel()
@@ -128,7 +127,7 @@ class HelperBox(object):
         slicer.util.errorDisplay( "Error: selected merge label volume is not a label volume" )
       else:
         # make the source node the active background, and the label node the active label
-        selectionNode = self.applicationLogic.GetSelectionNode()
+        selectionNode = slicer.app.applicationLogic().GetSelectionNode()
         selectionNode.SetReferenceActiveVolumeID( self.master.GetID() )
         selectionNode.SetReferenceActiveLabelVolumeID( merge.GetID() )
 
