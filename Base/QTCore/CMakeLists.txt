@@ -194,6 +194,24 @@ set(KIT_resources
   Resources/qSlicerBaseQTCore.qrc
   )
 
+if(APPLE)
+  message("Configuring qSlicerBaseQTCoreExtra.qrc for qt.conf with Slicer_QtPlugins_DIR:${Slicer_QtPlugins_DIR}")
+  set(QT_CONF_FILEPATH "${CMAKE_CURRENT_BINARY_DIR}/Resources/qt.conf")
+  file(WRITE ${QT_CONF_FILEPATH}
+"[Paths]
+Plugins = ${Slicer_QtPlugins_DIR}
+")
+
+  configure_file(
+    Resources/qSlicerBaseQTCoreExtra.qrc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/qSlicerBaseQTCoreExtra.qrc
+    )
+
+  list(APPEND KIT_resources
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources/qSlicerBaseQTCoreExtra.qrc
+    )
+endif()
+
 # Python wrap
 if(Slicer_USE_PYTHONQT)
   if(${VTK_VERSION_MAJOR} GREATER 5)
