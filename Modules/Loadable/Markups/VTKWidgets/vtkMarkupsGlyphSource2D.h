@@ -40,7 +40,7 @@
 #include "vtkPolyDataAlgorithm.h"
 
 /// when add new glyph types, make sure to increase the clamp
-#define VTK_STARBURST_GLYPH 12
+#define VTK_STARBURST_GLYPH 13
 
 class vtkPoints;
 class vtkUnsignedCharArray;
@@ -116,13 +116,20 @@ public:
   void SetGlyphTypeToArrow() {this->SetGlyphType(VTK_ARROW_GLYPH);}
   void SetGlyphTypeToThickArrow() {this->SetGlyphType(VTK_THICKARROW_GLYPH);}
   void SetGlyphTypeToHookedArrow() {this->SetGlyphType(VTK_HOOKEDARROW_GLYPH);}
+  void SetGlyphTypeToEdgeArrow() {this->SetGlyphType(VTK_EDGEARROW_GLYPH);}
   void SetGlyphTypeToStarBurst() {this->SetGlyphType(VTK_STARBURST_GLYPH);}
 
   void SetGlyphTypeAsString(const char* type);
 
+  /// Set/get the desired precision for the output points.
+  /// vtkAlgorithm::SINGLE_PRECISION - Output single-precision floating point.
+  /// vtkAlgorithm::DOUBLE_PRECISION - Output double-precision floating point.
+  vtkSetMacro(OutputPointsPrecision,int);
+  vtkGetMacro(OutputPointsPrecision,int);
+
 protected:
   vtkMarkupsGlyphSource2D();
-  ~vtkMarkupsGlyphSource2D() {};
+  ~vtkMarkupsGlyphSource2D() {}
 
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
@@ -135,6 +142,8 @@ protected:
   int   Cross;
   int   GlyphType;
   double RotationAngle;
+  int    Resolution;
+  int    OutputPointsPrecision;
 
   void TransformGlyph(vtkPoints *pts);
   void ConvertColor();
@@ -162,6 +171,8 @@ protected:
                         vtkCellArray *polys, vtkUnsignedCharArray *colors);
   void CreateHookedArrow(vtkPoints *pts, vtkCellArray *lines,
                          vtkCellArray *polys, vtkUnsignedCharArray *colors);
+  void CreateEdgeArrow(vtkPoints *pts, vtkCellArray *lines,
+                       vtkCellArray *polys, vtkUnsignedCharArray *colors);
   void CreateStarBurst(vtkPoints *pts, vtkCellArray *lines,
                        vtkCellArray *polys, vtkUnsignedCharArray *colors, double scale);
 

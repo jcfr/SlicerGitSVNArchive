@@ -49,6 +49,12 @@ vtkMarkupsGlyphSource2D::vtkMarkupsGlyphSource2D()
   this->Cross = 0;
   this->Dash = 0;
   this->RotationAngle = 0.0;
+  this->Resolution = 8;
+#if (VTK_MAJOR_VERSION <= 5)
+  this->OutputPointsPrecision = -1;
+#else
+  this->OutputPointsPrecision = SINGLE_PRECISION;
+#endif
   this->GlyphType = VTK_VERTEX_GLYPH;
 
   this->SetNumberOfInputPorts(0);
@@ -69,6 +75,19 @@ int vtkMarkupsGlyphSource2D::RequestData(
 
   //Allocate storage
   vtkPoints *pts = vtkPoints::New();
+
+#if (VTK_MAJOR_VERSION > 5)
+  // Set the desired precision for the points in the output.
+  if(this->OutputPointsPrecision == vtkAlgorithm::DOUBLE_PRECISION)
+    {
+    pts->SetDataType(VTK_DOUBLE);
+    }
+  else
+    {
+    pts->SetDataType(VTK_FLOAT);
+    }
+#endif
+
   pts->Allocate(6,6);
   vtkCellArray *verts = vtkCellArray::New();
   verts->Allocate(verts->EstimateSize(1,1),1);
@@ -79,6 +98,7 @@ int vtkMarkupsGlyphSource2D::RequestData(
   vtkUnsignedCharArray *colors = vtkUnsignedCharArray::New();
   colors->SetNumberOfComponents(3);
   colors->Allocate(2,2);
+  colors->SetName("Colors");
 
   this->ConvertColor();
 
@@ -136,6 +156,9 @@ int vtkMarkupsGlyphSource2D::RequestData(
     case VTK_HOOKEDARROW_GLYPH:
       this->CreateHookedArrow(pts,lines,polys,colors);
       break;
+    case VTK_EDGEARROW_GLYPH:
+      this->CreateEdgeArrow(pts,lines,polys,colors);
+      break;
     case VTK_STARBURST_GLYPH:
       this->CreateStarBurst(pts,lines,polys,colors,this->Scale);
       break;
@@ -146,39 +169,34 @@ int vtkMarkupsGlyphSource2D::RequestData(
   //Clean up
   output->SetPoints(pts);
   pts->Delete();
-  pts = NULL;
 
   output->SetVerts(verts);
   verts->Delete();
-  verts = NULL;
 
   output->SetLines(lines);
   lines->Delete();
-  lines = NULL;
 
   output->SetPolys(polys);
   polys->Delete();
-  polys = NULL;
 
   output->GetCellData()->SetScalars(colors);
   colors->Delete();
-  colors = NULL;
 
   return 1;
 }
 
 void vtkMarkupsGlyphSource2D::ConvertColor()
 {
-  this->RGB[0] = (unsigned char) (255.0 * this->Color[0]);
-  this->RGB[1] = (unsigned char) (255.0 * this->Color[1]);
-  this->RGB[2] = (unsigned char) (255.0 * this->Color[2]);
+  this->RGB[0] = static_cast<unsigned char>(255.0 * this->Color[0]);
+  this->RGB[1] = static_cast<unsigned char>(255.0 * this->Color[1]);
+  this->RGB[2] = static_cast<unsigned char>(255.0 * this->Color[2]);
 }
 
 void vtkMarkupsGlyphSource2D::TransformGlyph(vtkPoints *pts)
 {
   double x[3];
-  int i;
-  int numPts=pts->GetNumberOfPoints();
+  vtkIdType i;
+  vtkIdType numPts=pts->GetNumberOfPoints();
 
   if ( this->RotationAngle == 0.0 )
     {
@@ -345,31 +363,35 @@ void vtkMarkupsGlyphSource2D::CreateSquare(vtkPoints *pts, vtkCellArray *lines,
 void vtkMarkupsGlyphSource2D::CreateCircle(vtkPoints *pts, vtkCellArray *lines,
                                     vtkCellArray *polys, vtkUnsignedCharArray *colors)
 {
-  vtkIdType ptIds[9];
+  vtkIdList* ptIds = vtkIdList::New();
+  ptIds->SetNumberOfIds(this->Resolution + 1);
+
   double x[3], theta;
 
   // generate eight points in a circle
   x[2] = 0.0;
-  theta = 2.0 * vtkMath::Pi() / 8.0;
-  for (int i=0; i<8; i++)
+  theta = 2.0 * vtkMath::Pi() / static_cast<double>(this->Resolution);
+  for (int i=0; i<this->Resolution; i++)
     {
-    x[0] = 0.5 * cos((double)i*theta);
-    x[1] = 0.5 * sin((double)i*theta);
-    ptIds[i] = pts->InsertNextPoint(x);
+    x[0] = 0.5 * cos(i*theta);
+    x[1] = 0.5 * sin(i*theta);
+    ptIds->SetId(i, pts->InsertNextPoint(x));
     }
 
+  ptIds->SetId(this->Resolution, ptIds->GetId(0));
   if ( this->Filled )
     {
-    polys->InsertNextCell(8,ptIds);
+    polys->InsertNextCell(ptIds);
     }
   else
     {
-    ptIds[8] = ptIds[0];
-    lines->InsertNextCell(9,ptIds);
+    lines->InsertNextCell(ptIds);
     }
   colors->InsertNextValue(this->RGB[0]);
   colors->InsertNextValue(this->RGB[1]);
   colors->InsertNextValue(this->RGB[2]);
+
+  ptIds->Delete();
 }
 
 void vtkMarkupsGlyphSource2D::CreateDiamond(vtkPoints *pts, vtkCellArray *lines,
@@ -501,6 +523,29 @@ void vtkMarkupsGlyphSource2D::CreateHookedArrow(vtkPoints *pts, vtkCellArray *li
     }
 }
 
+void vtkMarkupsGlyphSource2D::CreateEdgeArrow(vtkPoints *pts, vtkCellArray *lines,
+                                              vtkCellArray *polys, vtkUnsignedCharArray *colors)
+{
+  vtkIdType ptIds[3];
+
+  double x = 0.5 / sqrt(3.0);
+  ptIds[0] = pts->InsertNextPoint(-1.0,   x, 0.0);
+  ptIds[1] = pts->InsertNextPoint( 0.0, 0.0, 0.0);
+  ptIds[2] = pts->InsertNextPoint(-1.0,  -x, 0.0);
+
+  if ( this->Filled )
+    {
+    polys->InsertNextCell(3,ptIds);
+    }
+  else
+    {
+    lines->InsertNextCell(3,ptIds);
+    }
+  colors->InsertNextValue(this->RGB[0]);
+  colors->InsertNextValue(this->RGB[1]);
+  colors->InsertNextValue(this->RGB[2]);
+}
+
 void vtkMarkupsGlyphSource2D::CreateStarBurst(vtkPoints *pts, vtkCellArray *lines,
                                                  vtkCellArray *vtkNotUsed(polys),
                                                  vtkUnsignedCharArray *colors,
@@ -572,6 +617,7 @@ void vtkMarkupsGlyphSource2D::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Scale: " << this->Scale << "\n";
   os << indent << "Scale2: " << this->Scale2 << "\n";
   os << indent << "Rotation Angle: " << this->RotationAngle << "\n";
+  os << indent << "Resolution: " << this->Resolution << "\n";
 
   os << indent << "Color: (" << this->Color[0] << ", "
      << this->Color[1] << ", " << this->Color[2] << ")\n";
@@ -618,6 +664,9 @@ void vtkMarkupsGlyphSource2D::PrintSelf(ostream& os, vtkIndent indent)
       break;
     case VTK_HOOKEDARROW_GLYPH:
       os << "Hooked Arrow\n";
+      break;
+    case VTK_EDGEARROW_GLYPH:
+      os << "Edge Arrow\n";
       break;
     case VTK_STARBURST_GLYPH:
       os << "Star Burst\n";
