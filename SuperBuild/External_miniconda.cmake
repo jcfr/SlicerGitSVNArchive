@@ -182,19 +182,19 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
   #-----------------------------------------------------------------------------
   # numpy
   ExternalProject_Add_Step(${proj} ${proj}-install-numpy
-    COMMAND ${python_DIR}/bin/conda install --yes --quiet numpy
+    COMMAND "${PYTHON_EXECUTABLE}" "${python_DIR}/bin/conda" install --yes --quiet numpy
     DEPENDEES install
     )
 
   # Test: install scipy... OK
   # ExternalProject_Add_Step(${proj} ${proj}-install-scipy
-  #   COMMAND ${python_DIR}/bin/conda install --yes --quiet scipy
+  #   COMMAND "${PYTHON_EXECUTABLE}" "${python_DIR}/bin/conda" install --yes --quiet scipy
   #   DEPENDEES ${proj}-install-numpy
   #   )
 
   # scipy
   ExternalProject_Add_Step(${proj} ${proj}-install-scikit-learn
-    COMMAND ${python_DIR}/bin/conda install --yes --quiet scikit-learn
+    COMMAND "${PYTHON_EXECUTABLE}" "${python_DIR}/bin/conda" install --yes --quiet scikit-learn
     DEPENDEES ${proj}-install-numpy
     )
   #-----------------------------------------------------------------------------
