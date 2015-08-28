@@ -86,7 +86,8 @@ public:
     StarBurst2D,
     Sphere3D,
     Diamond3D,
-    GlyphMax = Sphere3D,
+    Cylinder3D,
+    GlyphMax = Cylinder3D,
   };
   /// Return the min/max glyph types, for iterating over them in tcl
   int GetMinimumGlyphType() { return vtkMRMLMarkupsDisplayNode::GlyphMin; };

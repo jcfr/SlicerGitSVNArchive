@@ -39,7 +39,9 @@ const char *vtkMRMLMarkupsDisplayNode::GlyphTypesNames[GlyphMax+2] =
   "ThickArrow2D",
   "HookedArrow2D",
   "StarBurst2D",
-  "Sphere3D"
+  "Sphere3D",
+  "Diamond3D",
+  "Cylinder3D"
 };
 
 //----------------------------------------------------------------------------

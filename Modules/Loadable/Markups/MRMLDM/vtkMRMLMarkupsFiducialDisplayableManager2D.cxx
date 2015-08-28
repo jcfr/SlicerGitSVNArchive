@@ -578,6 +578,11 @@ void vtkMRMLMarkupsFiducialDisplayableManager2D::SetNthSeed(int n, vtkMRMLMarkup
           // std::cout << "using circle 2d for sphere 3d" << std::endl;
           glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::Circle2D);
           }
+        else if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Cylinder3D)
+          {
+          // std::cout << "using circle 2d for cylinder 3d" << std::endl;
+          glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::Circle2D);
+          }
         else if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Diamond3D)
           {
           glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::Diamond2D);
@@ -724,7 +729,8 @@ void vtkMRMLMarkupsFiducialDisplayableManager2D::SetNthSeed(int n, vtkMRMLMarkup
           {
           double glyphScale = pointDisplayNode->GetGlyphScale()*2.0;
           int glyphType = pointDisplayNode->GetGlyphType();
-          if (glyphType == vtkMRMLMarkupsDisplayNode::Sphere3D)
+          if (glyphType == vtkMRMLMarkupsDisplayNode::Sphere3D ||
+             glyphType == vtkMRMLMarkupsDisplayNode::Cylinder3D)
             {
             // 3D Sphere glyph is represented in 2D by a Circle2D glyph
             glyphType = vtkMRMLMarkupsDisplayNode::Circle2D;

@@ -37,6 +37,7 @@
 
 // VTK includes
 #include <vtkAbstractWidget.h>
+#include <vtkCylinderSource.h>
 #include <vtkFollower.h>
 #include <vtkHandleRepresentation.h>
 #include <vtkInteractorStyle.h>
@@ -322,7 +323,27 @@ void GetHandlePolyData(vtkObject* self,
         << (displayNode->GlyphTypeIs3D() ? "true" : "false"));
   if (displayNode->GlyphTypeIs3D())
     {
-    if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Sphere3D)
+    if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Cylinder3D)
+      {
+      // std::cout << "3d cylinder" << std::endl;
+      vtkNew<vtkCylinderSource> cylinderSource;
+      cylinderSource->SetRadius(0.5);
+      cylinderSource->SetHeight(0.1);
+      cylinderSource->SetResolution(10);
+
+      vtkNew<vtkTransformPolyDataFilter> transformFilter;
+      vtkNew<vtkTransform> transform;
+      if (!displayNode->GetOrientGlyph())
+        {
+        transform->RotateX(90);
+        }
+      transformFilter->SetTransform(transform.GetPointer());
+      transformFilter->SetInputConnection(cylinderSource->GetOutputPort());
+      transformFilter->Update();
+
+      handlePolyData->DeepCopy(transformFilter->GetOutput());
+      }
+    else if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Sphere3D)
       {
       // std::cout << "3d sphere" << std::endl;
       vtkNew<vtkSphereSource> sphereSource;
