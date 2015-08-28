@@ -474,7 +474,7 @@ void vtkMRMLMarkupsNode::InitMarkup(Markup *markup)
   // use an empty associated node id
   markup->AssociatedNodeID = std::string("");
 
-  // orientatation is 0 around the z axis
+  // orientation is 0 around the z axis
   markup->OrientationWXYZ[0] = 0.0;
   markup->OrientationWXYZ[1] = 0.0;
   markup->OrientationWXYZ[2] = 0.0;

@@ -44,6 +44,7 @@
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkOrientedPolygonalHandleRepresentation3D.h>
+#include <vtkPolygonalHandleRepresentation3D.h>
 #if (VTK_MAJOR_VERSION >= 6)
 #include <vtkPickingManager.h>
 #endif
@@ -55,6 +56,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkSeedRepresentation.h>
 #include <vtkSphereSource.h>
+#include <vtkTransform.h>
+#include <vtkTransformPolyDataFilter.h>
 
 // STD includes
 #include <sstream>
@@ -141,6 +144,20 @@ void vtkMRMLMarkupsFiducialDisplayableManager3D::PrintSelf(ostream& os, vtkInden
 }
 
 //---------------------------------------------------------------------------
+namespace
+{
+void InitializeHandleRepresentation(vtkAbstractPolygonalHandleRepresentation3D* handleRepresentation)
+{
+  // default to a starburst glyph, update in propagate mrml to widget
+  vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
+  glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::StarBurst2D);
+  glyphSource->Update();
+  glyphSource->SetScale(1.0);
+  handleRepresentation->SetHandle(glyphSource->GetOutput());
+}
+}
+
+//---------------------------------------------------------------------------
 /// Create a new widget.
 vtkAbstractWidget * vtkMRMLMarkupsFiducialDisplayableManager3D::CreateWidget(vtkMRMLMarkupsNode* node)
 {
@@ -160,21 +177,25 @@ vtkAbstractWidget * vtkMRMLMarkupsFiducialDisplayableManager3D::CreateWidget(vtk
 
   vtkMRMLMarkupsDisplayNode *displayNode = fiducialNode->GetMarkupsDisplayNode();
 
-  if (!displayNode)
+  /*if (!displayNode)
     {
-    // std::cout<<"No DisplayNode!"<<std::endl;
+    vtkDebugMacro("CreateWidget: Could not get display node for node "
+                  << (fiducialNode->GetID() ? fiducialNode->GetID() : "null id"));
+    return 0;
     }
+  */
 
   vtkNew<vtkSeedRepresentation> rep;
-  vtkNew<vtkOrientedPolygonalHandleRepresentation3D> handle;
-
-  // default to a starburst glyph, update in propagate mrml to widget
-  vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
-  glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::StarBurst2D);
-  glyphSource->Update();
-  glyphSource->SetScale(1.0);
-  handle->SetHandle(glyphSource->GetOutput());
-
+  vtkSmartPointer<vtkAbstractPolygonalHandleRepresentation3D> handle;
+  if (displayNode && displayNode->GetOrientGlyph())
+    {
+    handle = vtkSmartPointer<vtkPolygonalHandleRepresentation3D>::New();
+    }
+  else
+    {
+    handle = vtkSmartPointer<vtkOrientedPolygonalHandleRepresentation3D>::New();
+    }
+  InitializeHandleRepresentation(handle.GetPointer());
   rep->SetHandleRepresentation(handle.GetPointer());
 
   //seed widget
@@ -286,6 +307,55 @@ bool vtkMRMLMarkupsFiducialDisplayableManager3D::UpdateNthSeedPositionFromMRML(i
 }
 
 //---------------------------------------------------------------------------
+namespace
+{
+
+//---------------------------------------------------------------------------
+void GetHandlePolyData(vtkObject* self,
+                       vtkMRMLMarkupsDisplayNode* displayNode,
+                       vtkPolyData* handlePolyData)
+{
+  vtkDebugWithObjectMacro(self, "3D: DisplayNode glyph type = "
+        << displayNode->GetGlyphType()
+        << " = " << displayNode->GetGlyphTypeAsString()
+        << ", is 3d glyph = "
+        << (displayNode->GlyphTypeIs3D() ? "true" : "false"));
+  if (displayNode->GlyphTypeIs3D())
+    {
+    if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Sphere3D)
+      {
+      // std::cout << "3d sphere" << std::endl;
+      vtkNew<vtkSphereSource> sphereSource;
+      sphereSource->SetRadius(0.5);
+      sphereSource->SetPhiResolution(10);
+      sphereSource->SetThetaResolution(10);
+      sphereSource->Update();
+      handlePolyData->DeepCopy(sphereSource->GetOutput());
+      }
+    else
+      {
+      // the 3d diamond isn't supported yet, use a 2d diamond for now
+      vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
+      glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::Diamond2D);
+      glyphSource->Update();
+      glyphSource->SetScale(1.0);
+      handlePolyData->DeepCopy(glyphSource->GetOutput());
+      }
+    }//if (displayNode->GlyphTypeIs3D())
+  else
+    {
+    // 2D
+    vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
+    glyphSource->SetGlyphType(displayNode->GetGlyphType());
+    glyphSource->Update();
+    glyphSource->SetScale(1.0);
+    handlePolyData->DeepCopy(glyphSource->GetOutput());
+    }
+}
+
+}
+
+//---------------------------------------------------------------------------
 void vtkMRMLMarkupsFiducialDisplayableManager3D::SetNthSeed(int n, vtkMRMLMarkupsFiducialNode* fiducialNode, vtkSeedWidget *seedWidget)
 {
   vtkSeedRepresentation * seedRepresentation = vtkSeedRepresentation::SafeDownCast(seedWidget->GetRepresentation());
@@ -336,17 +406,31 @@ void vtkMRMLMarkupsFiducialDisplayableManager3D::SetNthSeed(int n, vtkMRMLMarkup
     vtkDebugMacro("Position did not change");
     }
 
-  vtkOrientedPolygonalHandleRepresentation3D *handleRep =
-    vtkOrientedPolygonalHandleRepresentation3D::SafeDownCast(seedRepresentation->GetHandleRepresentation(n));
+  // check handle representation type
+  vtkAbstractPolygonalHandleRepresentation3D *handleRep = 0;
+  std::string handleRepType;
+  if (displayNode->GetOrientGlyph())
+    {
+    handleRep = vtkPolygonalHandleRepresentation3D::SafeDownCast(seedRepresentation->GetHandleRepresentation(n));
+    }
+  else
+    {
+    handleRepType = "n oriented";
+    handleRep = vtkOrientedPolygonalHandleRepresentation3D::SafeDownCast(seedRepresentation->GetHandleRepresentation(n));
+    }
   if (!handleRep)
     {
-    vtkErrorMacro("Failed to get an oriented polygonal handle rep for n = "
+    vtkErrorMacro("Failed to get a" << handleRepType << " polygonal handle rep for n = "
           << n << ", number of seeds = "
           << seedRepresentation->GetNumberOfSeeds()
           << ", handle rep = "
           << (seedRepresentation->GetHandleRepresentation(n) ? seedRepresentation->GetHandleRepresentation(n)->GetClassName() : "null"));
     return;
     }
+
+  // update the orientation
+  // XXX Implement this
+  bool orientationChanged = true;
 
   // update the text
   std::string textString = fiducialNode->GetNthFiducialLabel(n);
@@ -408,44 +492,28 @@ void vtkMRMLMarkupsFiducialDisplayableManager3D::SetNthSeed(int n, vtkMRMLMarkup
   // set the glyph type if a new handle was created, or the glyph type changed
   int oldGlyphType = this->Helper->GetNodeGlyphType(displayNode, n);
   if (createdNewHandle ||
-      oldGlyphType != displayNode->GetGlyphType())
+      oldGlyphType != displayNode->GetGlyphType() ||
+      orientationChanged)
     {
-    vtkDebugMacro("3D: DisplayNode glyph type = "
-          << displayNode->GetGlyphType()
-          << " = " << displayNode->GetGlyphTypeAsString()
-          << ", is 3d glyph = "
-          << (displayNode->GlyphTypeIs3D() ? "true" : "false"));
-    if (displayNode->GlyphTypeIs3D())
-      {
-      if (displayNode->GetGlyphType() == vtkMRMLMarkupsDisplayNode::Sphere3D)
-        {
-        // std::cout << "3d sphere" << std::endl;
-        vtkNew<vtkSphereSource> sphereSource;
-        sphereSource->SetRadius(0.5);
-        sphereSource->SetPhiResolution(10);
-        sphereSource->SetThetaResolution(10);
-        sphereSource->Update();
-        handleRep->SetHandle(sphereSource->GetOutput());
-        }
-      else
-        {
-        // the 3d diamond isn't supported yet, use a 2d diamond for now
-        vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
-        glyphSource->SetGlyphType(vtkMRMLMarkupsDisplayNode::Diamond2D);
-        glyphSource->Update();
-        glyphSource->SetScale(1.0);
-        handleRep->SetHandle(glyphSource->GetOutput());
-        }
-      }//if (displayNode->GlyphTypeIs3D())
-    else
-      {
-      // 2D
-      vtkNew<vtkMarkupsGlyphSource2D> glyphSource;
-      glyphSource->SetGlyphType(displayNode->GetGlyphType());
-      glyphSource->Update();
-      glyphSource->SetScale(1.0);
-      handleRep->SetHandle(glyphSource->GetOutput());
-      }
+    vtkNew<vtkPolyData> handlePolyData;
+    GetHandlePolyData(this, displayNode, handlePolyData.GetPointer());
+
+    double orientation[4] = {0.0, 0.0, 0.0, 0.0};
+    fiducialNode->GetNthMarkupOrientation(n, orientation);
+
+    vtkNew<vtkTransformPolyDataFilter> transformFilter;
+    vtkNew<vtkTransform> transform;
+    transform->RotateWXYZ(
+          orientation[0], orientation[1], orientation[2], orientation[3]);
+    transformFilter->SetTransform(transform.GetPointer());
+#if (VTK_MAJOR_VERSION <= 5)
+    transformFilter->SetInput(handlePolyData.GetPointer());
+#else
+    transformFilter->SetInputData(handlePolyData.GetPointer());
+#endif
+    transformFilter->Update();
+
+    handleRep->SetHandle(transformFilter->GetOutput());
     // TBD: keep with the assumption of one glyph type per markups node,
     // but they may have different glyphs during update
     this->Helper->SetNodeGlyphType(displayNode, displayNode->GetGlyphType(), n);
@@ -551,6 +619,42 @@ void vtkMRMLMarkupsFiducialDisplayableManager3D::PropagateMRMLToWidget(vtkMRMLMa
     vtkDebugMacro("PropagateMRMLToWidget: Could not get display node for node " << (fiducialNode->GetID() ? fiducialNode->GetID() : "null id"));
     }
 
+  vtkSeedRepresentation * seedRepresentation = vtkSeedRepresentation::SafeDownCast(seedWidget->GetRepresentation());
+
+  // update handle representation
+  bool resetHandles = false;
+  if (displayNode && displayNode->GetOrientGlyph()
+      && !vtkPolygonalHandleRepresentation3D::SafeDownCast(seedRepresentation->GetHandleRepresentation()))
+    {
+    //std::cout << "PropagateMRMLToWidget: Switch to vtkPolygonalHandleRepresentation3D" << std::endl;
+    vtkNew<vtkPolygonalHandleRepresentation3D> handle;
+    InitializeHandleRepresentation(handle.GetPointer());
+    seedRepresentation->SetHandleRepresentation(handle.GetPointer());
+    resetHandles = true;
+    }
+  else if (displayNode && !displayNode->GetOrientGlyph()
+      && !vtkOrientedPolygonalHandleRepresentation3D::SafeDownCast(seedRepresentation->GetHandleRepresentation()))
+    {
+    //std::cout << "PropagateMRMLToWidget: Switch to vtkOrientedPolygonalHandleRepresentation3D" << std::endl;
+    vtkNew<vtkOrientedPolygonalHandleRepresentation3D> handle;
+    InitializeHandleRepresentation(handle.GetPointer());
+    seedRepresentation->SetHandleRepresentation(handle.GetPointer());
+    resetHandles = true;
+    }
+
+  if (resetHandles)
+    {
+    //std::cout << "PropagateMRMLToWidget: Reset handles"<< std::endl;
+    while(seedRepresentation->GetNumberOfSeeds() > 0)
+      {
+      vtkHandleRepresentation* handleRep =
+          seedRepresentation->GetHandleRepresentation(
+            seedRepresentation->GetNumberOfSeeds() - 1);
+      this->GetRenderer()->RemoveViewProp(handleRep);
+      seedRepresentation->RemoveLastHandle();
+      }
+    }
+
   // iterate over the fiducials in this markup
   int numberOfFiducials = fiducialNode->GetNumberOfMarkups();
 
@@ -569,7 +673,6 @@ void vtkMRMLMarkupsFiducialDisplayableManager3D::PropagateMRMLToWidget(vtkMRMLMa
   // std::cout << "PropagateMRMLToWidget: calling UpdateWidgetVisibility" << std::endl;
   this->UpdateWidgetVisibility(node);
 
-  vtkSeedRepresentation * seedRepresentation = vtkSeedRepresentation::SafeDownCast(seedWidget->GetRepresentation());
   seedRepresentation->NeedToRenderOn();
   seedWidget->Modified();
 

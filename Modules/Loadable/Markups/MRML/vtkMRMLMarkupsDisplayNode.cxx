@@ -73,6 +73,7 @@ vtkMRMLMarkupsDisplayNode::vtkMRMLMarkupsDisplayNode()
   this->TextScale = 3.4;
   this->GlyphType = vtkMRMLMarkupsDisplayNode::Sphere3D;
   this->GlyphScale = 2.1;
+  this->OrientGlyph = 0;
 
   // projection settings
   this->SliceProjection = (vtkMRMLMarkupsDisplayNode::ProjectionOff |
@@ -97,6 +98,7 @@ void vtkMRMLMarkupsDisplayNode::WriteXML(ostream& of, int nIndent)
   of << " textScale=\"" << this->TextScale << "\"";
   of << " glyphScale=\"" << this->GlyphScale << "\"";
   of << " glyphType=\"" << this->GlyphType << "\"";
+  of << " orientGlyph=\"" << this->OrientGlyph << "\"";
 
   of << " sliceProjection=\"" << this->SliceProjection << "\"";
 
@@ -141,6 +143,12 @@ void vtkMRMLMarkupsDisplayNode::ReadXMLAttributes(const char** atts)
       ss << attValue;
       ss >> this->GlyphScale;
       }
+    else if (!strcmp(attName, "orientGlyph"))
+      {
+      std::stringstream ss;
+      ss << attValue;
+      ss >> this->OrientGlyph;
+      }
     else if (!strcmp(attName, "sliceProjection"))
       {
       std::stringstream ss;
@@ -183,6 +191,7 @@ void vtkMRMLMarkupsDisplayNode::Copy(vtkMRMLNode *anode)
   this->SetTextScale(node->TextScale);
   this->SetGlyphType(node->GlyphType);
   this->SetGlyphScale(node->GlyphScale);
+  this->SetOrientGlyph(node->OrientGlyph);
   this->SetSliceProjection(node->SliceProjection);
   this->SetSliceProjectionColor(node->GetSliceProjectionColor());
   this->SetSliceProjectionOpacity(node->GetSliceProjectionOpacity());

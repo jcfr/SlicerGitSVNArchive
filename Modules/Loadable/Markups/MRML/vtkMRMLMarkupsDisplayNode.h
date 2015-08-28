@@ -108,6 +108,17 @@ public:
   void SetGlyphScale(double scale);
   vtkGetMacro(GlyphScale,double);
 
+  /// Set OrientGlyph flag that controls if the orientation of markups
+  /// is applied or not in 3D viewers.
+  ///
+  /// If Off, glyph will always remain front facing, ie it maintains a
+  /// fixed orientation with respect to the camera.
+  ///
+  /// Off by default
+  vtkSetMacro(OrientGlyph, int);
+  vtkGetMacro(OrientGlyph, int);
+  vtkBooleanMacro(OrientGlyph, int);
+
   /// An event that lets the markups logic know to reset this node to the
   /// default values
   enum
@@ -186,6 +197,8 @@ protected:
   double TextScale;
   int GlyphType;
   double GlyphScale;
+  int OrientGlyph;
+
   static const char* GlyphTypesNames[GlyphMax+2];
 
   int SliceProjection;
