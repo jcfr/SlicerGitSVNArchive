@@ -34,14 +34,26 @@ ExternalProject_Execute(${proj} \"install\" \"${PYTHON_EXECUTABLE}\" PythonPacka
 ")
 
   set(SimpleITK_REPOSITORY ${git_protocol}://itk.org/SimpleITK.git)
-  set(SimpleITK_GIT_TAG 4531702ba9bfeb802b27b3795df1344b2626891b ) # v0.9.0
+  set(SimpleITK_GIT_TAG 1d7e62a66da5d39634d205f75c75cac1a763126f ) # v0.10.0 (master)
+
+  # A separate project is used to download, so that the SuperBuild
+  # subdirectory can be use for SimpleITK's SuperBuild to build
+  # required Lua, GTest etc. dependencies not in Slicer SuperBuild
+  ExternalProject_add(SimpleITK-download
+    SOURCE_DIR SimpleITK
+    GIT_REPOSITORY ${SimpleITK_REPOSITORY}
+    GIT_TAG ${SimpleITK_GIT_TAG}
+    CONFIGURE_COMMAND ""
+    INSTALL_COMMAND ""
+    BUILD_COMMAND ""
+    )
 
   ExternalProject_add(SimpleITK
     ${${proj}_EP_ARGS}
-    SOURCE_DIR SimpleITK
+    SOURCE_DIR SimpleITK/SuperBuild
     BINARY_DIR SimpleITK-build
-    GIT_REPOSITORY ${SimpleITK_REPOSITORY}
-    GIT_TAG ${SimpleITK_GIT_TAG}
+    DOWNLOAD_COMMAND ""
+    UPDATE_COMMAND ""
     CMAKE_CACHE_ARGS
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
       -DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}
@@ -54,7 +66,10 @@ ExternalProject_Execute(${proj} \"install\" \"${PYTHON_EXECUTABLE}\" PythonPacka
       -DSimpleITK_INSTALL_LIBRARY_DIR:PATH=${Slicer_INSTALL_LIB_DIR}
       -DSITK_INT64_PIXELIDS:BOOL=OFF
       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+      -DUSE_SYSTEM_ITK:BOOL=ON
       -DITK_DIR:PATH=${ITK_DIR}
+      -DSWIG_EXECUTABLE:PATH=${SWIG_EXECUTABLE}
+      -DUSE_SYSTEM_SWIG:BOOL=ON
       -DPYTHON_EXECUTABLE:PATH=${PYTHON_EXECUTABLE}
       -DPYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}
       -DPYTHON_INCLUDE_DIR:PATH=${PYTHON_INCLUDE_DIR}
@@ -67,12 +82,11 @@ ExternalProject_Execute(${proj} \"install\" \"${PYTHON_EXECUTABLE}\" PythonPacka
       -DWRAP_LUA:BOOL=OFF
       -DWRAP_CSHARP:BOOL=OFF
       -DWRAP_R:BOOL=OFF
-      -DSWIG_EXECUTABLE:PATH=${SWIG_EXECUTABLE}
       -DSimpleITK_BUILD_DISTRIBUTE:BOOL=ON # Shorten version and install path removing -g{GIT-HASH} suffix.
     #
     INSTALL_COMMAND ${CMAKE_COMMAND} -P ${_install_script}
     #
-    DEPENDS ${${proj}_DEPENDENCIES}
+    DEPENDS SimpleITK-download ${${proj}_DEPENDENCIES}
     )
   set(SimpleITK_DIR ${CMAKE_BINARY_DIR}/SimpleITK-build)
 
