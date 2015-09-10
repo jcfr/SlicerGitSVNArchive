@@ -1,6 +1,6 @@
 
 set(proj miniconda)
-if(NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_python)
+if(NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
   list(APPEND ${proj}_DEPENDENCIES CTKAPPLAUNCHER)
 endif()
 
@@ -77,7 +77,7 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
     message(FATAL_ERROR "Unknown system !")
   endif()
 
-    if(NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_python)
+  if(NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
     # Configure python launcher
     configure_file(
