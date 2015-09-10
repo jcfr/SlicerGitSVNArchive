@@ -183,7 +183,7 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
   # numpy
   ExternalProject_Add_Step(${proj} ${proj}-install-numpy
     COMMAND "${PYTHON_EXECUTABLE}" "${python_DIR}/bin/conda" install --yes --quiet numpy
-    DEPENDEES install
+    DEPENDEES python_customPython_configure
     )
 
   # Test: install scipy... OK
