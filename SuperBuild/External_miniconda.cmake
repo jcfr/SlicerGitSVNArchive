@@ -98,10 +98,6 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
 
   endif()
 
-  if(CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_CFG_INTDIR ${SAVED_CMAKE_CFG_INTDIR}) # Restore CMAKE_CFG_INTDIR
-  endif()
-
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
 
