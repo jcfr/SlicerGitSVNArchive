@@ -34,6 +34,7 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
   endif()
 
   ExternalProject_Add(${proj}
+    ${${proj}_EP_ARGS}
     URL ${PYTHON-INSTALL-FILE}
     #URL_MD5 "d3ad8868836e177ee4f9bd8bbd0c827a"
     DOWNLOAD_DIR ${python_DIR}-install
@@ -41,6 +42,8 @@ if(NOT DEFINED PYTHON_INCLUDE_DIR
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ${INSTALL_COMMAND}
+    DEPENDS
+      ${${proj}_DEPENDENCIES}
     )
 
   if(APPLE)
