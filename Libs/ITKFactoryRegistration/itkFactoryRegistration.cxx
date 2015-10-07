@@ -13,3 +13,9 @@ void itk::itkFactoryRegistration(void)
   return;
 }
 
+void register_itk_factory()
+{
+  std::cout << "ITK Factory registered" << std::endl;
+  itk::itkFactoryRegistration();
+}
+
