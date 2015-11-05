@@ -56,6 +56,8 @@ endif()
 # Sources
 # --------------------------------------------------------------------------
 set(vtkAddon_SRCS
+  vtkEventSpy.cxx
+  vtkEventSpy.h
   vtkLoggingMacros.h
   vtkTestingOutputWindow.cxx
   vtkTestingOutputWindow.h
