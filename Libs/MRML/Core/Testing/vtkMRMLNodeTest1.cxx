@@ -157,22 +157,43 @@ bool CheckNotNull(int line, const std::string& function, const void* current)
 }
 
 //----------------------------------------------------------------------------
-bool CheckString(int line, const std::string& function, const char* current, const char* expected)
+bool AreStringDifferent(const char* s1, const char* s2)
 {
   bool different = true;
-  if (current == 0 || expected == 0)
+  if (s1 == 0 || s2 == 0)
     {
-    different = !(current == 0 && expected == 0);
+    different = !(s1 == 0 && s2 == 0);
     }
-  else if(strcmp(current, expected) == 0)
+  else if(strcmp(s1, s2) == 0)
     {
     different = false;
     }
-  if(different)
+  return different;
+}
+
+//----------------------------------------------------------------------------
+bool CheckString(int line, const std::string& function, const char* current, const char* expected)
+{
+  if(AreStringDifferent(current, expected))
     {
     std::cerr << "Line " << line << " - " << function << " : CheckString failed"
               << "\n\tcurrent:" << (current ? current : "<null>")
               << "\n\texpected:" << (expected ? expected : "<null>")
+              << std::endl;
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool CheckStringDifferent(int line, const std::string& function,
+                          const char* current, const char* unexpected)
+{
+  if(!AreStringDifferent(current, unexpected))
+    {
+    std::cerr << "Line " << line << " - " << function << " : CheckStringDifferent failed"
+              << "\n\tcurrent:" << (current ? current : "<null>")
+              << "\n\tunexpected:" << (unexpected ? unexpected : "<null>")
               << std::endl;
     return false;
     }
@@ -2210,8 +2231,6 @@ bool TestNodeReferenceSerialization()
   scene2->SetSceneXMLString(sceneXMLString);
   scene2->Import();
 
-
-
   if (!CheckInt(__LINE__,
                 "Scene2-GetNumberOfNodes",
                 scene2->GetNumberOfNodes(), 4))
@@ -2252,11 +2271,11 @@ bool TestNodeReferenceSerialization()
     return false;
     }
 
-  if(!CheckString(__LINE__,
-                  std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:0-role:") + role1,
-                  referencingNodeImported->GetNthNodeReferenceID(role1.c_str(), 0),
-                  referencedNode11->GetID()
-                  ))
+  if(!CheckStringDifferent(
+       __LINE__,
+       std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:0-role:") + role1,
+       referencingNodeImported->GetNthNodeReferenceID(role1.c_str(), 0),
+       referencedNode11->GetID()))
     {
     return false;
     }
@@ -2268,11 +2287,11 @@ bool TestNodeReferenceSerialization()
     return false;
     }
 
-  if(!CheckString(__LINE__,
-                  std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:0-role:") + role2,
-                  referencingNodeImported->GetNthNodeReferenceID(role2.c_str(), 0),
-                  referencedNode21->GetID()
-                  ))
+  if(!CheckStringDifferent(
+       __LINE__,
+       std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:0-role:") + role2,
+       referencingNodeImported->GetNthNodeReferenceID(role2.c_str(), 0),
+       referencedNode21->GetID()))
     {
     return false;
     }
@@ -2284,11 +2303,11 @@ bool TestNodeReferenceSerialization()
     return false;
     }
 
-  if(!CheckString(__LINE__,
-                  std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:1-role:") + role2,
-                  referencingNodeImported->GetNthNodeReferenceID(role2.c_str(), 1),
-                  referencedNode22->GetID()
-                  ))
+  if(!CheckStringDifferent(
+       __LINE__,
+       std::string("Scene2-referencingNodeImported-GetNthNodeReferenceID-n:1-role:") + role2,
+       referencingNodeImported->GetNthNodeReferenceID(role2.c_str(), 1),
+       referencedNode22->GetID()))
     {
     return false;
     }
