@@ -1645,7 +1645,7 @@ void qMRMLSliceControllerWidget::setSliceOrientation(const QString& orientation)
   d->MRMLSliceNode->SetOrientation(orientation.toLatin1());
   d->SliceLogic->EndSliceNodeInteraction();
 }
-
+#include <vtkMRMLModelNode.h>
 //---------------------------------------------------------------------------
 void qMRMLSliceControllerWidget::setSliceVisible(bool visible)
 {
@@ -1655,6 +1655,11 @@ void qMRMLSliceControllerWidget::setSliceVisible(bool visible)
     {
     return;
     }
+
+//  qDebug() << "qMRMLSliceControllerWidget::setSliceVisible";
+//  qDebug() << "  MRMLSliceNode" << d->MRMLSliceNode->GetID() << d->MRMLSliceNode->GetName();
+//  qDebug() << "  MRMLSliceCompositeNode" << d->MRMLSliceCompositeNode->GetID() << d->MRMLSliceCompositeNode->GetName();
+//  qDebug() << "  SliceModelNode" << d->SliceLogic->GetSliceModelNode() << d->SliceLogic->GetSliceModelNode()->GetID() << d->SliceLogic->GetSliceModelNode()->GetName();
 
   d->SliceLogic->StartSliceNodeInteraction(vtkMRMLSliceNode::SliceVisibleFlag);
   d->MRMLSliceNode->SetSliceVisible(visible);

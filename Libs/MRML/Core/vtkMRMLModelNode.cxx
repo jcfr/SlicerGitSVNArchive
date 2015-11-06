@@ -776,6 +776,13 @@ void vtkMRMLModelNode
 #if (VTK_MAJOR_VERSION <= 5)
   modelDisplayNode->SetInputPolyData(this->PolyData);
 #else
+  std::cout << "vtkMRMLModelNode::SetPolyDataToDisplayNode "
+            << (this->GetID() ? this->GetID() : "null") << " / " << (this->GetName() ? this->GetName() : "null")
+            << " this->GetPolyDataConnection() " << this->GetPolyDataConnection() << std::endl;
+  if (this->GetPolyDataConnection() && this->GetName() && strcmp(this->GetName(), "Model_1_tissue") == 0)
+    {
+    std::cout << "ADD BREAKPOINT #2 here" << std::endl;
+    }
   modelDisplayNode->SetInputPolyDataConnection(this->GetPolyDataConnection());
 #endif
 }

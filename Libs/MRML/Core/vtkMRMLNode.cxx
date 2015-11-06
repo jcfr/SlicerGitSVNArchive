@@ -386,6 +386,7 @@ void vtkMRMLNode::ReadXMLAttributes(const char** atts)
            if (references.find(id) == references.end() ||
              references.find(id)->second != referenceRole)
              {
+//             std::cerr << "Case2: referenceRole:" << referenceRole << ", id:" << id.c_str() << std::endl;
              this->AddNodeReferenceID(referenceRole, id.c_str());
              references[id] = std::string(referenceRole);
              }
@@ -424,6 +425,7 @@ void vtkMRMLNode::ParseReferencesAttribute(const char *attValue,
         if (references.find(id) == references.end() ||
           references.find(id)->second != role )
           {
+//          std::cerr << "Case1: referenceRole:" << role << ", id:" << id << std::endl;
           this->AddNodeReferenceID(role.c_str(), id.c_str());
           references[id] = role;
           }
@@ -708,6 +710,7 @@ void vtkMRMLNode::SetSceneReferences()
   NodeReferencesType::iterator it;
   for (it = this->NodeReferences.begin(); it != this->NodeReferences.end(); it++)
     {
+//    std::cerr << "id: " << it->first;
     for (unsigned int i=0; i<it->second.size(); i++)
       {
       vtkMRMLNodeReference* reference = it->second[i];
@@ -716,8 +719,11 @@ void vtkMRMLNode::SetSceneReferences()
         vtkErrorMacro(<< "SetSceneReferences: Reference " << i << " is expected to be non NULL.");
         return;
         }
+//      std::cerr <<"\n\treferencing: " << (this->GetID() ? this->GetID() : "(null")
+//               << ", referenced: " << (reference->GetReferencedNodeID() ? reference->GetReferencedNodeID() : "(null)");
       this->Scene->AddReferencedNodeID(reference->GetReferencedNodeID(), this);
       }
+//    std::cerr << std::endl;
     }
 }
 
