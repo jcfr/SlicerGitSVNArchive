@@ -2100,18 +2100,25 @@ std::string vtkMRMLScene::ExtractBaseID(const std::string& nodeID)
     {
     --it;
     }
+  std::string baseID = std::string(nodeID.begin(), it);
 
-  // XXX After stripping the digits, we could check if it is a valid
-  //     class name by calling "GetTagByClassName()" or by adding a
-  //     function named "IsNodeClassRegistered()". The problem with
-  //     that approach is that the "mapping" between "class name"
-  //     and "node" is done using a vector and each call to
-  //     "GetTagByClassName()" result in iterating over the complete
-  //     vector. Using a map, would bring down the completity to O(log n)
-  //     instead of O(n) and would make the BaseID extracting more
-  //     robust.
+  // Check if the extracted baseID corresponds to a registered class name.
+  // If not, let's backtrack re-including digit one by one.
+  while (it != nodeID.end())
+    {
+    // XXX Since the mapping between "class name" and "node" is done
+    //     using a vector of "node". Calling "GetTagByClassName()" will
+    //     impact loading performance for large scene.
+    //     An possible improvement could be to use a map, that would
+    //     bring down the completity to O(log n) instead of O(n).
+    if (this->GetTagByClassName(std::string(nodeID.begin(), it).c_str()))
+      {
+      return std::string(nodeID.begin(), it);
+      }
+    it++;
+    }
 
-  return std::string(nodeID.begin(), it);
+  return baseID;
 }
 
 //------------------------------------------------------------------------------
