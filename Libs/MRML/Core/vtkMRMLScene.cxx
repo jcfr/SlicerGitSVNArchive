@@ -2079,6 +2079,34 @@ std::string vtkMRMLScene::BuildID(const std::string& baseID, int idIndex)const
 }
 
 //------------------------------------------------------------------------------
+std::string vtkMRMLScene::ExtractBaseID(const std::string& nodeID)
+{
+  if (nodeID.empty())
+    {
+    return std::string();
+    }
+
+  // Strip digit from the end of the string
+  std::string::const_iterator it = nodeID.end();
+  while(it >= nodeID.begin() && isdigit(*(it - 1)))
+    {
+    --it;
+    }
+
+  // XXX After stripping the digits, we could check if it is a valid
+  //     class name by calling "GetTagByClassName()" or by adding a
+  //     function named "IsNodeClassRegistered()". The problem with
+  //     that approach is that the "mapping" between "class name"
+  //     and "node" is done using a vector and each call to
+  //     "GetTagByClassName()" result in iterating over the complete
+  //     vector. Using a map, would bring down the completity to O(log n)
+  //     instead of O(n) and would make the BaseID extracting more
+  //     robust.
+
+  return std::string(nodeID.begin(), it);
+}
+
+//------------------------------------------------------------------------------
 std::string vtkMRMLScene::GenerateUniqueName(vtkMRMLNode* node)
 {
   assert(node);

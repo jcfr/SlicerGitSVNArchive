@@ -653,6 +653,29 @@ protected:
   int GetUniqueIDIndex(const std::string& baseID);
   std::string BuildID(const std::string& baseID, int idIndex)const;
 
+  /// \brief Extract \a baseID from \a nodeID.
+  ///
+  /// This function allows to retrieve the \a baseID
+  /// from \a nodeID obtained using
+  /// GenerateUniqueID(const std::string& baseID).
+  ///
+  /// Example:
+  ///
+  /// \code{.py}
+  /// std::string nodeID("vtkMRMLTransformNode42");
+  /// std::string baseID = this->ExtractBaseID(nodeID);
+  /// \\ baseID == "vtkMRMLTransformNode"
+  /// \endcode
+  ///
+  /// \note The current implementation removes all digits
+  /// from the end of the string without checking that the
+  /// substring corresponds to a class name registered
+  /// using RegisterNodeClass(). It means that if the original
+  /// class name was ending with a digit, this function
+  /// will also remove it.
+  ///
+  std::string ExtractBaseID(const std::string& nodeID);
+
   /// Return a unique name for a MRML node. It uses the node tag as the base.
   std::string GenerateUniqueName(vtkMRMLNode* node);
 

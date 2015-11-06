@@ -26,15 +26,43 @@
 // VTK includes
 #include <vtkCallbackCommand.h>
 #include <vtkNew.h>
+#include <vtkObjectFactory.h>
 
 // STD includes
 #include <iostream>
+
+namespace
+{
+
+//----------------------------------------------------------------------------
+class vtkMRMLTestScene : public vtkMRMLScene
+{
+public:
+  static vtkMRMLTestScene *New();
+  typedef vtkMRMLTestScene Self;
+
+  vtkTypeMacro(vtkMRMLTestScene, vtkMRMLScene);
+
+  std::string test_ExtractBaseID(const std::string& nodeID)
+  {
+    return this->ExtractBaseID(nodeID);
+  }
+
+protected:
+  vtkMRMLTestScene()
+  {
+  }
+};
+vtkStandardNewMacro(vtkMRMLTestScene);
+
+}
+
 
 //---------------------------------------------------------------------------
 int vtkMRMLSceneIDTest(
   int vtkNotUsed(argc), char * vtkNotUsed(argv) [] )
 {
-  vtkNew<vtkMRMLScene> scene;
+  vtkNew<vtkMRMLTestScene> scene;
 
   //---------------------------------------------------------------------------
   // GenerateUniqueName
@@ -188,6 +216,55 @@ int vtkMRMLSceneIDTest(
               << greenSlice->GetID() << std::endl;
     return EXIT_FAILURE;
     }
+
+
+  //---------------------------------------------------------------------------
+  // ExtractBaseID
+  //---------------------------------------------------------------------------
+  {
+    std::string current = scene->test_ExtractBaseID("vtkMRMLModelNode5");
+    std::string expected = "vtkMRMLModelNode";
+    if (current != expected)
+      {
+      std::cerr << "Line " << __LINE__ << " - Problem with ExtractBaseID()"
+                << "\n\tcurrent: " << current
+                << "\n\texpected: " << expected << std::endl;
+      return EXIT_FAILURE;
+      }
+  }
+  {
+    std::string current = scene->test_ExtractBaseID("vtkMRMLModelNode12");
+    std::string expected = "vtkMRMLModelNode";
+    if (current != expected)
+      {
+      std::cerr << "Line " << __LINE__ << " - Problem with ExtractBaseID()"
+                << "\n\tcurrent: " << current
+                << "\n\texpected: " << expected << std::endl;
+      return EXIT_FAILURE;
+      }
+  }
+  {
+    std::string current = scene->test_ExtractBaseID("vtkMRMLModelNode");
+    std::string expected = "vtkMRMLModelNode";
+    if (current != expected)
+      {
+      std::cerr << "Line " << __LINE__ << " - Problem with ExtractBaseID()"
+                << "\n\tcurrent: " << current
+                << "\n\texpected: " << expected << std::endl;
+      return EXIT_FAILURE;
+      }
+  }
+  {
+    std::string current = scene->test_ExtractBaseID("vtkMRMLModel1Node1");
+    std::string expected = "vtkMRMLModel1Node";
+    if (current != expected)
+      {
+      std::cerr << "Line " << __LINE__ << " - Problem with ExtractBaseID()"
+                << "\n\tcurrent: " << current
+                << "\n\texpected: " << expected << std::endl;
+      return EXIT_FAILURE;
+      }
+  }
 
   return EXIT_SUCCESS;
 }
