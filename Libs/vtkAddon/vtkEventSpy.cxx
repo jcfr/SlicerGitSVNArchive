@@ -237,6 +237,12 @@ vtkIdType vtkEventSpy::GetCount()
 }
 
 //----------------------------------------------------------------------------
+vtkIdType vtkEventSpy::GetTotalNumberOfEvents()
+{
+  return this->GetCount();
+}
+
+//----------------------------------------------------------------------------
 vtkIdType vtkEventSpy::GetCountByEventId(unsigned long eventId)
 {
   vtkIdType count = 0;
@@ -248,6 +254,12 @@ vtkIdType vtkEventSpy::GetCountByEventId(unsigned long eventId)
       }
     }
   return count;
+}
+
+//----------------------------------------------------------------------------
+vtkIdType vtkEventSpy::GetNumberOfEvents(unsigned long eventId)
+{
+  return this->GetCountByEventId(eventId);
 }
 
 //----------------------------------------------------------------------------
@@ -269,6 +281,12 @@ vtkEventSpyEntry* vtkEventSpy::GetNthEvent(vtkIdType index)
 void vtkEventSpy::ResetEvents()
 {
   this->Internal->Events->Reset();
+}
+
+//----------------------------------------------------------------------------
+void vtkEventSpy::ResetNumberOfEvents()
+{
+  this->ResetEvents();
 }
 
 //----------------------------------------------------------------------------

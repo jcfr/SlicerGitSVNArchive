@@ -119,14 +119,29 @@ public:
   /// Get the number of collected events.
   vtkIdType GetCount();
 
+  ///\copydoc GetCount()
+  ///
+  /// \deprecated Use GetCount() instead.
+  vtkIdType GetTotalNumberOfEvents();
+
   /// Get the number of collected events for a given \a eventId.
   vtkIdType GetCountByEventId(unsigned long eventId);
+
+  /// \copybrief GetCountByEventId()
+  ///
+  /// \deprecated Use GetCountByEventId() instead.
+  vtkIdType GetNumberOfEvents(unsigned long eventId);
 
   /// Get Nth event if any.
   vtkEventSpyEntry* GetNthEvent(vtkIdType index);
 
   /// Clear all collected events.
-  void ResetEvents();
+  virtual void ResetEvents();
+
+  /// \copybrief ResetEvents()
+  ///
+  /// \deprecated Use ResetEvents() instead.
+  void ResetNumberOfEvents();
 
   /// Get \a caller stored in \a event.
   static vtkObject* GetEventCaller(vtkEventSpyEntry* event);
