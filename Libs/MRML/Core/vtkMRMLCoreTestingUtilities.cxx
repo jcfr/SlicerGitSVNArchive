@@ -124,19 +124,25 @@ bool CheckNodeInSceneByID(int line, vtkMRMLScene* scene,
   if (!scene)
     {
     std::cerr << "Line " << line << " - scene is NULL"
-              << " : " << testName << " failed";
+              << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (!nodeID)
     {
     std::cerr << "Line " << line << " - nodeID is NULL"
-              << " : " << testName << " failed";
+              << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (nodeID[0] == '\0')
     {
     std::cerr << "Line " << line << " - nodeID is an empty string"
-              << " : " << testName << " failed";
+              << " : " << testName << " failed" << std::endl;
+    return false;
+    }
+  if (!expected)
+    {
+    std::cerr << "Line " << line << " - expected node is NULL"
+              << " : " << testName << " failed" << std::endl;
     return false;
     }
   vtkMRMLNode* current = scene->GetNodeByID(nodeID);
@@ -160,7 +166,7 @@ bool CheckNodeIdAndName(int line, vtkMRMLNode* node,
   if (!node)
     {
     std::cerr << "Line " << line << " - node is NULL"
-              << " : " << testName << " failed";
+              << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (!CheckString(
