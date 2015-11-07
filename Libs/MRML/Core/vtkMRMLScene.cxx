@@ -2086,6 +2086,40 @@ std::string vtkMRMLScene::BuildID(const std::string& baseID, int idIndex)const
 }
 
 //------------------------------------------------------------------------------
+std::string vtkMRMLScene::ExtractBaseID(const std::string& nodeID)
+{
+  if (nodeID.empty())
+    {
+    return std::string();
+    }
+
+  // Strip digit from the end of the string
+  std::string::const_iterator it = nodeID.end();
+  while(it >= nodeID.begin() && isdigit(*(it - 1)))
+    {
+    --it;
+    }
+  std::string baseID = std::string(nodeID.begin(), it);
+
+  // Check if the extracted baseID corresponds to a registered class name.
+  // If not, let's backtrack re-including digit one by one.
+  while (it != nodeID.end())
+    {
+    // XXX Since the mapping between "class name" and "node" is done
+    //     using a vector of "node". Calling "GetTagByClassName()" will
+    //     impact loading performance for large scene.
+    //     A possible improvement could be to use a map.
+    if (this->GetTagByClassName(std::string(nodeID.begin(), it).c_str()))
+      {
+      return std::string(nodeID.begin(), it);
+      }
+    it++;
+    }
+
+  return baseID;
+}
+
+//------------------------------------------------------------------------------
 std::string vtkMRMLScene::GenerateUniqueName(vtkMRMLNode* node)
 {
   assert(node);
