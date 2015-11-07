@@ -197,6 +197,7 @@ vtkMRMLHierarchyNode* vtkMRMLHierarchyNode::GetParentNode()
   vtkMRMLHierarchyNode* node = NULL;
   if (this->GetScene() && this->ParentNodeIDReference != NULL )
     {
+    std::cout << "vtkMRMLHierarchyNode::GetParentNode() - ParentNodeIDReference:" << this->ParentNodeIDReference << std::endl;
     vtkMRMLNode* snode = this->GetScene()->GetNodeByID(this->ParentNodeIDReference);
     node = vtkMRMLHierarchyNode::SafeDownCast(snode);
     }

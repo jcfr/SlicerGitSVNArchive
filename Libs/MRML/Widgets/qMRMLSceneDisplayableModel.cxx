@@ -18,6 +18,8 @@
 
 ==============================================================================*/
 
+#include <QDebug>
+
 // qMRML includes
 #include "qMRMLSceneDisplayableModel_p.h"
 
@@ -41,7 +43,7 @@ qMRMLSceneDisplayableModelPrivate
 void qMRMLSceneDisplayableModelPrivate::init()
 {
   Q_Q(qMRMLSceneDisplayableModel);
-  q->setLazyUpdate(true);
+  //q->setLazyUpdate(true);
   q->setVisibilityColumn(q->nameColumn());
 }
 
@@ -74,9 +76,13 @@ vtkMRMLDisplayNode* qMRMLSceneDisplayableModelPrivate
   vtkMRMLDisplayableNode* displayableNode = vtkMRMLDisplayableNode::SafeDownCast(node);
   if (selectionNode && displayableNode)
     {
+//    qDebug() << "\nqMRMLSceneDisplayableModelPrivate::displayNode - Found displayable"
+//             << "ID" << displayableNode->GetID() << "NAME" << displayableNode->GetName();
     char *displayableType = (char *)displayableNode->GetClassName();
+//    qDebug() << "  displayableType:" << displayableType;
     std::string displayType =
         selectionNode->GetModelHierarchyDisplayNodeClassName(displayableType);
+//    qDebug() << "  displayType:" << QString::fromStdString(displayType);
     if (!displayType.empty())
       {
       for (int  i=0; i<displayableNode->GetNumberOfDisplayNodes(); i++)
@@ -84,17 +90,26 @@ vtkMRMLDisplayNode* qMRMLSceneDisplayableModelPrivate
         vtkMRMLDisplayNode *displayNode = displayableNode->GetNthDisplayNode(i);
         if (displayNode && displayNode->IsA(displayType.c_str()))
           {
+//            qDebug() << ""
+//                     << "Found ID:" << displayNode->GetID() << ", NAME:" << displayNode->GetName();
             return displayNode;
           }
         }
       }
     else
       {
+//      qDebug() << "  Case: No display node class associated with hierarchy - Return "
+//               << "ID:" << (displayableNode->GetDisplayNode() ? displayableNode->GetDisplayNode()->GetID() : "null")
+//               << ", NAME:" << (displayableNode->GetDisplayNode() ? displayableNode->GetDisplayNode()->GetName() : "null");
       return displayableNode->GetDisplayNode();
       }
     }
   else if (displayableNode)
     {
+//    qDebug() << "qMRMLSceneDisplayableModelPrivate::displayNode:"
+//             << "Neithed selection node or displayableNode - Return "
+//             << "ID:" << (displayableNode->GetDisplayNode() ? displayableNode->GetDisplayNode()->GetID() : "null")
+//             << ", NAME:" << (displayableNode->GetDisplayNode() ? displayableNode->GetDisplayNode()->GetName() : "null");
     return displayableNode->GetDisplayNode();
     }
 
@@ -102,6 +117,10 @@ vtkMRMLDisplayNode* qMRMLSceneDisplayableModelPrivate
       = vtkMRMLDisplayableHierarchyNode::SafeDownCast(node);
   if (displayableHierarchyNode)
     {
+//    qDebug() << "qMRMLSceneDisplayableModelPrivate::displayNode:"
+//             << "Return displayableHierarchyNode::DisplayNode "
+//             << "ID:" << (displayableHierarchyNode->GetDisplayNode() ? displayableHierarchyNode->GetDisplayNode()->GetID() : "null")
+//             << ", NAME:" << (displayableHierarchyNode->GetDisplayNode() ? displayableHierarchyNode->GetDisplayNode()->GetName() : "null");
     return displayableHierarchyNode->GetDisplayNode();
     }
   return 0;
@@ -143,8 +162,13 @@ bool qMRMLSceneDisplayableModel::canBeAChild(vtkMRMLNode* node)const
     {
     return false;
     }
-  return node->IsA("vtkMRMLDisplayableNode") ||
+  bool ret = node->IsA("vtkMRMLDisplayableNode") ||
          node->IsA("vtkMRMLDisplayableHierarchyNode");
+//  qDebug() << "qMRMLSceneDisplayableModelPrivate::canBeAChild:"
+//           << "ID:" << (node ? node->GetID() : "null")
+//           << ", NAME:" << (node ? node->GetName() : "null")
+//           << (ret ? "YES" : "NO");
+  return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -223,6 +247,11 @@ void qMRMLSceneDisplayableModel
 ::updateNodeFromItemData(vtkMRMLNode* node, QStandardItem* item)
 {
   Q_D(qMRMLSceneDisplayableModel);
+
+//  qDebug() << "qMRMLSceneDisplayableModelPrivate::updateNodeFromItemData:"
+//           << "ID:" << (node ? node->GetID() : "null")
+//           << ", NAME:" << (node ? node->GetName() : "null");
+
   if (item->column() == this->colorColumn())
     {
     QColor color = item->data(Qt::DecorationRole).value<QColor>();

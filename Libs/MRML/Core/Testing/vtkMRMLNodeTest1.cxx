@@ -17,6 +17,11 @@
 
 // VTK includes
 #include <vtkCollection.h>
+#include <vtkEventSpy.h>
+#include <vtkMRMLModelDisplayNode.h>
+#include <vtkMRMLModelHierarchyNode.h>
+#include <vtkMRMLModelNode.h>
+#include <vtkMRMLModelStorageNode.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 
@@ -95,6 +100,7 @@ bool TestSetNodeReferenceID();
 bool TestSetNodeReferenceIDToZeroOrEmptyString();
 bool TestNodeReferenceSerialization();
 bool TestClearScene();
+bool TestImportSceneReferenceValidDuringImport();
 
 
 //---------------------------------------------------------------------------
@@ -107,24 +113,25 @@ int vtkMRMLNodeTest1(int , char * [] )
   EXERCISE_BASIC_MRML_METHODS(vtkMRMLNodeTestHelper1, node1.GetPointer());
 
   bool res = true;
-  res = TestAttribute();
+  res = res && TestAttribute();
 
-  res = TestSetAndObserveNodeReferenceID() && res;
-  res = TestAddRefrencedNodeIDWithNoScene() && res;
-  res = TestAddDelayedReferenceNode() && res;
-  res = TestRemoveReferencedNodeID() && res;
-  res = TestRemoveReferencedNode() && res;
-  res = TestRemoveReferencingNode() && res;
-  res = TestNodeReferences() && res;
-  res = TestReferenceModifiedEvent() && res;
-  res = TestReferencesWithEvent() && res;
-  res = TestMultipleReferencesToSameNodeWithEvent() && res;
-  res = TestSingletonNodeReferencesUpdate() && res;
-  res = TestAddReferencedNodeIDEventsWithNoScene() && res;
-  res = TestSetNodeReferenceID() && res;
-  res = TestSetNodeReferenceIDToZeroOrEmptyString() && res;
-  res = TestNodeReferenceSerialization() && res;
-  res = TestClearScene() && res;
+  res = res && TestSetAndObserveNodeReferenceID();
+  res = res && TestAddRefrencedNodeIDWithNoScene();
+  res = res && TestAddDelayedReferenceNode();
+  res = res && TestRemoveReferencedNodeID();
+  res = res && TestRemoveReferencedNode();
+  res = res && TestRemoveReferencingNode();
+  res = res && TestNodeReferences();
+  res = res && TestReferenceModifiedEvent();
+  res = res && TestReferencesWithEvent();
+  res = res && TestMultipleReferencesToSameNodeWithEvent();
+  res = res && TestSingletonNodeReferencesUpdate();
+  res = res && TestAddReferencedNodeIDEventsWithNoScene();
+  res = res && TestSetNodeReferenceID();
+  res = res && TestSetNodeReferenceIDToZeroOrEmptyString();
+  res = res && TestNodeReferenceSerialization();
+  res = res && TestClearScene();
+  res = res && TestImportSceneReferenceValidDuringImport();
 
   return res ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -2482,6 +2489,312 @@ bool TestClearScene()
     {
     return false;
     }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool TestImportSceneReferenceValidDuringImport()
+{
+  // This enum described the properties that should be recorded using
+  // the NodeAddedEventPropertyRecorder.
+  //
+  // Recorded properties of the NodeAddedEvent callData of type vtkMRMLNode
+  // are:
+  //
+  //  * NodeID with possible values being:
+  //    - "<NodeID>"
+  //    - "(null-id)   Indicates that the NodeID associated with node
+  //                   added was Null.
+  //
+  //  * ReferenceNodeID_from_GetNodeReferenceID_refrole1 with possible
+  //    values being:
+  //    - "<ReferenceNodeID>" A non null string representing a NodeID
+  //    - "(null-id)          Indicates that the ReferenceNodeID associated
+  //                          with the reference was Null.
+  //                   .
+  //  * ReferenceNodeID_from_GetNodeReference_refrole1 with possible
+  //    values being:
+  //    - "<ReferenceNodeID>" A non null string representing a NodeID
+  //    - "(null-node)        Indicates that the ReferenceNode associated
+  //                          with the reference was Null.
+  //    - "(null-id)          Indicates that the NodeID associated with the
+  //                          ReferenceNode was Null.
+  enum
+  {
+    NodeID = vtkEventSpy::EventDefaultPropertyCount,
+    ReferenceNodeID_from_GetNodeReferenceID_refrole1,
+    ReferenceNodeID_from_GetNodeReference_refrole1,
+  };
+
+  #define NULL_ID "(null-id)"
+  #define NULL_NODE "(null-node)"
+
+  // NodeAddedEventPropertyRecorder used by vtkEventSpy.
+  struct NodeAddedEventPropertyRecorder : vtkEventSpy::EventPropertyRecorder
+  {
+    virtual void operator () (vtkEventSpyEntry* event)
+    {
+      vtkMRMLNode* node =
+          reinterpret_cast<vtkMRMLNode*>(vtkEventSpy::GetEventCallDataAsVoid(event));
+      event->InsertValue(
+            NodeID,
+            vtkVariant(node ? node->GetID() : NULL_ID));
+
+      {
+        std::string referencedNodeID = NULL_ID;
+        if (node->GetNodeReferenceID("refrole1"))
+          {
+          referencedNodeID = node->GetNodeReferenceID("refrole1");
+          }
+        event->InsertValue(
+              ReferenceNodeID_from_GetNodeReferenceID_refrole1,
+              vtkVariant(referencedNodeID));
+      }
+
+      {
+        std::string referencedNodeID = NULL_NODE;
+        vtkMRMLNode* referencedNode = node->GetNodeReference("refrole1");
+        if (referencedNode)
+          {
+          referencedNodeID = NULL_ID;
+          if (referencedNode->GetID())
+            {
+            referencedNodeID = referencedNode->GetID();
+            }
+          }
+        event->InsertValue(
+              ReferenceNodeID_from_GetNodeReference_refrole1,
+              vtkVariant(referencedNodeID));
+      }
+//      std::cerr << "NodeAddedEventPropertyRecorder: "
+//                << vtkEventSpy::ToString(event) << std::endl;
+    }
+  };
+
+  //
+  // Create scene and register node
+  //
+
+  std::string role1("refrole1");
+
+  vtkNew<vtkMRMLScene> scene;
+  scene->RegisterNodeClass(vtkSmartPointer<vtkMRMLNodeTestHelper1>::New());
+
+  //
+  // Configure vtkEventSpy
+  //
+
+  vtkNew<vtkEventSpy> spy;
+
+  // Associated our custom recorder with NodeAddedEvent
+  NodeAddedEventPropertyRecorder nodeAddedEventPropertyRecorder;
+  spy->SetEventPropertyRecorder(
+        vtkMRMLScene::NodeAddedEvent, &nodeAddedEventPropertyRecorder);
+
+  // Describe the callData type associated with NodeAddedEvent
+  spy->SetCallDataType(vtkMRMLScene::NodeAddedEvent, vtkEventSpy::VTKObject);
+
+  // Install the spy
+  scene->AddObserver(vtkMRMLScene::NodeAddedEvent, spy->GetSpy());
+
+  //
+  // Add nodes
+  //
+
+  //
+  //  Scene
+  //    |---- vtkMRMLNodeTestHelper11
+  //    |---- vtkMRMLNodeTestHelper12
+  //               |-- ref [refrole1] to vtkMRMLNodeTestHelper11
+
+  vtkNew<vtkMRMLNodeTestHelper1> referencingNode;
+  scene->AddNode(referencingNode.GetPointer()); // ID: vtkMRMLNodeTestHelper11
+
+  vtkNew<vtkMRMLNodeTestHelper1> referencedNode11;
+  scene->AddNode(referencedNode11.GetPointer()); // ID: vtkMRMLNodeTestHelper12
+  referencingNode->AddNodeReferenceID(role1.c_str(), referencedNode11->GetID());
+
+  //
+  // Write scene to XML string for importing later
+  //
+  scene->SetSaveToXMLString(1);
+  scene->Commit();
+  std::string sceneXMLString = scene->GetSceneXMLString();
+
+  //
+  // Add few more nodes
+  //
+
+  //
+  //  Scene
+  //    |---- vtkMRMLNodeTestHelper11
+  //    |---- vtkMRMLNodeTestHelper12
+  //               |-- ref [refrole1] to vtkMRMLNodeTestHelper11
+  //    |---- vtkMRMLNodeTestHelper13
+  //    |---- vtkMRMLNodeTestHelper14
+  //               |-- ref [refrole1] to vtkMRMLNodeTestHelper13
+
+  vtkNew<vtkMRMLNodeTestHelper1> referencingNode2;
+  scene->AddNode(referencingNode2.GetPointer()); // ID: vtkMRMLNodeTestHelper13
+
+  vtkNew<vtkMRMLNodeTestHelper1> referencedNode21;
+  scene->AddNode(referencedNode21.GetPointer()); // ID: vtkMRMLNodeTestHelper14
+  referencingNode2->AddNodeReferenceID(role1.c_str(), referencedNode21->GetID());
+
+  //
+  // Check recorded events before Import
+  //
+
+  if (!CheckInt(__LINE__, "TestImportScene-NodeAddedEvent-count",
+               spy->GetCountByEventId(vtkMRMLScene::NodeAddedEvent), 4))
+    {
+    return false;
+    }
+
+  {
+    vtkIdType index = 0;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent,
+          referencingNode.GetPointer());
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper11");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1, NULL_ID);
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1, NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
+
+  {
+    vtkIdType index = 1;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent,
+          referencedNode11.GetPointer());
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper12");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1, NULL_ID);
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1, NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
+
+  {
+    vtkIdType index = 2;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent,
+          referencingNode2.GetPointer());
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper13");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1, NULL_ID);
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1, NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
+
+  {
+    vtkIdType index = 3;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent,
+          referencedNode21.GetPointer());
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper14");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1, NULL_ID);
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1, NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
+
+  //
+  // Import saved scene into existing one
+  //
+
+  scene->SetLoadFromXMLString(1);
+  scene->SetSceneXMLString(sceneXMLString);
+  scene->Import();
+
+  //
+  // Check recorded events after Import
+  //
+
+  if (!CheckInt(__LINE__, "TestImportScene-NodeAddedEvent-count",
+               spy->GetCountByEventId(vtkMRMLScene::NodeAddedEvent), 6))
+    {
+    return false;
+    }
+
+  {
+    vtkIdType index = 0;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent);
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper15");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1,
+                          "vtkMRMLNodeTestHelper16");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1,
+                          NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
+
+  {
+    vtkIdType index = 1;
+
+    vtkVariantArray* current = spy->GetNthEvent(index);
+
+    vtkNew<vtkVariantArray> expected;
+    vtkEventSpy::UpdateEvent(
+          expected.GetPointer(), scene.GetPointer(),
+          vtkMRMLScene::NodeAddedEvent);
+    expected->InsertValue(NodeID, "vtkMRMLNodeTestHelper16");
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReferenceID_refrole1, NULL_ID);
+    expected->InsertValue(ReferenceNodeID_from_GetNodeReference_refrole1, NULL_NODE);
+
+    if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
+          current, expected.GetPointer()))
+      {
+      return false;
+      }
+  }
 
   return true;
 }

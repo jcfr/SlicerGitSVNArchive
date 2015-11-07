@@ -300,12 +300,12 @@ bool ImportModelHierarchyTwiceTest()
     {
     std::cerr << "Line " << __LINE__
               << " - Failed to import scene at line " << __LINE__ << " :"
-              << " model hierarchy #2: " << modelHierarchyNode2;
+              << "\n model hierarchy #2: " << modelHierarchyNode2;
     if (modelHierarchyNode2)
       {
-      std::cerr << " model hierarchy #2 parent: " << modelHierarchyNode2->GetParentNode();
+      std::cerr << "\n model hierarchy #2 parent: " << modelHierarchyNode2->GetParentNode();
       }
-    std::cerr << " hierarchy #2: " << hierarchyNode2 << std::endl;
+    std::cerr << "\n hierarchy #2: " << hierarchyNode2 << std::endl;
     return false;
     }
 

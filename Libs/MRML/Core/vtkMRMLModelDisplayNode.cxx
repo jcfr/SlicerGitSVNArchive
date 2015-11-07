@@ -60,6 +60,8 @@ void vtkMRMLModelDisplayNode::ProcessMRMLEvents(vtkObject *caller,
     }
 }
 
+#include <vtkMRMLDisplayableNode.h>
+
 //---------------------------------------------------------------------------
 #if (VTK_MAJOR_VERSION <= 5)
 void vtkMRMLModelDisplayNode::SetInputPolyData(vtkPolyData* polyData)
@@ -78,6 +80,18 @@ void vtkMRMLModelDisplayNode
   if (this->GetInputPolyDataConnection() == polyDataConnection)
     {
     return;
+    }
+  std::cout << "vtkMRMLModelDisplayNode::SetInputPolyDataConnection - "
+            << (this->GetID() ? this->GetID() : "null") << " / " << (this->GetName() ? this->GetName() : "null")
+            << " " << this << " - polyDataConnection " << polyDataConnection
+            << " displayable node: "
+            << (this->GetDisplayableNode() && this->GetDisplayableNode()->GetID() ? this->GetDisplayableNode()->GetID() : "null")
+            << " / "
+            << (this->GetDisplayableNode() && this->GetDisplayableNode()->GetName() ? this->GetDisplayableNode()->GetName() : "null")
+            << std::endl;
+  if (this->GetName() && strcmp(this->GetName(), "Yellow Display") == 0)
+    {
+    std::cout << "ADD BREAK POINT HERE" << std::endl;
     }
   this->SetInputToPolyDataPipeline(polyDataConnection);
   this->Modified();

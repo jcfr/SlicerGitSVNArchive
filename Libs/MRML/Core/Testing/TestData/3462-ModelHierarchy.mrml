@@ -1,0 +1,14 @@
+<MRML  version="Slicer4.4.0" >
+<ModelHierarchy
+  id="vtkMRMLModelHierarchyNode1"  name="Models"  hideFromEditors="false" allowMultipleChildren="true"  displayNodeID="vtkMRMLModelDisplayNode1"></ModelHierarchy>
+ <ModelDisplay
+  id="vtkMRMLModelDisplayNode1"  name="ModelDisplay"  hideFromEditors="true"></ModelDisplay>
+ <ModelStorage
+  id="vtkMRMLModelStorageNode1"  name="ModelStorage"  hideFromEditors="true" fileName="Model_1_tissue.vtk"></ModelStorage>
+ <ModelDisplay
+  id="vtkMRMLModelDisplayNode2"  name="ModelDisplay_1"  hideFromEditors="true"></ModelDisplay>
+ <Model
+  id="vtkMRMLModelNode1"  name="Model_1_tissue"  hideFromEditors="false" displayNodeRef="vtkMRMLModelDisplayNode2"  storageNodeRef="vtkMRMLModelStorageNode1"  references="display:vtkMRMLModelDisplayNode2;storage:vtkMRMLModelStorageNode1;"></Model>
+ <ModelHierarchy
+  id="vtkMRMLModelHierarchyNode2"  name="ModelHierarchy"  hideFromEditors="true" parentNodeRef="vtkMRMLModelHierarchyNode1"  associatedNodeRef="vtkMRMLModelNode1" allowMultipleChildren="true"  expanded="true" ></ModelHierarchy>
+</MRML>

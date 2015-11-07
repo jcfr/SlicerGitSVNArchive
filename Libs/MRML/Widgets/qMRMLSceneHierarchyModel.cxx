@@ -139,6 +139,13 @@ vtkMRMLNode* qMRMLSceneHierarchyModel::parentNode(vtkMRMLNode* node)const
     {
     hierarchyNode = vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(node->GetScene(), node->GetID());
     }
+//  if (hierarchyNode && hierarchyNode->GetParentNode())
+//    {
+//    qDebug() << "hierarchyNode.GetParentNode - ID"
+//             << hierarchyNode->GetParentNode()->GetID()
+//             << ", Name:"
+//             << hierarchyNode->GetParentNode()->GetName();
+//    }
   return hierarchyNode ? hierarchyNode->GetParentNode() : 0;
 }
 
@@ -161,6 +168,8 @@ int qMRMLSceneHierarchyModel::nodeIndex(vtkMRMLNode* node)const
   vtkMRMLHierarchyNode *assocHierarchyNode = vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(d->MRMLScene, node->GetID());
   if (assocHierarchyNode)
     {
+//    qDebug() << "qMRMLSceneHierarchyModel::nodeIndex: is there a hierarchy node associated with this node? ID"
+//             << assocHierarchyNode->GetID();
     int assocHierarchyNodeIndex = this->nodeIndex(assocHierarchyNode);
     return assocHierarchyNodeIndex + 1;
     }
@@ -183,6 +192,10 @@ int qMRMLSceneHierarchyModel::nodeIndex(vtkMRMLNode* node)const
         parentHierarchy = vtkMRMLHierarchyNode::GetAssociatedHierarchyNode(
           d->MRMLScene, parent->GetID());
         }
+//      qDebug() << "qMRMLSceneHierarchyModel::nodeIndex: parentHierarchy - ID"
+//               << (parentHierarchy ? parentHierarchy->GetID() : "null")
+//               << ", Name:"
+//               << (parentHierarchy ? parentHierarchy->GetName() : "null");
       const int childrenCount = parentHierarchy->GetNumberOfChildrenNodes();
       for ( int i = 0; i < childrenCount ; ++i)
         {
@@ -255,6 +268,8 @@ bool qMRMLSceneHierarchyModel::reparent(vtkMRMLNode* node, vtkMRMLNode* newParen
     {
     return false;
     }
+
+//  qDebug() << "qMRMLSceneHierarchyModel::nodeIndex: parentHierarchy reparent";
 
   vtkMRMLNode *mrmlNode = vtkMRMLNode::SafeDownCast(node);
   vtkMRMLHierarchyNode *hierarchyNode = vtkMRMLHierarchyNode::SafeDownCast(node);
