@@ -110,7 +110,7 @@ void vtkEventSpy::vtkInternal::UpdateEvent(vtkEventSpyEntry* event,
     }
     break;
   default:
-    callDataVariant = vtkVariant();
+    callDataVariant = vtkVariant("(unknown)");
     }
   event->InsertValue(EventCallData, callDataVariant);
 }
@@ -386,10 +386,21 @@ void vtkEventSpy::UpdateEvent(vtkEventSpyEntry* event,
 //----------------------------------------------------------------------------
 bool vtkEventSpy::AreEventEqual(vtkEventSpyEntry* event1,
                                 vtkEventSpyEntry* event2,
-                                bool verbose,
-                                const std::string& nameEvent1,
-                                const std::string& nameEvent2)
+                                int options)
 {
+  return AreEventEqual(event1, event2, "1", "2", options);
+}
+
+//----------------------------------------------------------------------------
+bool vtkEventSpy::AreEventEqual(vtkEventSpyEntry* event1,
+                                vtkEventSpyEntry* event2,
+                                const std::string& descriptionEvent1,
+                                const std::string& descriptionEvent2,
+                                int options)
+{
+  bool verbose = !(options & Quiet);
+  bool ignoreCustomProperties = options & IgnoreCustomProperties;
+
   // NULL values are always equal to one another and
   // unequal to anything else.
   if (!(event1 && event2))
@@ -397,18 +408,48 @@ bool vtkEventSpy::AreEventEqual(vtkEventSpyEntry* event1,
     return event1 == event2;
     }
 
-  if (event1->GetNumberOfValues() != event2->GetNumberOfValues())
+  if (ignoreCustomProperties)
     {
-    if (verbose)
+    // events are expected to have at least three values: EventCaller, EventId
+    // and EventCallData.
+    if (event1->GetNumberOfValues() < 3)
       {
-      vtkGenericWarningMacro(
-            << "Arrays have different size"
-            << "\n\tsize " << nameEvent1 << ": " << event1->GetNumberOfValues()
-            << "\n\tsize " << nameEvent2 << ": " << event2->GetNumberOfValues()
-            << "\n\tcontent " << nameEvent1 << ": " << Self::ToString(event1)
-            << "\n\tcontent " << nameEvent2 << ": " << Self::ToString(event2));
+      if (verbose)
+        {
+        vtkGenericWarningMacro(
+              << "Event " << descriptionEvent1 << " has size < 3"
+              << "\n\tsize " << descriptionEvent1 << ": " << event1->GetNumberOfValues()
+              << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1));
+        }
+      return false;
       }
-    return false;
+    if (event2->GetNumberOfValues() < 3)
+      {
+      if (verbose)
+        {
+        vtkGenericWarningMacro(
+              << "Event " << descriptionEvent2 << " has size < 3"
+              << "\n\tsize " << descriptionEvent2 << ": " << event2->GetNumberOfValues()
+              << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
+        }
+      return false;
+      }
+    }
+  else
+    {
+    if (event1->GetNumberOfValues() != event2->GetNumberOfValues())
+      {
+      if (verbose)
+        {
+        vtkGenericWarningMacro(
+              << "Arrays have different size"
+              << "\n\tsize " << descriptionEvent1 << ": " << event1->GetNumberOfValues()
+              << "\n\tsize " << descriptionEvent2 << ": " << event2->GetNumberOfValues()
+              << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1)
+              << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
+        }
+      return false;
+      }
     }
 
   unsigned long eventId1 = event1->GetValue(vtkEventSpy::EventId).ToInt();
@@ -419,10 +460,10 @@ bool vtkEventSpy::AreEventEqual(vtkEventSpyEntry* event1,
       {
       vtkGenericWarningMacro(
             << "Arrays have different eventId"
-            << "\n\teventId " << nameEvent1 << ": " << eventId1
-            << "\n\teventId " << nameEvent2 << ": " << eventId2
-            << "\n\tcontent " << nameEvent1 << ": " << Self::ToString(event1)
-            << "\n\tcontent " << nameEvent2 << ": " << Self::ToString(event2));
+            << "\n\teventId " << descriptionEvent1 << ": " << eventId1
+            << "\n\teventId " << descriptionEvent2 << ": " << eventId2
+            << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1)
+            << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
       }
     return false;
     }
@@ -435,51 +476,55 @@ bool vtkEventSpy::AreEventEqual(vtkEventSpyEntry* event1,
       {
       vtkGenericWarningMacro(
             << "Arrays have different caller"
-            << "\n\tcaller " << nameEvent1 << ": " << caller1
-            << "\n\tcaller " << nameEvent2 << ": " << caller2
-            << "\n\tcontent " << nameEvent1 << ": " << Self::ToString(event1)
-            << "\n\tcontent " << nameEvent2 << ": " << Self::ToString(event2));
+            << "\n\tcaller " << descriptionEvent1 << ": " << caller1
+            << "\n\tcaller " << descriptionEvent2 << ": " << caller2
+            << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1)
+            << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
       }
     return false;
     }
 
   vtkVariant callData1 = event1->GetValue(vtkEventSpy::EventCallData);
   vtkVariant callData2 = event2->GetValue(vtkEventSpy::EventCallData);
-  if ((callData2 != "(ignored)") && (callData1 != callData2))
+  if ((callData2 != "(unknown)") && (callData1 != callData2))
     {
     if (verbose)
       {
       vtkGenericWarningMacro(
             << "Arrays have different callData"
-            << "\n\tcallData " << nameEvent1 << ": " << callData1
-            << "\n\tcallData " << nameEvent2 << ": " << callData2
-            << "\n\tcontent " << nameEvent1 << ": " << Self::ToString(event1)
-            << "\n\tcontent " << nameEvent2 << ": " << Self::ToString(event2));
+            << "\n\tcallData " << descriptionEvent1 << ": " << callData1
+            << "\n\tcallData " << descriptionEvent2 << ": " << callData2
+            << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1)
+            << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
       }
     return false;
     }
 
-  for(vtkIdType index = EventDefaultPropertyCount;
-      index < event1->GetNumberOfValues();
-      ++index)
+  if (!ignoreCustomProperties)
     {
-    vtkVariant value1 = event1->GetValue(index);
-    vtkVariant value2 = event2->GetValue(index);
-    if (value1 != value2)
+
+    for(vtkIdType index = EventDefaultPropertyCount;
+        index < event1->GetNumberOfValues();
+        ++index)
       {
-      if (verbose)
+      vtkVariant value1 = event1->GetValue(index);
+      vtkVariant value2 = event2->GetValue(index);
+      if (value1 != value2)
         {
-        vtkGenericWarningMacro(
-              << "Arrays have different variants at index "
-              << index
-              << "\n\tvariants[" << index << "] " << nameEvent1 << ": "
-                << value1 << " " << value1.GetTypeAsString()
-              << "\n\tvariants[" << index << "] " << nameEvent2 << ": "
-                << value2 << " " << value2.GetTypeAsString()
-              << "\n\tcontent " << nameEvent1 << ": " << Self::ToString(event1)
-              << "\n\tcontent " << nameEvent2 << ": " << Self::ToString(event2));
+        if (verbose)
+          {
+          vtkGenericWarningMacro(
+                << "Arrays have different variants at index "
+                << index
+                << "\n\tvariants[" << index << "] " << descriptionEvent1 << ": "
+                  << value1 << " " << value1.GetTypeAsString()
+                << "\n\tvariants[" << index << "] " << descriptionEvent2 << ": "
+                  << value2 << " " << value2.GetTypeAsString()
+                << "\n\tcontent " << descriptionEvent1 << ": " << Self::ToString(event1)
+                << "\n\tcontent " << descriptionEvent2 << ": " << Self::ToString(event2));
+          }
+        return false;
         }
-      return false;
       }
     }
 

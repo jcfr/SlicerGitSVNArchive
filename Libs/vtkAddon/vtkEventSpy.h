@@ -176,14 +176,47 @@ public:
                           unsigned long eventId,
                           const vtkObjectBase* callData);
 
-  /// Return \a true if \a eventId, \a caller, \a callData and \a callDataType match.
+  enum AreEventEqualOptions
+  {
+    Default = 0x0,
+    Quiet = 0x1,
+    IgnoreCustomProperties = 0x2
+  };
+
+  /// \brief Return \a true if \a eventId, \a caller, \a callData and
+  /// \a callDataType match.
   ///
-  /// \note Size of the event arrays is also expected to match.
+  /// Options:
+  ///
+  /// * IgnoreCustomProperties: By default, the function will check if
+  /// \a all custom properties match. Setting this option changes this.
+  /// In that case, events are only expected to have at least 3 values
+  /// (EventCaller, EventId, and EventCallData).
+  ///
   static bool AreEventEqual(vtkEventSpyEntry* event1,
                             vtkEventSpyEntry* event2,
-                            bool verbose = false,
-                            const std::string& nameEvent1 = "1",
-                            const std::string& nameEvent2 = "2");
+                            int options = Quiet);
+
+  /// \copybrief AreEventEqual(vtkEventSpyEntry*, vtkEventSpyEntry*, int options)
+  ///
+  /// Specifying \a descriptionEvent1 and \a descriptionEvent2 will allow to
+  /// customize the name of event displayed in error message.
+  ///
+  /// Options:
+  ///
+  /// * Quiet: By default, the function will display information. Setting this
+  /// option changes this.
+  ///
+  /// * IgnoreCustomProperties: By default, the function will check if
+  /// \a all custom properties match. Setting this option changes this.
+  /// In that case, events are only expected to have at least 3 values
+  /// (EventCaller, EventId, and EventCallData).
+  ///
+  static bool AreEventEqual(vtkEventSpyEntry* event1,
+                            vtkEventSpyEntry* event2,
+                            const std::string& descriptionEvent1,
+                            const std::string& descriptionEvent2,
+                            int options = Default);
 
   static std::string ToString(vtkEventSpyEntry* event);
 

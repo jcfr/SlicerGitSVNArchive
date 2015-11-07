@@ -86,7 +86,7 @@ bool Check(int line, const std::string& description,
 {
   if(current != expected)
     {
-    std::cerr << "Line " << line << " - " << description << " : CheckPOD failed"
+    std::cerr << "Line " << line << " - " << description << " : Check failed"
               << "\n\tcurrent:" << current
               << "\n\texpected:" << expected
               << std::endl;
@@ -100,7 +100,7 @@ bool CheckEvent(int line, const std::string& description,
                 vtkEventSpyEntry* current, vtkEventSpyEntry* expected)
 {
   bool equal = vtkEventSpy::AreEventEqual(
-        current, expected, /* verbose= */ true, "current", "expected");
+        current, expected, "current", "expected");
   if (!equal)
     {
     std::cerr << "Line " << line
@@ -373,10 +373,10 @@ bool TestUpdateEventWithEmptyArray()
     {
     return false;
     }
-  if (!Check<bool>(
-        __LINE__, "vtkEventSpyEntry-EventCallData-IsValid",
-        event->GetValue(vtkEventSpy::EventCallData).IsValid(),
-        false))
+  if (!Check<std::string>(
+        __LINE__, "vtkEventSpyEntry-EventCallData-ToString",
+        event->GetValue(vtkEventSpy::EventCallData).ToString(),
+        "(unknown)"))
     {
     return false;
     }
@@ -428,7 +428,7 @@ bool TestUpdateEventWithEmptyArray()
 bool TestUpdateEventWithInitializedArray()
 {
   // Initialize a vtkEventSpyEntry with 10 integers.
-  // Only the first two values are expected to be updated.
+  // Only the first three values are expected to be updated.
 
   vtkNew<vtkObject> foo;
   vtkNew<vtkEventSpyEntry> event;
@@ -470,10 +470,10 @@ bool TestUpdateEventWithInitializedArray()
     return false;
     }
 
-  if (!Check<bool>(
-        __LINE__, "vtkEventSpyEntry-EventCallData-IsValid",
-        event->GetValue(vtkEventSpy::EventCallData).IsValid(),
-        false))
+  if (!Check<std::string>(
+        __LINE__, "vtkEventSpyEntry-EventCallData-ToString",
+        event->GetValue(vtkEventSpy::EventCallData).ToString(),
+        "(unknown)"))
     {
     return false;
     }
@@ -711,7 +711,14 @@ bool TestEventRecordingWithCallData()
     vtkEventSpy::UpdateEvent(
           expectedEvent.GetPointer(), foo.GetPointer(),
           OtherEvent);
-    expectedEvent->InsertValue(vtkEventSpy::EventCallData, vtkVariant());
+
+    if (!Check<vtkVariant>(
+          __LINE__, "event-" + ToString<vtkIdType>(index),
+          expectedEvent->GetValue(vtkEventSpy::EventCallData).ToString(),
+          vtkVariant("(unknown)")))
+      {
+      return false;
+      }
 
     if (!CheckEvent(__LINE__, "event-" + ToString<vtkIdType>(index),
                     spy->GetNthEvent(index), expectedEvent.GetPointer()))
