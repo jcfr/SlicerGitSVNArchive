@@ -651,6 +651,36 @@ protected:
   int GetUniqueIDIndex(const std::string& baseID);
   std::string BuildID(const std::string& baseID, int idIndex)const;
 
+  /// \brief Extract \a baseID from \a nodeID.
+  ///
+  /// This function allows to retrieve the \a baseID
+  /// from \a nodeID obtained using
+  /// GenerateUniqueID(const std::string& baseID).
+  ///
+  /// Example:
+  ///
+  /// \code{.cpp}
+  /// std::string nodeID("vtkMRMLTransformNode42");
+  /// std::string baseID = this->ExtractBaseID(nodeID);
+  /// \\ baseID == "vtkMRMLTransformNode"
+  /// \endcode
+  ///
+  /// Since the function considers the class names registered
+  /// using RegisterNodeClass(), it will return the expected
+  /// \a baseID including digit if it applies.
+  ///
+  /// Example:
+  ///
+  /// \code{.cpp}
+  /// this->RegisterNodeClass(vtkSmartPointer<vtkMRMLNodeVersion123>::New());
+  ///
+  /// std::string nodeID("vtkMRMLNodeVersion12342");
+  /// std::string baseID = this->ExtractBaseID(nodeID);
+  /// \\ baseID == "vtkMRMLNodeVersion123"
+  /// \endcodes
+  ///
+  std::string ExtractBaseID(const std::string& nodeID);
+
   /// Return a unique name for a MRML node. It uses the node tag as the base.
   std::string GenerateUniqueName(vtkMRMLNode* node);
 
