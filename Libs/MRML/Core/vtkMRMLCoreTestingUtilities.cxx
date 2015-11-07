@@ -23,6 +23,9 @@
 #include "vtkMRMLNode.h"
 #include "vtkMRMLScene.h"
 
+// VTK includes
+#include <vtkEventSpy.h>
+
 namespace vtkMRMLCoreTestingUtilities
 {
 
@@ -113,6 +116,20 @@ bool CheckString(int line, const std::string& description,
     return false;
     }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool CheckEvent(int line, const std::string& description,
+                vtkEventSpyEntry* current, vtkEventSpyEntry* expected)
+{
+  bool equal = vtkEventSpy::AreEventEqual(
+        current, expected, "current", "expected");
+  if (!equal)
+    {
+    std::cerr << "Line " << line
+              << " - Problem with " << description << std::endl;
+    }
+  return equal;
 }
 
 //----------------------------------------------------------------------------
