@@ -26,6 +26,10 @@
 class vtkMRMLNode;
 class vtkMRMLScene;
 
+// VTK includes
+class vtkVariantArray;
+typedef vtkVariantArray vtkEventSpyEntry;
+
 // STD includes
 #include <sstream>
 
@@ -64,6 +68,10 @@ bool CheckPointer(int line, const std::string& description,
 VTK_MRML_EXPORT
 bool CheckString(int line, const std::string& description,
                  const char* current, const char* expected);
+
+VTK_MRML_EXPORT
+bool CheckEvent(int line, const std::string& description,
+                vtkEventSpyEntry* current, vtkEventSpyEntry* expected);
 
 VTK_MRML_EXPORT
 bool CheckNodeInSceneByID(int line, vtkMRMLScene* scene,
