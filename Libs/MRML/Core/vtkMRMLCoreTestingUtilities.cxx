@@ -38,7 +38,7 @@ bool Check(int line, const std::string& description,
   std::string testName = _testName.empty() ? "Check" : _testName;
   if(current != expected)
     {
-    std::cerr << "Line " << line << " - " << description
+    std::cerr << "\nLine " << line << " - " << description
               << " : " << testName << " failed"
               << "\n\tcurrent :" << current
               << "\n\texpected:" << expected
@@ -61,7 +61,7 @@ bool CheckNotNull(int line, const std::string& description,
 {
   if(!pointer)
     {
-    std::cerr << "Line " << line << " - " << description
+    std::cerr << "\nLine " << line << " - " << description
               << " : CheckNotNull failed"
               << "\n\tpointer:" << pointer
               << std::endl;
@@ -75,7 +75,7 @@ bool CheckNull(int line, const std::string& description, const void* pointer)
 {
   if(pointer)
     {
-    std::cerr << "Line " << line << " - " << description
+    std::cerr << "\nLine " << line << " - " << description
               << " : CheckNull failed"
               << "\n\tpointer:" << pointer
               << std::endl;
@@ -108,7 +108,7 @@ bool CheckString(int line, const std::string& description,
     }
   if(different)
     {
-    std::cerr << "Line " << line << " - " << description
+    std::cerr << "\nLine " << line << " - " << description
               << " : " << testName << "  failed"
               << "\n\tcurrent :" << (current ? current : "<null>")
               << "\n\texpected:" << (expected ? expected : "<null>")
@@ -126,7 +126,7 @@ bool CheckEvent(int line, const std::string& description,
         current, expected, "current", "expected");
   if (!equal)
     {
-    std::cerr << "Line " << line
+    std::cerr << "\nLine " << line
               << " - Problem with " << description << std::endl;
     }
   return equal;
@@ -140,32 +140,32 @@ bool CheckNodeInSceneByID(int line, vtkMRMLScene* scene,
 
   if (!scene)
     {
-    std::cerr << "Line " << line << " - scene is NULL"
+    std::cerr << "\nLine " << line << " - scene is NULL"
               << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (!nodeID)
     {
-    std::cerr << "Line " << line << " - nodeID is NULL"
+    std::cerr << "\nLine " << line << " - nodeID is NULL"
               << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (nodeID[0] == '\0')
     {
-    std::cerr << "Line " << line << " - nodeID is an empty string"
+    std::cerr << "\nLine " << line << " - nodeID is an empty string"
               << " : " << testName << " failed" << std::endl;
     return false;
     }
   if (!expected)
     {
-    std::cerr << "Line " << line << " - expected node is NULL"
+    std::cerr << "\nLine " << line << " - expected node is NULL"
               << " : " << testName << " failed" << std::endl;
     return false;
     }
   vtkMRMLNode* current = scene->GetNodeByID(nodeID);
   if (current != expected)
     {
-    std::cerr << "Line " << line << " - GetNodeByID(\"" << nodeID << "\")"
+    std::cerr << "\nLine " << line << " - GetNodeByID(\"" << nodeID << "\")"
               << " : " << testName << " failed"
               << "\n\tcurrent :" << current
               << "\n\texpected:" << expected
@@ -182,7 +182,7 @@ bool CheckNodeIdAndName(int line, vtkMRMLNode* node,
   std::string testName = "CheckNodeIdAndName";
   if (!node)
     {
-    std::cerr << "Line " << line << " - node is NULL"
+    std::cerr << "\nLine " << line << " - node is NULL"
               << " : " << testName << " failed" << std::endl;
     return false;
     }
