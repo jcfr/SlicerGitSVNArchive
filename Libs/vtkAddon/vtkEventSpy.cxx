@@ -101,6 +101,10 @@ void vtkEventSpy::vtkInternal::UpdateEvent(vtkEventSpyEntry* event,
     }
   event->InsertValue(EventCaller, vtkVariant(caller));
   event->InsertValue(EventId, vtkVariant(eventId));
+  if (!callData)
+    {
+    callDataType = Unknown;
+    }
   vtkVariant callDataVariant;
   switch(callDataType)
     {

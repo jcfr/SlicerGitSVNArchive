@@ -59,8 +59,8 @@ int vtkEventSpyTest1(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
 }
 
 //----------------------------------------------------------------------------
-template<typename TYPE>
-std::string ToString(TYPE value)
+template<typename Type>
+std::string ToString(Type value)
 {
   std::ostringstream stream;
   stream << value;
@@ -72,7 +72,7 @@ bool CheckNotNull(int line, const std::string& description, void* pointer)
 {
   if (!pointer)
     {
-    std::cerr << "Line " << line << " - " << description
+    std::cerr << "\nLine " << line << " - " << description
               << " : CheckNotNull failed" << std::endl;
     return false;
     }
@@ -80,13 +80,13 @@ bool CheckNotNull(int line, const std::string& description, void* pointer)
 }
 
 //----------------------------------------------------------------------------
-template<typename TYPE>
+template<typename Type>
 bool Check(int line, const std::string& description,
-              TYPE current, TYPE expected)
+              Type current, Type expected)
 {
   if(current != expected)
     {
-    std::cerr << "Line " << line << " - " << description << " : Check failed"
+    std::cerr << "\nLine " << line << " - " << description << " : Check failed"
               << "\n\tcurrent:" << current
               << "\n\texpected:" << expected
               << std::endl;
@@ -103,7 +103,7 @@ bool CheckEvent(int line, const std::string& description,
         current, expected, "current", "expected");
   if (!equal)
     {
-    std::cerr << "Line " << line
+    std::cerr << "\nLine " << line
               << " - Problem with " << description << std::endl;
     }
   return equal;
@@ -562,6 +562,11 @@ bool TestEventRecording()
 //----------------------------------------------------------------------------
 bool TestEventRecordingWithCallData()
 {
+
+  // CallData of type VTKObject is tested in:
+  //  * TestEventPropertyRecorderUsingDerivation
+  //  * TestEventPropertyRecorderUsingFunctor
+
   enum
   {
     IntEvent = vtkCommand::UserEvent,
