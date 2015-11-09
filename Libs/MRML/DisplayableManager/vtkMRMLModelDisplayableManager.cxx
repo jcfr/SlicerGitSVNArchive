@@ -1013,6 +1013,8 @@ void vtkMRMLModelDisplayableManager
       if (!prop)
         {
         prop = vtkActor::New();
+//        std::cerr << "DM:" << this << ", Associating actor:" << prop << " with "
+//                  << ", ID:" << displayNode->GetID() << ", node:" << displayNode << std::endl;
         }
       }
     else
@@ -1256,9 +1258,12 @@ void vtkMRMLModelDisplayableManager::UpdateModelHierarchyVisibility(vtkMRMLModel
   vtkMRMLDisplayNode* dnode = mhnode->GetDisplayNode();
   if (dnode)
     {
+//    std::cerr << "DM:UpdateModelHierarchyVisibility "
+//              << mhnode->GetID() << " / " << mhnode->GetName() << std::endl;
     std::map<std::string, vtkProp3D *>::iterator iter = this->Internal->DisplayedActors.find(dnode->GetID());
     if (iter != this->Internal->DisplayedActors.end())
       {
+//      std::cerr << "DM:UpdateModelHierarchyDisplay Found DisplayedVisibility set to:"<< visibility << std::endl;
       vtkProp3D *actor = iter->second;
       actor->SetVisibility(visibility);
       this->Internal->DisplayedVisibility[dnode->GetID()] = visibility;
@@ -1276,6 +1281,8 @@ void vtkMRMLModelDisplayableManager::UpdateModelHierarchyDisplay(vtkMRMLDisplaya
 
     if (mhnode)
       {
+//      std::cerr << "DM:UpdateModelHierarchyDisplay "
+//                << mhnode->GetID() << " / " << mhnode->GetName() << std::endl;
       // turn off visibility of this node
       int ndnodes = model->GetNumberOfDisplayNodes();
       for (int i=0; i<ndnodes; i++)
@@ -1283,9 +1290,12 @@ void vtkMRMLModelDisplayableManager::UpdateModelHierarchyDisplay(vtkMRMLDisplaya
         vtkMRMLDisplayNode *dnode = model->GetNthDisplayNode(i);
         if (dnode)
           {
+//          std::cerr << "DM:UpdateModelHierarchyDisplay DNode "
+//                    << dnode->GetID() << " / " << dnode->GetName() << std::endl;
           std::map<std::string, vtkProp3D *>::iterator iter = this->Internal->DisplayedActors.find(dnode->GetID());
           if (iter != this->Internal->DisplayedActors.end())
             {
+//            std::cerr << "DM:UpdateModelHierarchyDisplay Found displayed actor - HIDE" << std::endl;
             vtkProp3D *actor = iter->second;
             actor->SetVisibility(0);
             this->Internal->DisplayedVisibility[dnode->GetID()] = 0;

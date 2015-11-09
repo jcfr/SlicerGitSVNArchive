@@ -132,7 +132,7 @@ int vtkMRMLSceneImportIDConflictTest(int vtkNotUsed(argc), char * vtkNotUsed(arg
   //               |-- ref [displayNodeRef] to vtkMRMLModelDisplayNode3
 
   //
-  // Check scene contains original node
+  // Check scene contains original nodes
   //
 
   if (!CheckInt(

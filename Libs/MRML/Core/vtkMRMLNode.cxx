@@ -740,6 +740,10 @@ void vtkMRMLNode::UpdateReferenceID(const char *oldID, const char *newID)
         }
       if (std::string(oldID) == std::string(reference->GetReferencedNodeID()))
         {
+        std::cerr << "      UpdateReferenceID: "
+                  << "Calling SetAndObserveNthNodeReferenceID to update "
+                  << "reference #" << i << " / role [" << reference->GetReferenceRole() << "]"
+                  << " from oldID [" << oldID << "] to newID [" << newID << "]" << std::endl;
         this->SetAndObserveNthNodeReferenceID(reference->GetReferenceRole(), i, newID, reference->GetEvents());
         }
       }

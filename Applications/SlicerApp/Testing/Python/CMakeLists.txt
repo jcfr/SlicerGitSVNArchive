@@ -273,6 +273,7 @@ if(Slicer_USE_QtTesting AND Slicer_USE_PYTHONQT)
     FiducialLayoutSwitchBug1914.py
     SubjectHierarchyGenericSelfTest.py
     SubjectHierarchyCorePluginsSelfTest.py
+    ModelMakerBreaksSliceViewsIssue3462.py
     )
 
   set(KIT_PYTHON_RESOURCES

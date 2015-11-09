@@ -105,10 +105,12 @@ void vtkMRMLHierarchyNode::UpdateReferenceID(const char *oldID, const char *newI
   Superclass::UpdateReferenceID(oldID, newID);
   if (this->ParentNodeIDReference && !strcmp(oldID, this->ParentNodeIDReference))
     {
+    std::cerr << "        vtkMRMLDisplayableHierarchyNode: UpdateReferenceID / ParentNodeID [oldID:" << oldID << "] ->  [newID:" << newID << "]" << std::endl;
     this->SetParentNodeID(newID);
     }
   else if (this->AssociatedNodeIDReference && !strcmp(oldID, this->AssociatedNodeIDReference))
     {
+    std::cerr << "        vtkMRMLDisplayableHierarchyNode: UpdateReferenceID / AssociatedNodeID [oldID:" << oldID << "] ->  [newID:" << newID << "]" << std::endl;
     this->SetAssociatedNodeID(newID);
     }
 }
@@ -128,6 +130,7 @@ void vtkMRMLHierarchyNode::ReadXMLAttributes(const char** atts)
     attValue = *(atts++);
     if (!strcmp(attName, "parentNodeRef"))
       {
+      std::cerr << "vtkMRMLHierarchyNode: Reading " << attName << " [" << attValue << "]" << std::endl;
       // dont reset SortingValue
       double sortingValue = this->GetSortingValue();
       this->SetParentNodeID(attValue);
@@ -136,6 +139,7 @@ void vtkMRMLHierarchyNode::ReadXMLAttributes(const char** atts)
       }
     if (!strcmp(attName, "associatedNodeRef"))
       {
+      std::cerr << "vtkMRMLHierarchyNode: Reading " << attName << " [" << attValue << "]" << std::endl;
       this->SetAssociatedNodeID(attValue);
       }
     else if (!strcmp(attName, "sortingValue"))
@@ -197,6 +201,7 @@ vtkMRMLHierarchyNode* vtkMRMLHierarchyNode::GetParentNode()
   vtkMRMLHierarchyNode* node = NULL;
   if (this->GetScene() && this->ParentNodeIDReference != NULL )
     {
+    std::cerr << "    vtkMRMLHierarchyNode::GetParentNode() - ParentNodeIDReference:" << this->ParentNodeIDReference << std::endl;
     vtkMRMLNode* snode = this->GetScene()->GetNodeByID(this->ParentNodeIDReference);
     node = vtkMRMLHierarchyNode::SafeDownCast(snode);
     }

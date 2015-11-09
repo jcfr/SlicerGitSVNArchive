@@ -660,6 +660,9 @@ vtkMRMLDisplayableNode* vtkMRMLDisplayNode::GetDisplayableNode()
   return NULL;
 }
 
+#include <vtkMRMLModelDisplayNode.h>
+#include <vtkMRMLDisplayableNode.h>
+
 //----------------------------------------------------------------------------
 #if (VTK_MAJOR_VERSION <= 5)
 void vtkMRMLDisplayNode::SetAndObserveTextureImageData(vtkImageData *ImageData)
@@ -685,6 +688,13 @@ void vtkMRMLDisplayNode
     {
     return;
     }
+
+   if (vtkMRMLModelDisplayNode::SafeDownCast(this))
+     {
+     std::cerr << "vtkMRMLModelDisplayNode:SetTextureImageDataConnection:"
+               << (this->GetID() ? this->GetID() : "null") << " / " << (this->GetName() ? this->GetName() : "null")
+               <<  " " << this << newTextureImageDataConnection << std::endl;
+     }
 
   vtkAlgorithm* oldTextureImageDataAlgorithm = this->TextureImageDataConnection ?
     this->TextureImageDataConnection->GetProducer() : 0;

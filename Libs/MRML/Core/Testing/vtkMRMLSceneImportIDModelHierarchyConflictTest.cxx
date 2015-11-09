@@ -377,7 +377,7 @@ bool ImportModelHierarchyTwiceTest()
   scene->SetSaveToXMLString(1);
   scene->Commit();
   std::string xmlScene = scene->GetSceneXMLString();
-  std::cout << xmlScene << std::endl;
+//  std::cerr << xmlScene << std::endl;
 
   // Load same scene into scene
   scene->SetSceneXMLString(xmlScene);

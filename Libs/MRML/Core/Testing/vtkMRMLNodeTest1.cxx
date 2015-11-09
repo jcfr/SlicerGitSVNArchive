@@ -17,6 +17,11 @@
 
 // VTK includes
 #include <vtkCollection.h>
+#include <vtkEventSpy.h>
+#include <vtkMRMLModelDisplayNode.h>
+#include <vtkMRMLModelHierarchyNode.h>
+#include <vtkMRMLModelNode.h>
+#include <vtkMRMLModelStorageNode.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 
@@ -47,7 +52,6 @@ public:
     {
     return "vtkMRMLNodeTestHelper1";
     }
-
   int GetNumberOfNodeReferenceObjects(const char* refrole)
     {
     if (!refrole)
@@ -63,20 +67,91 @@ public:
     this->LastMRMLEventId = event;
     }
 
+  void SetOtherNodeID(const char* id);
+  vtkGetStringMacro(OtherNodeID);
+
+  virtual void SetSceneReferences();
+  virtual void UpdateReferenceID(const char *oldID, const char *newID);
+  virtual void WriteXML(ostream& of, int nIndent);
+  virtual void ReadXMLAttributes(const char** atts);
+
+  char *OtherNodeID;
+
   vtkObject* LastMRMLEventCaller;
   unsigned long LastMRMLEventId;
 
 private:
   vtkMRMLNodeTestHelper1()
     {
+    this->OtherNodeID = NULL;
     this->LastMRMLEventCaller = NULL;
     this->LastMRMLEventId = 0;
     }
+  ~vtkMRMLNodeTestHelper1()
+    {
+    this->SetOtherNodeID(NULL);
+    }
 
 };
+vtkCxxSetReferenceStringMacro(vtkMRMLNodeTestHelper1, OtherNodeID);
 vtkStandardNewMacro(vtkMRMLNodeTestHelper1);
 
 //---------------------------------------------------------------------------
+class vtkMRMLStorageNodeTestHelper : public vtkMRMLStorageNode
+{
+public:
+  static vtkMRMLStorageNodeTestHelper *New();
+
+  vtkTypeMacro(vtkMRMLStorageNodeTestHelper,vtkMRMLStorageNode);
+
+  virtual vtkMRMLNode* CreateNodeInstance()
+    {
+    return vtkMRMLStorageNodeTestHelper::New();
+    }
+  virtual const char* GetNodeTagName()
+    {
+    return "vtkMRMLStorageNodeTestHelper";
+    }
+
+  void SetOtherNodeID(const char* id);
+  vtkGetStringMacro(OtherNodeID);
+
+  virtual void SetSceneReferences();
+  virtual void UpdateReferenceID(const char *oldID, const char *newID);
+  virtual void WriteXML(ostream& of, int nIndent);
+  virtual void ReadXMLAttributes(const char** atts);
+
+  virtual const char* GetDefaultWriteFileExtension()
+    {
+    return "txt";
+    }
+  virtual bool CanReadInReferenceNode(vtkMRMLNode* refNode)
+    {
+    return refNode->IsA("vtkMRMLNodeTestHelper1");
+    }
+  virtual bool CanWriteFromReferenceNode(vtkMRMLNode* refNode)
+    {
+    return refNode->IsA("vtkMRMLNodeTestHelper1");
+    }
+
+  char *OtherNodeID;
+
+private:
+  vtkMRMLStorageNodeTestHelper()
+    {
+    this->OtherNodeID = NULL;
+    }
+  ~vtkMRMLStorageNodeTestHelper()
+    {
+    this->SetOtherNodeID(NULL);
+    }
+
+};
+vtkCxxSetReferenceStringMacro(vtkMRMLStorageNodeTestHelper, OtherNodeID);
+vtkStandardNewMacro(vtkMRMLStorageNodeTestHelper);
+
+//---------------------------------------------------------------------------
+int TestBasicMethods();
 bool TestAttribute();
 
 bool TestSetAndObserveNodeReferenceID();
@@ -95,38 +170,128 @@ bool TestSetNodeReferenceID();
 bool TestSetNodeReferenceIDToZeroOrEmptyString();
 bool TestNodeReferenceSerialization();
 bool TestClearScene();
+bool TestImportSceneReferenceValidDuringImport();
 
 
 //---------------------------------------------------------------------------
 int vtkMRMLNodeTest1(int , char * [] )
 {
-  vtkNew<vtkMRMLNodeTestHelper1> node1;
-
-  EXERCISE_BASIC_OBJECT_METHODS(node1.GetPointer());
-
-  EXERCISE_BASIC_MRML_METHODS(vtkMRMLNodeTestHelper1, node1.GetPointer());
-
   bool res = true;
-  res = TestAttribute();
-
-  res = TestSetAndObserveNodeReferenceID() && res;
-  res = TestAddRefrencedNodeIDWithNoScene() && res;
-  res = TestAddDelayedReferenceNode() && res;
-  res = TestRemoveReferencedNodeID() && res;
-  res = TestRemoveReferencedNode() && res;
-  res = TestRemoveReferencingNode() && res;
-  res = TestNodeReferences() && res;
-  res = TestReferenceModifiedEvent() && res;
-  res = TestReferencesWithEvent() && res;
-  res = TestMultipleReferencesToSameNodeWithEvent() && res;
-  res = TestSingletonNodeReferencesUpdate() && res;
-  res = TestAddReferencedNodeIDEventsWithNoScene() && res;
-  res = TestSetNodeReferenceID() && res;
-  res = TestSetNodeReferenceIDToZeroOrEmptyString() && res;
-  res = TestNodeReferenceSerialization() && res;
-  res = TestClearScene() && res;
+//  res = res && (TestBasicMethods() == EXIT_SUCCESS);
+//  res = res && TestAttribute();
+//  res = res && TestSetAndObserveNodeReferenceID();
+//  res = res && TestAddRefrencedNodeIDWithNoScene();
+//  res = res && TestAddDelayedReferenceNode();
+//  res = res && TestRemoveReferencedNodeID();
+//  res = res && TestRemoveReferencedNode();
+//  res = res && TestRemoveReferencingNode();
+//  res = res && TestNodeReferences();
+//  res = res && TestReferenceModifiedEvent();
+//  res = res && TestReferencesWithEvent();
+//  res = res && TestMultipleReferencesToSameNodeWithEvent();
+//  res = res && TestSingletonNodeReferencesUpdate();
+//  res = res && TestAddReferencedNodeIDEventsWithNoScene();
+//  res = res && TestSetNodeReferenceID();
+//  res = res && TestSetNodeReferenceIDToZeroOrEmptyString();
+//  res = res && TestNodeReferenceSerialization();
+//  res = res && TestClearScene();
+  res = res && TestImportSceneReferenceValidDuringImport();
 
   return res ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNodeTestHelper1::UpdateReferenceID(const char *oldID, const char *newID)
+{
+  this->Superclass::UpdateReferenceID(oldID, newID);
+  if (this->OtherNodeID && !strcmp(oldID, this->OtherNodeID))
+    {
+    this->SetOtherNodeID(newID);
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNodeTestHelper1::SetSceneReferences()
+{
+  this->Superclass::SetSceneReferences();
+  this->Scene->AddReferencedNodeID(this->OtherNodeID, this);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNodeTestHelper1::WriteXML(ostream& of, int nIndent)
+{
+  Superclass::WriteXML(of, nIndent);
+  vtkIndent indent(nIndent);
+  if (this->OtherNodeID != NULL)
+    {
+    of << indent << " OtherNodeRef=\"" << this->OtherNodeID << "\"";
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLNodeTestHelper1::ReadXMLAttributes(const char** atts)
+{
+  int disabledModify = this->StartModify();
+  Superclass::ReadXMLAttributes(atts);
+  const char* attName;
+  const char* attValue;
+  while (*atts != NULL)
+    {
+    attName = *(atts++);
+    attValue = *(atts++);
+    if (!strcmp(attName, "OtherNodeRef"))
+      {
+      this->SetOtherNodeID(attValue);
+      }
+    }
+  this->EndModify(disabledModify);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLStorageNodeTestHelper::UpdateReferenceID(const char *oldID, const char *newID)
+{
+  this->Superclass::UpdateReferenceID(oldID, newID);
+  if (this->OtherNodeID && !strcmp(oldID, this->OtherNodeID))
+    {
+    this->SetOtherNodeID(newID);
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLStorageNodeTestHelper::SetSceneReferences()
+{
+  this->Superclass::SetSceneReferences();
+  this->Scene->AddReferencedNodeID(this->OtherNodeID, this);
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLStorageNodeTestHelper::WriteXML(ostream& of, int nIndent)
+{
+  Superclass::WriteXML(of, nIndent);
+  vtkIndent indent(nIndent);
+  if (this->OtherNodeID != NULL)
+    {
+    of << indent << " OtherNodeRef=\"" << this->OtherNodeID << "\"";
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLStorageNodeTestHelper::ReadXMLAttributes(const char** atts)
+{
+  int disabledModify = this->StartModify();
+  Superclass::ReadXMLAttributes(atts);
+  const char* attName;
+  const char* attValue;
+  while (*atts != NULL)
+    {
+    attName = *(atts++);
+    attValue = *(atts++);
+    if (!strcmp(attName, "OtherNodeRef"))
+      {
+      this->SetOtherNodeID(attValue);
+      }
+    }
+  this->EndModify(disabledModify);
 }
 
 //---------------------------------------------------------------------------
@@ -170,6 +335,18 @@ bool TestSetAttribute(int line, const char* attribute, const char* value,
     }
   spy->ResetNumberOfEvents();
   return true;
+}
+
+//---------------------------------------------------------------------------
+int TestBasicMethods()
+{
+  vtkNew<vtkMRMLNodeTestHelper1> node1;
+
+  EXERCISE_BASIC_OBJECT_METHODS(node1.GetPointer());
+
+  EXERCISE_BASIC_MRML_METHODS(vtkMRMLNodeTestHelper1, node1.GetPointer());
+
+  return EXIT_SUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -2479,6 +2656,478 @@ bool TestClearScene()
         /* expectedTotalNumberOfEventsForReferencedNode= */ 0,
         /* expectedNumberOfReferenceRemovedEventsForReferencedNode= */ 0
         ))
+    {
+    return false;
+    }
+
+  return true;
+}
+
+namespace
+{
+
+//----------------------------------------------------------------------------
+class vtkMRMLTestScene : public vtkMRMLScene
+{
+public:
+  static vtkMRMLTestScene *New();
+  typedef vtkMRMLTestScene Self;
+
+  vtkTypeMacro(vtkMRMLTestScene, vtkMRMLScene);
+
+  typedef NodeReferencesType TestNodeReferencesType;
+  TestNodeReferencesType test_NodeReferences()
+  {
+    return this->NodeReferences;
+  }
+
+protected:
+  vtkMRMLTestScene()
+  {
+  }
+};
+vtkStandardNewMacro(vtkMRMLTestScene);
+
+//----------------------------------------------------------------------------
+void DisplaySceneNodeReferences(
+    int line, vtkMRMLTestScene::TestNodeReferencesType nodeReferences)
+{
+  vtkMRMLTestScene::TestNodeReferencesType::iterator referenceIt;
+  vtkMRMLTestScene::TestNodeReferencesType::value_type::second_type::iterator referringNodesIt;
+
+  std::cout << "\nLine " << line << " - Scene NodeReferences:" << std::endl;
+
+  for (referenceIt = nodeReferences.begin(); referenceIt != nodeReferences.end(); ++referenceIt)
+    {
+    std::cout << "  " << referenceIt->first << " [";
+    for (referringNodesIt = referenceIt->second.begin(); referringNodesIt != referenceIt->second.end(); ++referringNodesIt)
+      {
+      std::cout << *referringNodesIt << ", ";
+      }
+    std::cout << "]" << std::endl;
+    }
+}
+
+}
+
+//----------------------------------------------------------------------------
+bool TestImportSceneReferenceValidDuringImport()
+{
+  //
+  // This enum describes the properties recorded using
+  // the NodeAddedEventPropertyRecorder.
+  //
+  enum NodeAddedEventProperties
+  {
+    NodeID = vtkEventSpy::EventDefaultPropertyCount,
+    Refrole1_GetNodeReferenceID,
+    Refrole1_GetNodeReference,
+    Refrole1_GetNodeReference_GetID,
+    OtherNodeID
+  };
+
+  // NodeAddedEventPropertyRecorder used by vtkEventSpy.
+  struct NodeAddedEventPropertyRecorder : vtkEventSpy::EventPropertyRecorder
+  {
+    virtual void operator () (vtkEventSpyEntry* event)
+    {
+      vtkMRMLNode* node =
+          reinterpret_cast<vtkMRMLNode*>(vtkEventSpy::GetEventCallDataAsVoid(event));
+
+      event->InsertValue(
+            NodeID,
+            node ? node->GetID() : vtkVariant());
+
+      const char* referenceRole = "refrole1";
+      event->InsertValue(
+            Refrole1_GetNodeReferenceID,
+            vtkVariant(node->GetNodeReferenceID(referenceRole)));
+
+      vtkMRMLNode* referencedNode = node->GetNodeReference(referenceRole);
+
+      event->InsertValue(
+            Refrole1_GetNodeReference,
+            vtkVariant(referencedNode));
+
+      event->InsertValue(
+            Refrole1_GetNodeReference_GetID,
+            referencedNode ? referencedNode->GetID() : vtkVariant());
+
+      vtkMRMLNodeTestHelper1* testNode =
+          vtkMRMLNodeTestHelper1::SafeDownCast(node);
+
+      event->InsertValue(
+            OtherNodeID,
+            testNode ? testNode->GetOtherNodeID() : vtkVariant());
+    }
+  };
+
+  // NodeAddedEventPropertyChecker allowing to check nth recorded
+  // event given some expected values.
+  struct NodeAddedEventPropertyChecker
+  {
+    vtkEventSpy* Spy;
+    vtkMRMLScene* Scene;
+    bool operator()(
+          int line, vtkIdType eventIndex,
+          vtkMRMLNode* expectedNodeAdded,
+          vtkVariant expectedNodeID,
+          vtkVariant expectedNodeReferenceID = vtkVariant(),
+          vtkVariant expectedNodeReference = vtkVariant(),
+          vtkVariant expectedNodeReference_GetID = vtkVariant(),
+          vtkVariant expectedOtherNodeID = vtkVariant())
+    {
+      assert(this->Scene);
+      assert(this->Spy);
+      vtkVariantArray* current = this->Spy->GetNthEvent(eventIndex);
+
+      vtkNew<vtkVariantArray> expected;
+      vtkEventSpy::UpdateEvent(
+            expected.GetPointer(), this->Scene,
+            vtkMRMLScene::NodeAddedEvent,
+            expectedNodeAdded);
+      expected->InsertValue(NodeID, expectedNodeID);
+      expected->InsertValue(Refrole1_GetNodeReferenceID, expectedNodeReferenceID);
+      expected->InsertValue(Refrole1_GetNodeReference, expectedNodeReference);
+      expected->InsertValue(Refrole1_GetNodeReference_GetID, expectedNodeReference_GetID);
+      expected->InsertValue(OtherNodeID, expectedOtherNodeID);
+
+      if (!vtkMRMLCoreTestingUtilities::CheckEvent(
+            line, "event-" + ToString<vtkIdType>(eventIndex),
+            current, expected.GetPointer()))
+        {
+        return false;
+        }
+      return true;
+    }
+  };
+
+  //
+  // Create scene and register node
+  //
+
+  std::string role1("refrole1");
+
+  vtkNew<vtkMRMLTestScene> scene;
+  scene->RegisterNodeClass(vtkSmartPointer<vtkMRMLNodeTestHelper1>::New());
+
+  //
+  // Configure vtkEventSpy
+  //
+
+  vtkNew<vtkEventSpy> spy;
+
+  // Associated our custom recorder with NodeAddedEvent
+  NodeAddedEventPropertyRecorder nodeAddedEventPropertyRecorder;
+
+  spy->SetEventPropertyRecorder(
+        vtkMRMLScene::NodeAddedEvent, &nodeAddedEventPropertyRecorder);
+
+  // Describe the callData type associated with NodeAddedEvent
+  spy->SetCallDataType(vtkMRMLScene::NodeAddedEvent, vtkEventSpy::VTKObject);
+
+  // Install the spy
+  scene->AddObserver(vtkMRMLScene::NodeAddedEvent, spy->GetSpy());
+
+  //
+  // Add nodes
+  //
+
+  vtkNew<vtkMRMLNodeTestHelper1> node1;
+  scene->AddNode(node1.GetPointer()); // ID: vtkMRMLNodeTestHelper11
+
+  vtkNew<vtkMRMLNodeTestHelper1> node2;
+  scene->AddNode(node2.GetPointer()); // ID: vtkMRMLNodeTestHelper12
+  node1->AddNodeReferenceID(role1.c_str(), node2->GetID());
+
+  vtkNew<vtkMRMLNodeTestHelper1> node3;
+  scene->AddNode(node3.GetPointer()); // ID: vtkMRMLNodeTestHelper13
+  node2->SetOtherNodeID(node3->GetID());
+
+  // At this point the scene should be:
+  //
+  //  Scene
+  //    |---- vtkMRMLNodeTestHelper11
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper12
+  //    |
+  //    |---- vtkMRMLNodeTestHelper12
+  //    |          |-- ref [otherNode] to vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper13
+
+//  DisplaySceneNodeReferences(__LINE__, scene->test_NodeReferences());
+
+  if (!CheckInt(
+        __LINE__, "GetNumberOfNodes",
+        scene->GetNumberOfNodes(), 3)
+
+      ||!CheckString(
+        __LINE__, "node1->GetNodeReferenceID(\"refrole1\")",
+        node1->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper12")
+
+      ||!CheckPointer(
+        __LINE__, "node1->GetNodeReference(\"refrole1\")",
+        node1->GetNodeReference("refrole1"), node2.GetPointer())
+
+      ||!CheckString(
+        __LINE__, "node2->GetOtherNodeID()",
+        node2->GetOtherNodeID(), "vtkMRMLNodeTestHelper13")
+      )
+    {
+    return false;
+    }
+
+  //
+  // Write scene to XML string for importing later
+  //
+  scene->SetSaveToXMLString(1);
+  scene->Commit();
+  std::string sceneXMLString = scene->GetSceneXMLString();
+
+//  std::cerr << sceneXMLString << std::endl;
+
+  //
+  // Add few more nodes and references
+  //
+
+  vtkNew<vtkMRMLNodeTestHelper1> node4;
+  node4->AddNodeReferenceID(role1.c_str(), node3->GetID());
+  scene->AddNode(node4.GetPointer()); // ID: vtkMRMLNodeTestHelper14
+
+  vtkNew<vtkMRMLNodeTestHelper1> node5;
+  scene->AddNode(node5.GetPointer()); // ID: vtkMRMLNodeTestHelper15
+  node5->AddNodeReferenceID(role1.c_str(), node4->GetID());
+
+  // At this point the scene should be:
+  //
+  //  Scene
+  //    |---- vtkMRMLNodeTestHelper11
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper12
+  //    |
+  //    |---- vtkMRMLNodeTestHelper12
+  //    |          |-- ref [otherNode] to vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper14
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper15
+  //               |-- ref [refrole1] to vtkMRMLNodeTestHelper14
+
+//  DisplaySceneNodeReferences(__LINE__, scene->test_NodeReferences());
+
+  if (!CheckInt(
+        __LINE__, "GetNumberOfNodes",
+        scene->GetNumberOfNodes(), 5)
+
+      ||!CheckString(
+        __LINE__, "node1->GetNodeReferenceID(\"refrole1\")",
+        node1->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper12")
+
+      ||!CheckPointer(
+        __LINE__, "node1->GetNodeReference(\"refrole1\")",
+        node1->GetNodeReference("refrole1"), node2.GetPointer())
+
+      ||!CheckString(
+        __LINE__, "node2->GetOtherNodeID()",
+        node2->GetOtherNodeID(), "vtkMRMLNodeTestHelper13")
+
+      ||!CheckString(
+        __LINE__, "node4->GetNodeReferenceID(\"refrole1\")",
+        node4->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper13")
+
+      ||!CheckPointer(
+        __LINE__, "node4->GetNodeReference(\"refrole1\")",
+        node4->GetNodeReference("refrole1"), node3.GetPointer())
+
+      ||!CheckString(
+        __LINE__, "node5->GetNodeReferenceID(\"refrole1\")",
+        node5->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper14")
+
+      ||!CheckPointer(
+        __LINE__, "node4->GetNodeReference(\"refrole1\")",
+        node5->GetNodeReference("refrole1"), node4.GetPointer())
+
+      )
+    {
+    return false;
+    }
+
+  //
+  // Check recorded events
+  //
+
+  NodeAddedEventPropertyChecker checkNthEvent;
+  checkNthEvent.Spy = spy.GetPointer();
+  checkNthEvent.Scene = scene.GetPointer();
+
+  if (!CheckInt(
+        __LINE__, "GetCountByEventId(vtkMRMLScene::NodeAddedEvent)",
+        spy->GetCountByEventId(vtkMRMLScene::NodeAddedEvent), 5)
+
+      ||!checkNthEvent(
+        __LINE__, 0,
+        node1.GetPointer(), "vtkMRMLNodeTestHelper11")
+
+      ||!checkNthEvent(
+        __LINE__, 1,
+        node2.GetPointer(), "vtkMRMLNodeTestHelper12")
+
+      ||!checkNthEvent(
+        __LINE__, 2,
+        node3.GetPointer(), "vtkMRMLNodeTestHelper13")
+
+      ||!checkNthEvent(
+        __LINE__, 3,
+        node4.GetPointer(), "vtkMRMLNodeTestHelper14",
+        "vtkMRMLNodeTestHelper13", node3.GetPointer(), "vtkMRMLNodeTestHelper13")
+
+      ||!checkNthEvent(
+        __LINE__, 4,
+        node5.GetPointer(), "vtkMRMLNodeTestHelper15")
+      )
+    {
+    return false;
+    }
+
+  //
+  // Reset the spy
+  //
+
+  spy->ResetEvents();
+
+
+  //
+  // Import saved scene into existing one
+  //
+
+  scene->SetLoadFromXMLString(1);
+  scene->SetSceneXMLString(sceneXMLString);
+  scene->Import();
+
+  // At this point the scene should be:
+  //
+  //  Scene
+  //    |---- vtkMRMLNodeTestHelper11
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper12
+  //    |
+  //    |---- vtkMRMLNodeTestHelper12
+  //    |          |-- ref [otherNode] to vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper14
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper13
+  //    |
+  //    |---- vtkMRMLNodeTestHelper15
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper14
+  //    |
+  //    |---- vtkMRMLNodeTestHelper16                             [was vtkMRMLNodeTestHelper11]
+  //    |          |-- ref [refrole1] to vtkMRMLNodeTestHelper17
+  //    |
+  //    |---- vtkMRMLNodeTestHelper17                             [was vtkMRMLNodeTestHelper12]
+  //    |          |-- ref [otherNode] to vtkMRMLNodeTestHelper18
+  //    |
+  //    |---- vtkMRMLNodeTestHelper18                             [was vtkMRMLNodeTestHelper13]
+
+//  DisplaySceneNodeReferences(__LINE__, scene->test_NodeReferences());
+
+  //
+  // Check recorded events
+  //
+
+  if (!CheckInt(
+        __LINE__, "GetCountByEventId(vtkMRMLScene::NodeAddedEvent)",
+        spy->GetCountByEventId(vtkMRMLScene::NodeAddedEvent), 3)
+
+      ||!checkNthEvent(
+        __LINE__, 0, 0, "vtkMRMLNodeTestHelper16", "vtkMRMLNodeTestHelper17")
+
+      ||!checkNthEvent(
+        __LINE__, 1, 0, "vtkMRMLNodeTestHelper17",
+        vtkVariant(), vtkVariant(), vtkVariant(), "vtkMRMLNodeTestHelper18")
+
+      ||!checkNthEvent(
+        __LINE__, 2, 0, "vtkMRMLNodeTestHelper18")
+      )
+    {
+    return false;
+    }
+
+  //
+  // Check scene contains original and imported nodes
+  //
+
+  if (!CheckInt(
+        __LINE__, "GetNumberOfNodes",
+        scene->GetNumberOfNodes(), 8)
+
+      ||!CheckString(
+        __LINE__, "node1->GetNodeReferenceID(\"refrole1\")",
+        node1->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper12")
+
+      ||!CheckPointer(
+        __LINE__, "node1->GetNodeReference(\"refrole1\")",
+        node1->GetNodeReference("refrole1"), node2.GetPointer())
+
+      ||!CheckString(
+        __LINE__, "node2->GetOtherNodeID()",
+        node2->GetOtherNodeID(), "vtkMRMLNodeTestHelper13")
+
+      ||!CheckString(
+        __LINE__, "node4->GetNodeReferenceID(\"refrole1\")",
+        node4->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper13")
+
+      ||!CheckPointer(
+        __LINE__, "node4->GetNodeReference(\"refrole1\")",
+        node4->GetNodeReference("refrole1"), node3.GetPointer())
+
+      ||!CheckString(
+        __LINE__, "node5->GetNodeReferenceID(\"refrole1\")",
+        node5->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper14")
+
+      ||!CheckPointer(
+        __LINE__, "node4->GetNodeReference(\"refrole1\")",
+        node5->GetNodeReference("refrole1"), node4.GetPointer())
+      )
+    {
+    return false;
+    }
+
+  vtkMRMLNodeTestHelper1 *node6 =
+      vtkMRMLNodeTestHelper1::SafeDownCast(scene->GetNodeByID("vtkMRMLNodeTestHelper16"));
+
+  vtkMRMLNodeTestHelper1 *node7 =
+      vtkMRMLNodeTestHelper1::SafeDownCast(scene->GetNodeByID("vtkMRMLNodeTestHelper17"));
+
+  vtkMRMLNodeTestHelper1 *node8 =
+      vtkMRMLNodeTestHelper1::SafeDownCast(scene->GetNodeByID("vtkMRMLNodeTestHelper18"));
+
+  if (!CheckNotNull(
+        __LINE__,
+        "GetNodeByID(\"vtkMRMLNodeTestHelper16\")", node6)
+
+      ||!CheckNotNull(
+        __LINE__,
+        "GetNodeByID(\"vtkMRMLNodeTestHelper17\")", node7)
+
+      ||!CheckNotNull(
+        __LINE__,
+        "GetNodeByID(\"vtkMRMLNodeTestHelper18\")", node8)
+
+      ||!CheckString(
+        __LINE__, "node6->GetNodeReferenceID(\"refrole1\")",
+        node6->GetNodeReferenceID("refrole1"), "vtkMRMLNodeTestHelper17")
+
+      ||!CheckPointer(
+        __LINE__, "node6->GetNodeReference(\"refrole1\")",
+        node6->GetNodeReference("refrole1"), node7)
+
+      ||!CheckString(
+        __LINE__, "node7->GetOtherNodeID()",
+        node7->GetOtherNodeID(), "vtkMRMLNodeTestHelper18")
+      )
     {
     return false;
     }

@@ -112,9 +112,11 @@ bool PopulateScene(int line, vtkMRMLScene *scene)
 
 //---------------------------------------------------------------------------
 // Print out the model hierarchy nodes in a scene
-void PrintModelHierarchyNodes(vtkMRMLScene *scene)
+void PrintModelHierarchyNodes(int line, vtkMRMLScene *scene)
 {
   int numNodes = scene->GetNumberOfNodesByClass("vtkMRMLModelHierarchyNode");
+
+  std::cerr << "\nLine " << line << " - ModelHierarchyNodes:" << std::endl;
 
   for (int i = 0; i < numNodes; i++)
     {
@@ -123,11 +125,13 @@ void PrintModelHierarchyNodes(vtkMRMLScene *scene)
       {
       vtkMRMLModelHierarchyNode *hnode =
           vtkMRMLModelHierarchyNode::SafeDownCast(mrmlNode);
-      std::cout << i << ": Model Hierarchy node"
-                << " named " << hnode->GetName()
-                << " with id " << hnode->GetID()
-                << " has parent node id of "
-                << (hnode->GetParentNodeID() ? hnode->GetParentNodeID() : "null") << std::endl;
+      std::cerr << "  " << i << ": Model Hierarchy node"
+                << " named [" << (hnode->GetName() ? hnode->GetName() : "null")
+                << "] with id [" << (hnode->GetID() ? hnode->GetID() : "null")
+                << "] has parent node id of ["
+                << (hnode->GetParentNodeID() ? hnode->GetParentNodeID() : "null")
+                << "]"
+                << std::endl;
       }
     }
 }
@@ -233,7 +237,7 @@ bool ImportIDModelHierarchyParentIDConflictTestXMLString()
         scene->GetNumberOfNodesByClass("vtkMRMLModelHierarchyNode"), 10)
       )
     {
-    PrintModelHierarchyNodes(scene.GetPointer());
+    PrintModelHierarchyNodes(__LINE__, scene.GetPointer());
     return false;
     }
 
@@ -255,7 +259,7 @@ bool ImportIDModelHierarchyParentIDConflictTestXMLString()
             hierarchyNode->GetParentNodeID(), (index == 0 || index == 5) ? 0 : expectedParentID.c_str())
         )
       {
-      PrintModelHierarchyNodes(scene.GetPointer());
+      PrintModelHierarchyNodes(__LINE__, scene.GetPointer());
       return false;
       }
     }
@@ -339,8 +343,8 @@ bool ImportIDModelHierarchyParentIDConflictTestFile()
     return false;
     }
 
-  std::cout << "After first import, new scene has " << scene3->GetNumberOfNodes() << " nodes" << std::endl;
-  PrintModelHierarchyNodes(scene3.GetPointer());
+  std::cerr << "After first import, new scene has " << scene3->GetNumberOfNodes() << " nodes" << std::endl;
+  PrintModelHierarchyNodes(__LINE__, scene3.GetPointer());
 
   // now import file 2
   scene3->SetURL(filename2.c_str());
@@ -395,7 +399,7 @@ bool ImportIDModelHierarchyParentIDConflictTestFile()
           hierarchyNode2->GetParentNodeID(), "vtkMRMLModelHierarchyNode6")
       )
     {
-    PrintModelHierarchyNodes(scene3.GetPointer());
+    PrintModelHierarchyNodes(__LINE__, scene3.GetPointer());
     return false;
     }
 

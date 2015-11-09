@@ -647,9 +647,22 @@ int vtkMRMLScene::Connect()
   return res;
 }
 
+static bool FIX_VERBOSE = true;
+static bool FIX_ENABLED = true;
+static bool FIX_APPROACH_2 = true && FIX_ENABLED;
+static bool FIX_APPROACH_2_ALL_REFS = true && FIX_APPROACH_2;
+
 //------------------------------------------------------------------------------
 int vtkMRMLScene::Import()
 {
+
+  if (FIX_VERBOSE)
+    {
+    std::cerr << "#####################################################"<<std::endl;
+    std::cerr << "#        " << (FIX_APPROACH_2 ? (FIX_APPROACH_2_ALL_REFS ? "FIX_APPROACH_2_ALL_REFS" : "FIX_APPROACH_2") : "NORMAL" ) <<std::endl;
+    std::cerr << "#####################################################"<<std::endl;
+    }
+
 #ifdef MRMLSCENE_VERBOSE
   vtkTimerLog* addNodesTimer = vtkTimerLog::New();
   vtkTimerLog* updateSceneTimer = vtkTimerLog::New();
@@ -679,11 +692,51 @@ int vtkMRMLScene::Import()
     /// generator doesn't choose them.
     vtkMRMLNode *node=NULL;
     vtkCollectionSimpleIterator it;
+    //-----------[ START - NORMAL ]------------------
+    if (!FIX_ENABLED)
+      {
     for (loadedNodes->InitTraversal(it);
          (node = (vtkMRMLNode*)loadedNodes->GetNextItemAsObject(it)) ;)
       {
       this->AddReservedID(node->GetID());
       }
+      }
+    //-----------[ END - NORMAL ]------------------
+    //-----------[ START - FIX_APPROACH_2 ]------------------
+    if (FIX_APPROACH_2)
+      {
+    for (loadedNodes->InitTraversal(it);
+         (node = (vtkMRMLNode*)loadedNodes->GetNextItemAsObject(it)) ;)
+      {
+      std::string oldID = node->GetID();
+      if (this->GetNodeByID(oldID.c_str()) || this->IsReservedID(oldID))
+        {
+        if (FIX_VERBOSE)
+          {
+          std::cerr << "Import: Found node to be imported:" << node->GetID()
+                    << " was";
+          if (this->GetNodeByID(oldID.c_str()))
+            {
+            std::cerr << " already in the scene." << std::endl;
+            }
+          else
+            {
+            std::cerr << " already reserved." << std::endl;
+            }
+          }
+        // Generate a new ID
+        std::string newID = this->GenerateUniqueID(node);
+        // Keep track of the new ID
+        this->ReferencedIDChanges[oldID] = newID;
+        if (FIX_VERBOSE)
+          {
+          std::cerr << "Import: oldID -> newID:" << oldID << " -> " << newID << std::endl;
+          }
+        this->AddReservedID(newID.c_str());
+        }
+      }
+      }
+    //-----------[ END - FIX_APPROACH_2 ]------------------
 #ifdef MRMLSCENE_VERBOSE
     addNodesTimer->StartTimer();
 #endif
@@ -697,8 +750,21 @@ int vtkMRMLScene::Import()
     updateSceneTimer->StartTimer();
 #endif
     // Update the node references to the changed node IDs
-    // (that conflicted in the current scene and the imported scene)
+    // (that conflicted in the curr:) :) :)ent scene and the imported scene)
+    //-----------[ START - NORMAL ]------------------
+    if (!FIX_ENABLED)
+      {
+      if (FIX_VERBOSE)
+        {
+      std::cerr << "  AddNodeNoNotify: UpdateNodeReferences Start" << std::endl;
+        }
     this->UpdateNodeReferences(loadedNodes);
+      if (FIX_VERBOSE)
+        {
+      std::cerr << "  AddNodeNoNotify: UpdateNodeReferences End" << std::endl;
+        }
+      }
+    //-----------[ END - NORMAL ]------------------
     this->RemoveReservedIDs();
 
     this->InvokeEvent(vtkMRMLScene::NewSceneEvent, NULL);
@@ -714,7 +780,9 @@ int vtkMRMLScene::Import()
       vtkDebugMacro("Adding Node: " << node->GetName());
       if (node->GetAddToScene())
         {
+//        std::cerr << "0-UpdateScene:" << node->GetID() << std::endl;
         node->UpdateScene(this);
+//        std::cerr << "1-UpdateScene:" << node->GetID() << std::endl;
         }
       if (this->GetErrorCode() == 1)
         {
@@ -1047,7 +1115,6 @@ vtkMRMLNode*  vtkMRMLScene::AddNodeNoNotify(vtkMRMLNode *n)
       // A node can't be added twice into the scene
       assert(sn != n);
       std::string oldId(sn->GetID());
-      std::string newId(n->GetID() ? n->GetID() : sn->GetID());
 
       // Instead of using 'CopyWithSceneWithSingleModifiedEvent', 'StartModify' is
       // explicitly invoked before calling 'CopyWithScene', then 'EndModify' is
@@ -1062,6 +1129,7 @@ vtkMRMLNode*  vtkMRMLScene::AddNodeNoNotify(vtkMRMLNode *n)
       // cache the node so the whole scene cache stays up-to-date
       // Remove the old node ID only if the ID was associated with sn.
 #ifdef MRMLSCENE_VERBOSE
+      std::string newId(n->GetID() ? n->GetID() : sn->GetID());
       std::cerr << "Update node id cache swaping '" << oldId
                 << "' with '" << newId << "'" << std::endl;
 #endif
@@ -1089,23 +1157,70 @@ vtkMRMLNode*  vtkMRMLScene::AddNodeNoNotify(vtkMRMLNode *n)
   if (IsNodeWithoutID(n) || this->GetNodeByID(n->GetID()) != NULL)
     {
     std::string oldID;
+
+    //-----------[ START - NORMAL ]------------------
+    if (!FIX_ENABLED)
+      {
     if (n->GetID())
       {
       oldID = n->GetID();
       }
     n->SetID(this->GenerateUniqueID(n).c_str());
+      }
+    //-----------[ END - NORMAL ]------------------
+    //-----------[ START - FIX_APPROACH_2 ]------------------
+    if (FIX_APPROACH_2)
+      {
+    if (IsNodeWithoutID(n))
+      {
+      std::string newID = this->GenerateUniqueID(n);
+      if (FIX_VERBOSE)
+        {
+        std::cerr << "  AddNodeNoNotify: Generated ID [" << newID << "]" << std::endl;
+        }
+      n->SetID(newID.c_str());
+      vtkDebugMacro("AddNodeNoNotify: got unique id for new " << n->GetClassName() << " node: " << n->GetID() << endl);
+      }
+    else
+      {
+      // Does it need to be updated ?
+      if (this->GetChangedID(n->GetID()))
+        {
+        oldID = std::string(n->GetID());
+        std::string newID = this->GetChangedID(oldID.c_str());
+        if (FIX_VERBOSE)
+          {
+          std::cerr << "  AddNodeNoNotify: Found existing mapping from ID [" << oldID << "] -> [" << newID << "]" << std::endl;
+          }
+        n->SetID(newID.c_str());
+//        this->ReferencedIDChanges[oldID] = newID;
+        }
+      }
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "  AddNodeNoNotify: ID updated to [" << n->GetID() << "]" << std::endl;
+      }
+      }
+    //-----------[ END - FIX_APPROACH_2 ]------------------
+
     if (n->GetScene())
       {
+      std::cerr << "  SetSceneReferences - start" << std::endl;
       // The scene is set already so update the ID references for this new ID
       n->SetSceneReferences();
+      std::cerr << "  SetSceneReferences - start" << std::endl;
       }
-
+    //-----------[ START - NORMAL ]------------------
+    if (!FIX_ENABLED)
+      {
     vtkDebugMacro("AddNodeNoNotify: got unique id for new " << n->GetClassName() << " node: " << n->GetID() << endl);
     std::string newID(n->GetID());
     if (oldID != newID)
       {
       this->ReferencedIDChanges[oldID] = newID;
       }
+      }
+    //-----------[ END - NORMAL ]------------------
     }
 
   // Set a default name if none is given automatically
@@ -1113,13 +1228,155 @@ vtkMRMLNode*  vtkMRMLScene::AddNodeNoNotify(vtkMRMLNode *n)
     {
     n->SetName(this->GenerateUniqueName(n).c_str());
     }
+
+  // This will contains all the references for the node being added.
+  std::vector<std::string> nodeReferences;
+
+  //-----------[ START - FIX_APPROACH_2 ]------------------
+  if (FIX_APPROACH_2)
+    {
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "  SetScene - start" << std::endl;
+      }
+  // Backup current references
+  NodeReferencesType sceneReferences = this->NodeReferences;
+
+  // Clear references so that only references added by the node after
+  // calling "AddReferencedNodeID" are collected.
+  this->NodeReferences.clear();
+
   n->SetScene( this );
+
+  // Iterate over referenced nodes to
+  // (1) keep track of them and
+  // (2) update the copy previously done
+  NodeReferencesType::iterator referenceIt;
+  NodeReferencesType::value_type::second_type::iterator referringNodesIt;
+  for(referenceIt = this->NodeReferences.begin();
+      referenceIt != this->NodeReferences.end();
+      ++referenceIt)
+    {
+    for (referringNodesIt = referenceIt->second.begin();
+         referringNodesIt != referenceIt->second.end();
+         ++referringNodesIt)
+      {
+      sceneReferences[referenceIt->first].insert(*referringNodesIt);
+      }
+    nodeReferences.push_back(referenceIt->first);
+    }
+
+  // Reset node references
+  this->NodeReferences = sceneReferences;
+
+
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "  SetScene - end" << std::endl;
+      }
+    }
+  //-----------[ END - FIX_APPROACH_2 ]------------------
+
+  //-----------[ START - NORMAL ]------------------
+  if (!FIX_ENABLED)
+    {
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "  SetScene - start" << std::endl;
+      }
+  n->SetScene( this );
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "  SetScene - end" << std::endl;
+      }
+    }
+  //-----------[ END - NORMAL ]------------------
   this->Nodes->vtkCollection::AddItem((vtkObject *)n);
 
   // cache the node so the whole scene cache stays up-todate
   this->AddNodeID(n);
 
   //n->OnNodeAddedToScene();
+
+  // Issue #3462: Loop over all node roles/references and update referenced
+  //              node IDs.
+
+  struct ListRefRoles
+  {
+    ListRefRoles(const vtkMRMLNode::NodeReferencesType& refs):NodeReferences(refs){}
+    std::string operator () ()
+    {
+      std::string roles;
+      vtkMRMLNode::NodeReferencesType::iterator it;
+      for (it = NodeReferences.begin(); it != NodeReferences.end(); it++)
+        {
+        if (it != NodeReferences.begin())
+          {
+          roles += " ";
+          }
+        roles += it->first;
+        }
+      return roles;
+    }
+    vtkMRMLNode::NodeReferencesType NodeReferences;
+  };
+
+  //-----------[ START - FIX_APPROACH_2 ]------------------
+  if (FIX_APPROACH_2 && !FIX_APPROACH_2_ALL_REFS)
+    {
+      if (FIX_VERBOSE)
+        {
+  std::cerr << "  AddNodeNoNotify: Node " << n << " ID [" << n->GetID() << "] has " << n->NodeReferences.size() << " reference roles: " << ListRefRoles(n->NodeReferences)() << std::endl;
+  std::cerr << "  AddNodeNoNotify: Start iterating" << std::endl;
+        }
+
+  vtkMRMLNode::NodeReferencesType::iterator it;
+  for (it = n->NodeReferences.begin(); it != n->NodeReferences.end(); it++)
+    {
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "    role [" << it->first << "] from " << n << " ID [" << n->GetID() << "] has " << it->second.size() << " references" << std::endl;
+      }
+    for (unsigned int i=0; i < it->second.size(); i++)
+      {
+      vtkMRMLNode::vtkMRMLNodeReference* reference = it->second[i];
+      if (!reference)
+        {
+        vtkErrorWithObjectMacro(n, << "      AddNodeNoNotify: Reference " << i << " is expected to be non NULL.");
+        continue;
+        }
+      const char* oldID = reference->GetReferencedNodeID();
+      const char* newID = this->GetChangedID(oldID);
+      if (newID)
+        {
+        std::cerr << "    role [" << it->first << "]: Calling UpdateReferenceID(oldID:" << oldID << ", newID:" << newID << ")" << std::endl;
+        n->UpdateReferenceID(oldID, newID);
+        }
+      }
+    }
+  if (FIX_VERBOSE)
+    {
+  std::cerr << "  AddNodeNoNotify: Done iterating" << std::endl;
+    }
+    }
+  if (FIX_APPROACH_2_ALL_REFS)
+    {
+  std::cerr << "  AddNodeNoNotify: Start iterating over references" << std::endl;
+  for (std::vector<std::string>::iterator it = nodeReferences.begin();
+       it != nodeReferences.end();
+       ++it)
+    {
+    std::string oldID = *it;
+    const char* newID = this->GetChangedID(oldID.c_str());
+    if (newID)
+      {
+      std::cerr << "    Calling UpdateReferenceID(oldID:" << oldID << ", newID:" << newID << ")" << std::endl;
+      n->UpdateReferenceID(oldID.c_str(), newID);
+      }
+    }
+  std::cerr << "  AddNodeNoNotify: Done iterating  over references" << std::endl;
+    }
+  //-----------[ END - FIX_APPROACH_2 ]------------------
 
   n->EndModify(wasModifying);
   return n;
@@ -1137,6 +1394,7 @@ vtkMRMLNode*  vtkMRMLScene::AddNode(vtkMRMLNode *n)
     {
     return NULL;
     }
+
 #ifndef NDEBUG
   // Since calling IsNodePresent is costly, a "developper hint" is printed only
   // if build as debug. We can't exit here as the release would then be
@@ -1167,11 +1425,19 @@ vtkMRMLNode*  vtkMRMLScene::AddNode(vtkMRMLNode *n)
     {
     this->InvokeEvent(this->NodeAboutToBeAddedEvent, n);
     }
+  if (FIX_VERBOSE)
+    {
+    std::cerr << "\nAddNode: Before AddNodeNoNotify: " << n << " node ID [" << (n->GetID() ? n->GetID() : "null") << "]" << std::endl;
+    }
   vtkMRMLNode* node = this->AddNodeNoNotify(n);
   // If the node is a singleton, the returned node is the existing singleton
   assert( add || node != n);
   if (add)
     {
+    if (FIX_VERBOSE)
+      {
+      std::cerr << "AddNode: Before NodeAddedEvent: " << n << " node ID [" << n->GetID() << "], Name [" << n->GetName() << "]" << std::endl;
+      }
     this->InvokeEvent(this->NodeAddedEvent, n);
     }
   this->Modified();
@@ -2194,6 +2460,7 @@ void vtkMRMLScene::AddReservedID(const char *id)
     {
     return;
     }
+  std::cerr <<"AddReservedID: " << id << std::endl;
   this->ReservedIDs.insert(std::string(id));
 }
 
@@ -2717,18 +2984,34 @@ void vtkMRMLScene::AddReferencedNodeID(const char *id, vtkMRMLNode *referencingN
     vtkErrorMacro("Failed to add node reference: the referencing node is invalid");
     return;
     }
+//  std::cerr << "vtkMRMLScene::AddReferencedNodeID: 0 [" << referencingNode->GetID() << "] referencing ID[" << id << "]" << std::endl;
   if (referencingNode->GetScene()==NULL || referencingNode->GetID()==NULL)
     {
     // Scene is not yet set for the referencing node, so we don't need to add the reference to the scene yet.
     // When the scene will be set then all the references will be added.
     return;
     }
+//  std::cerr << "vtkMRMLScene::AddReferencedNodeID: 1 [" << referencingNode->GetID() << "] referencing ID[" << id << "]" << std::endl;
   if (this->IsNodeReferencingNodeID(referencingNode, id))
     {
     // this reference already exists, there is nothing to do
     return;
     }
-  this->NodeReferences[id].insert(referencingNode->GetID());
+//  std::cerr << "vtkMRMLScene::AddReferencedNodeID: 2 [" << referencingNode->GetID() << "] referencing ID[" << id << "]" << std::endl;
+
+  std::string newID = id;
+  if (this->GetChangedID(id))
+    {
+    std::cerr << "  vtkMRMLScene::AddReferencedNodeID: this->NodeReferences[" << id << " -> " << this->GetChangedID(id) << "].insert(" << referencingNode->GetID() << ")" << std::endl;
+//    if (vtkMRMLModelHierarchyNode::SafeDownCast(referencingNode))
+//      {
+//      vtkMRMLModelHierarchyNode * modelHierarchyNode = vtkMRMLModelHierarchyNode::SafeDownCast(referencingNode);
+//      std::cerr << "  vtkMRMLModelHierarchyNode - GetDisplayNodeID()"
+//                << (modelHierarchyNode->GetDisplayNodeID() ? modelHierarchyNode->GetDisplayNodeID() : "null") << std::endl;
+//      }
+//    newID = this->GetChangedID(id);
+    }
+  this->NodeReferences[newID].insert(referencingNode->GetID());
 }
 
 //------------------------------------------------------------------------------
@@ -2808,11 +3091,13 @@ void vtkMRMLScene::UpdateNodeReferences(vtkCollection* checkNodes/*=NULL*/)
     const std::string& oldID = iterChanged->first;
     const std::string& newID = iterChanged->second;
     NodeReferencesType::iterator referencedIdIt=this->NodeReferences.find(oldID);
+    std::cerr << "    UpdateNodeReferences: looking for " << oldID << std::endl;
     if (referencedIdIt==this->NodeReferences.end())
       {
       // this updated ID is not observed by any node
       continue;
       }
+    std::cerr << "    => found " << oldID << std::endl;
     // make a copy of the node list, as the list may change as a result of UpdateReferenceID calls
     std::set<std::string> nodesToNotify=referencedIdIt->second;
     for (NodeReferencesType::value_type::second_type::iterator referringNodesIt = nodesToNotify.begin();
@@ -2820,12 +3105,15 @@ void vtkMRMLScene::UpdateNodeReferences(vtkCollection* checkNodes/*=NULL*/)
       ++referringNodesIt)
       {
       vtkMRMLNode *node = this->GetNodeByID(*referringNodesIt);
+      std::cerr << "      UpdateNodeReferences: looking for referencing node " << *referringNodesIt << std::endl;
       if (node==NULL)
         {
         continue;
         }
+      std::cerr << "      => found " << *referringNodesIt << std::endl;
       if (checkNodes!=NULL && !checkNodes->IsItemPresent(node))
         {
+        std::cerr << "      .. but item not in the checkNodes list." << std::endl;
         continue;
         }
       node->UpdateReferenceID(oldID.c_str(), newID.c_str());
@@ -2997,6 +3285,12 @@ void vtkMRMLScene::AddNodeID(vtkMRMLNode *node)
 {
   if (this->Nodes && node && node->GetID())
     {
+//    std::cerr << "AddNodeID: Caching " << node->GetID()
+//              << ", node:" <<  node << std::endl;
+//    if (strcmp(node->GetID(), "vtkMRMLMarkupsDisplayNode2") == 0)
+//      {
+//      std::cerr << "BREAK here" << std::endl;
+//      }
     this->NodeIDs[std::string(node->GetID())] = node;
     this->NodeIDsMTime = this->Nodes->GetMTime();
     }

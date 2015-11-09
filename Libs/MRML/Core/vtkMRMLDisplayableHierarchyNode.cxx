@@ -73,8 +73,10 @@ void vtkMRMLDisplayableHierarchyNode::SetSceneReferences()
 void vtkMRMLDisplayableHierarchyNode::UpdateReferenceID(const char *oldID, const char *newID)
 {
   Superclass::UpdateReferenceID(oldID, newID);
+
   if (this->DisplayNodeID == NULL || !strcmp(oldID, this->DisplayNodeID))
     {
+    std::cerr << "        vtkMRMLDisplayableHierarchyNode: UpdateReferenceID / DisplayNodeID [oldID:" << oldID << "] ->  [newID:" << newID << "]" << std::endl;
     this->SetDisplayNodeID(newID);
     }
 }
@@ -86,6 +88,20 @@ void vtkMRMLDisplayableHierarchyNode::ReadXMLAttributes(const char** atts)
 
   Superclass::ReadXMLAttributes(atts);
 
+  //
+  // r14907:
+  //
+  //  Added displayableNodeID to replace modelNodeRef.
+  //  XXX Since (1) this attribute is not written to the scene and
+  //      (2) SetDisplayableNodeID calls SetAssociatedNodeID already called
+  //      in the superclass after reading associatedNodeRef. Let's remove it.
+  //
+  //
+  //  Deprecated displayNodeRef. Maintained to support loading Slicer3 scene.
+  //
+  //  Added displayNodeID
+  //
+
   const char* attName;
   const char* attValue;
   while (*atts != NULL)
@@ -94,11 +110,13 @@ void vtkMRMLDisplayableHierarchyNode::ReadXMLAttributes(const char** atts)
     attValue = *(atts++);
     if (!strcmp(attName, "displayableNodeID"))
       {
+      std::cerr << "vtkMRMLDisplayableHierarchyNode: Reading " << attName << " [" << attValue << "]" << std::endl;
       this->SetDisplayableNodeID(attValue);
       }
     else if (!strcmp(attName, "displayNodeRef") ||
              !strcmp(attName, "displayNodeID"))
       {
+      std::cerr << "vtkMRMLDisplayableHierarchyNode: Reading " << attName << " [" << attValue << "]" << std::endl;
       this->SetDisplayNodeID(attValue);
       }
     else if (!strcmp(attName, "expanded"))

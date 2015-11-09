@@ -70,6 +70,7 @@ void vtkMRMLModelHierarchyNode::ReadXMLAttributes(const char** atts)
     if (!strcmp(attName, "modelNodeRef") ||
         !strcmp(attName, "modelNodeID") )
       {
+      std::cerr << "vtkMRMLModelHierarchyNode: Reading " << attName << " [" << attValue << "]" << std::endl;
       this->SetDisplayableNodeID(attValue);
       //this->Scene->AddReferencedNodeID(this->ModelNodeID, this);
       }
