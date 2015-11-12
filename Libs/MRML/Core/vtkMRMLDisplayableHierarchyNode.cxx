@@ -86,6 +86,20 @@ void vtkMRMLDisplayableHierarchyNode::ReadXMLAttributes(const char** atts)
 
   Superclass::ReadXMLAttributes(atts);
 
+  //
+  // r14907:
+  //
+  //  Added displayableNodeID to replace modelNodeRef.
+  //  XXX Since (1) this attribute is not written to the scene and
+  //      (2) SetDisplayableNodeID calls SetAssociatedNodeID already called
+  //      in the superclass after reading associatedNodeRef. Let's remove it.
+  //
+  //
+  //  Deprecated displayNodeRef. Maintained to support loading Slicer3 scene.
+  //
+  //  Added displayNodeID
+  //
+
   const char* attName;
   const char* attValue;
   while (*atts != NULL)
