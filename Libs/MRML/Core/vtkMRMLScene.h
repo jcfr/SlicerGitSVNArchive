@@ -346,6 +346,10 @@ public:
   /// or NULL if id has not changed
   const char* GetChangedID(const char* id);
 
+  void AddChangedID(const char* oldID, const char* newID);
+
+  void RemoveChangedIDs();
+
   /// \brief Return collection of all nodes referenced directly or indirectly by
   /// \a node.
   ///
@@ -646,7 +650,9 @@ protected:
   static void SceneCallback( vtkObject *caller, unsigned long eid,
                              void *clientData, void *callData );
 
+public:
   std::string GenerateUniqueID(vtkMRMLNode* node);
+protected:
   std::string GenerateUniqueID(const std::string& baseID);
   int GetUniqueIDIndex(const std::string& baseID);
   std::string BuildID(const std::string& baseID, int idIndex)const;

@@ -538,6 +538,12 @@ void vtkMRMLSceneViewNode::RestoreScene(bool removeNodes)
       if (node->GetID())
         {
         snapshotMap[node->GetID()] = node;
+
+        // Reset UniqueIDs/Names only for node class that will be removed.
+        // This will ensure that the call to GenerateUniqueID done in
+        // vtkMRMLScene:AddNode re-assign ID starting from 0.
+        this->Scene->UniqueIDs[node->GetClassName()] = 0;
+        this->Scene->UniqueNames[node->GetClassName()] = 0;
         }
       }
     }

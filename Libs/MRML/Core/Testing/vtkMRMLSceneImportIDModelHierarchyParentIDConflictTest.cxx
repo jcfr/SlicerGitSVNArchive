@@ -380,26 +380,32 @@ bool ImportIDModelHierarchyParentIDConflictTestFile()
 
   if (!CheckInt(
         __LINE__, "GetNumberOfNodes",
-        scene3->GetNumberOfNodes(), 6))
+        scene3->GetNumberOfNodes(), 6)
+      )
     {
     return false;
     }
 
-  vtkMRMLModelHierarchyNode *hierarchyNode2 =
-      vtkMRMLModelHierarchyNode::SafeDownCast(scene3->GetNodeByID("vtkMRMLModelHierarchyNode2"));
-
-  if (!CheckNotNull(
-        __LINE__,
-        "GetNodeByID(\"vtkMRMLModelHierarchyNode2\")", hierarchyNode2)
-
-      // New model hierarchy node 2 should point to new parent hierarchynode with id vtkMRMLModelHierarchyNode6
-      ||!CheckString(
-          __LINE__, "hierarchyNode2->GetParentNodeID()",
-          hierarchyNode2->GetParentNodeID(), "vtkMRMLModelHierarchyNode6")
-      )
+  for (int index = 0; index < 6; ++index)
     {
-    PrintModelHierarchyNodes(__LINE__, scene3.GetPointer());
-    return false;
+    std::string nodeID = std::string("vtkMRMLModelHierarchyNode") + ToString(index + 1);
+    vtkMRMLModelHierarchyNode* hierarchyNode =
+        vtkMRMLModelHierarchyNode::SafeDownCast(scene3->GetNodeByID(nodeID.c_str()));
+
+    std::string expectedParentID = std::string("vtkMRMLModelHierarchyNode") + ToString(index);
+
+    if (!CheckNotNull(
+          __LINE__,
+          std::string("GetNodeByID(\"") + nodeID + "\")", hierarchyNode)
+
+        ||!CheckString(
+            __LINE__, std::string("hierarchyNode") + ToString(index + 1) + "->GetParentNodeID()",
+            hierarchyNode->GetParentNodeID(), (index ==0 || index == 1) ? 0 : expectedParentID.c_str())
+        )
+      {
+      PrintModelHierarchyNodes(__LINE__, scene3.GetPointer());
+      return false;
+      }
     }
 
   // clean up

@@ -168,11 +168,11 @@ int vtkMRMLSceneImportIDConflictTest(int vtkNotUsed(argc), char * vtkNotUsed(arg
         "GetNodeByID(\"vtkMRMLModelNode3\")", modelNode2)
 
       ||!CheckNodeIdAndName(
-        __LINE__, modelNode2, "vtkMRMLModelNode3", "New Model1")
+        __LINE__, modelNode2, "vtkMRMLModelNode3", "New Model2")
 
       ||!CheckNodeIdAndName(
         __LINE__, modelNode2->GetDisplayNode(),
-        "vtkMRMLModelDisplayNode3", "New Display 1")
+        "vtkMRMLModelDisplayNode3", "New Display 2")
       )
     {
     return EXIT_FAILURE;
@@ -190,11 +190,11 @@ int vtkMRMLSceneImportIDConflictTest(int vtkNotUsed(argc), char * vtkNotUsed(arg
         "GetNodeByID(\"vtkMRMLModelNode2\")", modelNode3)
 
       ||!CheckNodeIdAndName(
-        __LINE__, modelNode3, "vtkMRMLModelNode2", "New Model2")
+        __LINE__, modelNode3, "vtkMRMLModelNode2", "New Model1")
 
       ||!CheckNodeIdAndName(
         __LINE__, modelNode3->GetDisplayNode(),
-        "vtkMRMLModelDisplayNode2", "New Display 2")
+        "vtkMRMLModelDisplayNode2", "New Display 1")
       )
     {
     return EXIT_FAILURE;

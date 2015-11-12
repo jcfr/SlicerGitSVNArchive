@@ -1378,6 +1378,9 @@ void vtkSlicerApplicationLogic::ProcessReadSceneData(ReadDataRequest& req)
     // the code to load into a node heirarchy (with a corresponding
     // change in the conditional above)).
     this->GetMRMLScene()->SetURL( req.GetFilename().c_str() );
+
+    std::cerr << "-----------------> DIRECT IMPORT" << std::endl;
+
     this->GetMRMLScene()->Import();
 
     // Delete the file if requested
@@ -1400,6 +1403,47 @@ void vtkSlicerApplicationLogic::ProcessReadSceneData(ReadDataRequest& req)
   vtkNew<vtkMRMLScene> miniscene;
   miniscene->SetURL( req.GetFilename().c_str() );
   miniscene->Import();
+
+  vtkMRMLScene* scene = this->GetMRMLScene();
+
+  // Iterate over all miniscene nodes and populate
+  // the ReferencedIDChanges map. That way references
+  // will updated when CopyNode() will be called.
+  // XXX This code has been copied from vtkMRMMLScene::Import(), it should
+  // be refactored into a re-usable function named for example:
+  //
+  //     PrepareImport(vtkCollection* nodes)
+  //
+  vtkMRMLNode *node=NULL;
+  vtkCollectionSimpleIterator it;
+  for (miniscene->GetNodes()->InitTraversal(it);
+       (node = (vtkMRMLNode*)miniscene->GetNodes()->GetNextItemAsObject(it)) ;)
+    {
+    std::string oldID = node->GetID();
+    if (scene->GetNodeByID(oldID.c_str())
+        || scene->IsReservedID(oldID))
+      {
+//#ifdef MRMLSCENE_VERBOSE
+      std::cerr << "ProcessReadSceneData: " << node << " Found node to be imported "
+                << "with ID [" << node->GetID() << "] was"
+                << (scene->GetNodeByID(oldID.c_str()) ?
+                      " already in the scene." : " already reserved.") << std::endl;
+//#endif
+      // Generate a new ID
+      std::string newID = scene->GenerateUniqueID(node);
+      std::cerr << "ProcessReadSceneData: " << node << " Generated ID [" << newID << "]" << std::endl;
+      // Keep track of the new ID
+      scene->AddChangedID(oldID.c_str(), newID.c_str());
+      scene->AddReservedID(newID.c_str());
+//#ifdef MRMLSCENE_VERBOSE
+      std::cerr << "ProcessReadSceneData: " << node << " oldID -> newID:" << oldID << " -> " << newID << std::endl;
+//#endif
+      }
+    else
+      {
+      scene->AddReservedID(oldID.c_str());
+      }
+    }
 
   // iterate over the list of nodes specified to read
   std::vector<std::string>::const_iterator tit;
@@ -1595,7 +1639,9 @@ void vtkSlicerApplicationLogic::ProcessReadSceneData(ReadDataRequest& req)
     ++tit;
     }
 
-  this->GetMRMLScene()->EndState(vtkMRMLScene::BatchProcessState);
+  scene->RemoveChangedIDs();
+
+  scene->EndState(vtkMRMLScene::BatchProcessState);
 
   // Delete the file if requested
   if (req.GetDeleteFile())
