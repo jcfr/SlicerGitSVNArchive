@@ -81,12 +81,35 @@ public:
   /// Returns nonzero on success.
   int Connect();
 
+  /// \brief Update ChangeIDs map to ensure proper update of node with
+  /// ID conflicts on scene imports or explicit node addition.
+  ///
+  /// In case the scene needs to change the ID of some nodes to add, the new
+  /// ID should not be one already existing in the scene nor one of the
+  /// imported scene. To ensure the map of `oldID` to `newID` is up-to-date so
+  /// that reference are updated before invoking the NodeAddedEvent, this
+  /// function will call  GenerateUniqueID(vtkMRMLNode* node) for node that will
+  /// conflict and will keep track of the association using
+  /// AddChangedID(const char* oldID, const char* newID).
+  ///
+  /// Additionally, the following nodes will be marked as reserved so that
+  /// the ID generator doesn't choose them:
+  /// * all the node IDs of the scene that conclict with the one in \a nodes.
+  /// * all generated IDs.
+  ///
+  /// \sa Import(), AddNode(vtkMRMLNode* nodeToAdd), CopyNode(vtkMRMLNode* nodeToCopy)
+  /// \sa AddChangedID(const char* oldID, const char* newID)
+  /// \sa IsReservedID(const std::string& nodeID), AddReservedID(const char* nodeID)
+  /// \sa GenerateUniqueID(vtkMRMLNode* node)
+  void PrepareImport(vtkCollection* nodes);
+
   /// \brief Add the scene into the existing scene (no clear) from \a URL file
   /// or from \sa SceneXMLString XML string.
   ///
   /// Returns nonzero on success.
   ///
   /// \sa SetURL(), GetLoadFromXMLString(), SetSceneXMLString()
+  /// \sa PrepareImport(vtkCollection* nodes)
   int Import();
 
   /// Save scene into URL

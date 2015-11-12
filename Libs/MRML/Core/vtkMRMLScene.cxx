@@ -89,7 +89,7 @@ Version:   $Revision: 1.18 $
 #include <cassert>
 #include <numeric>
 
-//#define MRMLSCENE_VERBOSE
+#define MRMLSCENE_VERBOSE
 //#define MRMLSCENE_TIMING
 //#define MRMLSCENE_EXTRA_CHECK
 
@@ -650,6 +650,54 @@ int vtkMRMLScene::Connect()
 }
 
 //------------------------------------------------------------------------------
+void vtkMRMLScene::PrepareImport(vtkCollection* nodes)
+{
+  if (!nodes)
+    {
+    vtkErrorMacro("PrepareImport: No nodes collection has been specified !");
+    return;
+    }
+
+  vtkMRMLNode *node=NULL;
+  vtkCollectionSimpleIterator it;
+
+  for (nodes->InitTraversal(it);
+       (node = (vtkMRMLNode*)nodes->GetNextItemAsObject(it)) ;)
+    {
+    if (!node->GetID())
+      {
+      vtkWarningMacro("Import: Skipping node without ID");
+      continue;
+      }
+    std::string oldID = node->GetID();
+    if (this->GetNodeByID(oldID.c_str()) || this->IsReservedID(oldID))
+      {
+#ifdef MRMLSCENE_VERBOSE
+      std::cerr << "Import: " << node << " Found node to be imported "
+                << "with ID [" << node->GetID() << "] was"
+                << (this->GetNodeByID(oldID.c_str()) ?
+                      " already in the scene." : " already reserved.") << std::endl;
+#endif
+      // Generate a new ID
+      std::string newID = this->GenerateUniqueID(node);
+#ifdef MRMLSCENE_VERBOSE
+      std::cerr << "Import: " << node << " Generated ID [" << newID << "]" << std::endl;
+#endif
+      // Keep track of the new ID
+      this->ReferencedIDChanges[oldID] = newID;
+      this->AddReservedID(newID.c_str());
+#ifdef MRMLSCENE_VERBOSE
+      std::cerr << "Import: " << node << " oldID -> newID:" << oldID << " -> " << newID << std::endl;
+#endif
+      }
+    else
+      {
+      this->AddReservedID(oldID.c_str());
+      }
+    }
+}
+
+//------------------------------------------------------------------------------
 int vtkMRMLScene::Import()
 {
 
@@ -675,46 +723,8 @@ int vtkMRMLScene::Import()
 
   if (parsingSuccess)
     {
-    /// In case the scene needs to change the ID of some nodes to add, the new
-    /// ID should not be one already existing in the scene nor one of the
-    /// imported scene.
-    /// Mark all the node IDs of the scene as reserved so the node ID
-    /// generator doesn't choose them.
-    vtkMRMLNode *node=NULL;
-    vtkCollectionSimpleIterator it;
 
-    for (loadedNodes->InitTraversal(it);
-         (node = (vtkMRMLNode*)loadedNodes->GetNextItemAsObject(it)) ;)
-      {
-      if (!node->GetID())
-        {
-        vtkWarningMacro("Import: Skipping node without ID");
-        continue;
-        }
-      std::string oldID = node->GetID();
-      if (this->GetNodeByID(oldID.c_str()) || this->IsReservedID(oldID))
-        {
-#ifdef MRMLSCENE_VERBOSE
-        std::cerr << "Import: " << node << " Found node to be imported "
-                  << "with ID [" << node->GetID() << "] was"
-                  << (this->GetNodeByID(oldID.c_str()) ?
-                        " already in the scene." : " already reserved.") << std::endl;
-#endif
-        // Generate a new ID
-        std::string newID = this->GenerateUniqueID(node);
-        std::cerr << "Import: " << node << " Generated ID [" << newID << "]" << std::endl;
-        // Keep track of the new ID
-        this->ReferencedIDChanges[oldID] = newID;
-        this->AddReservedID(newID.c_str());
-#ifdef MRMLSCENE_VERBOSE
-        std::cerr << "Import: " << node << " oldID -> newID:" << oldID << " -> " << newID << std::endl;
-#endif
-        }
-      else
-        {
-        this->AddReservedID(oldID.c_str());
-        }
-      }
+    this->PrepareImport(loadedNodes);
 
 #ifdef MRMLSCENE_TIMING
     addNodesTimer->StartTimer();
