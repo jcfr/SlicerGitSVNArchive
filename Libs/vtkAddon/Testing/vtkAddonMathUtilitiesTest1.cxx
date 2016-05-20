@@ -53,7 +53,13 @@ int vtkAddonMathUtilitiesTest1(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
   m1->SetElement(0, 0 , 1e-4);
   CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), true);
 
+  m1->SetElement(0, 0 , -1e-4);
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), true);
+
   m1->SetElement(0, 0 , 5e-3);
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), false);
+
+  m1->SetElement(0, 0 , -5e-3);
   CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), false);
 
 
