@@ -17,12 +17,12 @@
 
 // vtkAddon includes
 #include "vtkAddonMathUtilities.h"
-#include "vtkAddonTestingUtilities.h"
+#include "vtkAddonTestingMacros.h"
 
 // vtk includes
-#include <vtkNew.h>
-#include <vtkSmartPointer.h>
 #include <vtkMatrix4x4.h>
+#include <vtkNew.h>
+
 
 using namespace vtkAddonTestingUtilities;
 
@@ -30,27 +30,32 @@ using namespace vtkAddonTestingUtilities;
 int vtkAddonMathUtilitiesTest1(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
 {
 
-  vtkSmartPointer<vtkMatrix4x4> m1 =
-      vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkSmartPointer<vtkMatrix4x4> m2 =
-      vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkSmartPointer<vtkMatrix4x4> m3 =
-      vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkNew<vtkMatrix4x4> m1;
+  vtkNew<vtkMatrix4x4> m2;
+  vtkNew<vtkMatrix4x4> m3;
   for (int i = 0; i < 4; i++)
     {
     for (int j = 0; j < 4; j++)
-      {
-      m1->SetElement(i, j, i * j);
-      m2->SetElement(i, j, i * j);
-      m3->SetElement(i, j, i);
+      {  
+      m1->SetElement(i, j, i);
+      m3->SetElement(i, j, i * j);
       }
     }
 
-  if (!CheckInt(__LINE__, "TestCheckInt", 1, vtkAddonMathUtilities::Matrix4x4AreEqual(m1, m2))
-      || CheckInt(__LINE__, "TestCheckInt Expected Failure", 1, vtkAddonMathUtilities::Matrix4x4AreEqual(m1, m3)))
-    {
-    std::cerr << "Line " << __LINE__ << " - TestCheckInt failed" << std::endl;
-    return EXIT_FAILURE;
-    }
+  m2->DeepCopy(m1.GetPointer());
+
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer()), true);
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m3.GetPointer()), false);
+
+  double tolerance = 1e-3;
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), true);
+
+  m1->SetElement(0, 0 , 1e-4);
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), true);
+
+  m1->SetElement(0, 0 , 5e-3);
+  CHECK_BOOL( vtkAddonMathUtilities::Matrix4x4AreEqual(m1.GetPointer(), m2.GetPointer(), tolerance), false);
+
+
   return EXIT_SUCCESS;
 }
