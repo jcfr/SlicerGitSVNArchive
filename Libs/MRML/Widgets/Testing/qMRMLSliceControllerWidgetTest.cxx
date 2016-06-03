@@ -37,6 +37,7 @@
 #include <vtkMRMLSliceNode.h>
 
 // VTK includes
+#include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 
 // ----------------------------------------------------------------------------
@@ -66,6 +67,8 @@ private slots:
   void testSetLabelVolume_data();
 
   void testSetLabelVolumeWithNoLinkedControl();
+
+  void testUpdateSliceOrientationSelector();
 };
 
 // ----------------------------------------------------------------------------
@@ -81,6 +84,18 @@ void qMRMLSliceControllerWidgetTester::init()
 
   vtkNew<vtkMRMLSliceNode> sliceNode;
   sliceNode->SetLayoutName("Red");
+  vtkNew<vtkMatrix4x4> axialSliceToRAS;
+  axialSliceToRAS->SetElement(0, 0, -1.0);
+  axialSliceToRAS->SetElement(1, 0,  0.0);
+  axialSliceToRAS->SetElement(2, 0,  0.0);
+  axialSliceToRAS->SetElement(0, 1,  0.0);
+  axialSliceToRAS->SetElement(1, 1,  1.0);
+  axialSliceToRAS->SetElement(2, 1,  0.0);
+  axialSliceToRAS->SetElement(0, 2,  0.0);
+  axialSliceToRAS->SetElement(1, 2,  0.0);
+  axialSliceToRAS->SetElement(2, 2,  1.0);
+  sliceNode->AddSliceOrientationPreset("Axial", axialSliceToRAS.GetPointer());
+  sliceNode->SetOrientation("Axial");
   this->MRMLScene->AddNode(sliceNode.GetPointer());
 
   vtkNew<vtkMRMLScalarVolumeNode> volumeNode1;
@@ -296,6 +311,29 @@ void qMRMLSliceControllerWidgetTester::testSetLabelVolumeWithNoLinkedControl()
 
   //sliceControllerWidget.show();
   //qApp->exec();
+}
+
+// ----------------------------------------------------------------------------
+void qMRMLSliceControllerWidgetTester::testUpdateSliceOrientationSelector()
+{
+  qMRMLSliceControllerWidget sliceControllerWidget;
+  sliceControllerWidget.setSliceViewLabel("R");
+  sliceControllerWidget.setSliceViewColor(Qt::red);
+  sliceControllerWidget.setMRMLScene(this->MRMLScene);
+  sliceControllerWidget.setMRMLSliceNode(this->MRMLSliceNode);
+
+  QCOMPARE(sliceControllerWidget.sliceOrientation(), QString("Axial"));
+
+  vtkMatrix4x4* sliceToRAS =
+      sliceControllerWidget.mrmlSliceNode()->GetSliceToRAS();
+  sliceToRAS->SetElement(0, 0, 1.2);
+  sliceControllerWidget.mrmlSliceNode()->Modified();
+  QCOMPARE(sliceControllerWidget.mrmlSliceNode()->GetOrientation(), std::string("Reformat"));
+  QCOMPARE(sliceControllerWidget.sliceOrientation(), QString("Reformat"));
+
+  sliceControllerWidget.mrmlSliceNode()->SetOrientation("Axial");
+  QCOMPARE(sliceControllerWidget.sliceOrientation(), QString("Axial"));
+
 }
 
 // ----------------------------------------------------------------------------
