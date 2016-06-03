@@ -817,7 +817,7 @@ void qMRMLSliceControllerWidgetPrivate::updateSliceOrientationSelector(
     }
   // In case the orientation matrix (sliceToRAS) is different from any preset,
   // "Reformat" will be displayed on the ctkComboBox.
-  if(!strcmp(sliceNode->GetOrientationString(), "Reformat"))
+  if(!sliceNode->GetOrientation().compare("Reformat"))
     {
     sliceOrientationSelector->insertItem(count, "Reformat");
     }
@@ -825,7 +825,7 @@ void qMRMLSliceControllerWidgetPrivate::updateSliceOrientationSelector(
 
   // Update orientation selector state
   int index = sliceOrientationSelector->findText(
-      QString::fromStdString(sliceNode->GetOrientationString()));
+      QString::fromStdString(sliceNode->GetOrientation()));
   Q_ASSERT(index>=0);
 
   // We block the signal to avoid calling setSliceOrientation from the MRMLNode
@@ -851,7 +851,7 @@ void qMRMLSliceControllerWidgetPrivate::updateWidgetFromMRMLSliceNode()
 
   // Update slice offset slider tooltip
   qMRMLOrientation orientation = this->mrmlOrientation(
-      QString::fromStdString(this->MRMLSliceNode->GetOrientationString()));
+      QString::fromStdString(this->MRMLSliceNode->GetOrientation().c_str()));
   this->SliceOffsetSlider->setToolTip(orientation.ToolTip);
   this->SliceOffsetSlider->setPrefix(orientation.Prefix);
 
@@ -1701,7 +1701,6 @@ void qMRMLSliceControllerWidget::setSliceOrientation(const QString& orientation)
 
   d->SliceLogic->StartSliceNodeInteraction(vtkMRMLSliceNode::OrientationFlag);
   d->MRMLSliceNode->SetOrientation(orientation.toLatin1());
-  this->fitSliceToBackground();
   d->SliceLogic->EndSliceNodeInteraction();
 }
 

@@ -142,24 +142,17 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   /// \sa UpdateMatrices()
   bool SetOrientation(const char* orientation);
 
+  /// \brief Get orientation.
+  ///
+  /// It returns a string with a description of the slice orientation
+  ///
+  /// \sa GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS)
+  std::string GetOrientation();
+
   /// \brief A description of the current orientation.
   ///
-  /// \warning SetOrientationString does *NOT* change the matrices, use
-  /// SetOrientation() instead.
-  /// \sa SetOrientation(const char*)
+  /// \deprecated (mantained for backward compatibility)
   vtkGetStringMacro (OrientationString);
-  vtkSetStringMacro (OrientationString);
-
-  /// The OrientationReference is a place to store the last orientation
-  /// that was explicitly selected.  This way if they RotateToVolumePlane
-  /// is called repeatedly it will always return the same plane
-  /// (without the hint, it would first try to match, say, Coronal, and then
-  /// try to match 'Reformat' but would not know what overall orientation to pick).
-  ///
-  /// \deprecated
-  vtkGetStringMacro (OrientationReference);
-  vtkSetStringMacro (OrientationReference);
-
 
   /// \brief Return the sliceToRAS matrix associated with \a name.
   vtkMatrix4x4 *GetSliceOrientationPreset(const std::string& name);
@@ -460,7 +453,8 @@ protected:
   vtkSmartPointer<vtkMatrix4x4> UVWToSlice;
   vtkSmartPointer<vtkMatrix4x4> UVWToRAS;
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > > OrientationMatrices;
+  typedef std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > OrientationPresetType;
+  std::vector< OrientationPresetType > OrientationMatrices;
 
   int JumpMode;
 
@@ -481,6 +475,10 @@ protected:
 
   char *OrientationString;
   char *OrientationReference;
+
+  void SetOrientationString(const char *name);
+  const char *GetOrientationReference();
+  void SetOrientationReference(const char *name);
 
   double LayoutColor[3];
 
