@@ -116,38 +116,80 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   vtkSetMacro ( UseLabelOutline, int );
   vtkBooleanMacro ( UseLabelOutline, int );
 
+  /// \brief Set 'standard' radiological convention views of patient space.
   ///
-  /// 'standard' radiological convention views of patient space
-  /// these calls adjust the SliceToRAS matrix to position the slice
-  /// cutting plane
-  void SetOrientationToAxial();
-  void SetOrientationToSagittal();
-  void SetOrientationToCoronal();
+  /// If the associated orientation preset has been renamed or removed, calling
+  /// these function returns \a False.
+  ///
+  /// \sa SetOrientation(const char*)
+  bool SetOrientationToAxial();
+  bool SetOrientationToSagittal();
+  bool SetOrientationToCoronal();
 
   ///
   /// General 'reformat' view that allows for multiplanar reformat
   void SetOrientationToReformat();
 
-  /// Convenient function that calls SetOrientationToAxial(),
-  /// SetOrientationToSagittal(), SetOrientationToCoronal() or
-  /// SetOrientationToReformat() depending on the value of the string
-  void SetOrientation(const char* orientation);
+  /// \brief Set orientation.
+  ///
+  /// It adjusts the SliceToRAS matrix to position the slice
+  /// cutting plane.
+  ///
+  /// Valid \a orientations are known as presets and are easily added,
+  /// removed or renamed.
+  ///
+  /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS)
+  /// \sa UpdateMatrices()
+  bool SetOrientation(const char* orientation);
 
-  /// Description
-  /// A description of the current orientation
-  /// Warning, OrientationString doesn't change the matrices, use
+  /// \brief A description of the current orientation.
+  ///
+  /// \warning SetOrientationString does *NOT* change the matrices, use
   /// SetOrientation() instead.
+  /// \sa SetOrientation(const char*)
   vtkGetStringMacro (OrientationString);
   vtkSetStringMacro (OrientationString);
 
-  /// Description
   /// The OrientationReference is a place to store the last orientation
   /// that was explicitly selected.  This way if the RotateToVolumePlane
   /// is called repeatedly it will always return the same plane
   /// (without the hint, it would first try to match, say, Coronal, and then
   /// try to match 'Reformat' but would not know what overall orientation to pick).
+  ///
+  /// \deprecated
   vtkGetStringMacro (OrientationReference);
   vtkSetStringMacro (OrientationReference);
+
+
+  /// \brief Return the sliceToRAS matrix associated with \a name.
+  vtkMatrix4x4 *GetSliceOrientationPreset(const std::string& name);
+
+  /// \brief Return the orientation name associated with \a sliceToRAS.
+  std::string GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS);
+
+  /// \brief Return all the orientation preset names.
+  void GetSliceOrientationPresetNames(vtkStringArray* presetOrientationNames);
+
+  /// \brief Add an orientation preset.
+  ///
+  /// \sa RenameSliceOrientationPreset(const std::string& name, const std::string& updatedName)
+  /// \sa RemoveSliceOrientationPreset(const std::string& name)
+  bool AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS);
+
+  /// \brief Remove an orientation preset.
+  ///
+  /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS)
+  bool RemoveSliceOrientationPreset(const std::string& name);
+
+  /// \brief Rename an orientation preset.
+  ///
+  /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS)
+  bool RenameSliceOrientationPreset(const std::string& name, const std::string& updatedName);
+
+  /// \brief Return True if an orientation preset is stored.
+  ///
+  /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS)
+  bool HasSliceOrientationPreset(const std::string& name);
 
   ///
   /// Size of the slice plane in millimeters
@@ -227,7 +269,7 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
 
   ///
   /// helper for comparing to matrices
-  bool Matrix4x4AreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2);
+  bool MatrixAreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2);
 
   ///
   /// Recalculate XYToSlice and XYToRAS in terms or fov, dim, SliceToRAS
@@ -418,6 +460,8 @@ protected:
   vtkSmartPointer<vtkMatrix4x4> UVWToSlice;
   vtkSmartPointer<vtkMatrix4x4> UVWToRAS;
 
+  typedef std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > OrientationPresetType;
+  std::vector< OrientationPresetType > OrientationMatrices;
 
   int JumpMode;
 
