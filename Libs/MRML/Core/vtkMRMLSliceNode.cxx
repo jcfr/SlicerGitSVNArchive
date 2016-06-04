@@ -389,7 +389,7 @@ vtkMatrix4x4 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &nam
     return NULL;
     }
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     if (!it->first.compare(name))
@@ -412,7 +412,7 @@ std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix4x4 *sliceT
     return "";
     }
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::reverse_iterator it;
+  std::vector< OrientationPresetType >::reverse_iterator it;
   for (it = this->OrientationMatrices.rbegin(); it != this->OrientationMatrices.rend(); ++it)
     {
     std::string presetName = it->first;
@@ -441,7 +441,7 @@ GetSliceOrientationPresetNames(vtkStringArray *presetOrientationNames)
 
   presetOrientationNames->SetNumberOfValues(this->OrientationMatrices.size());
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   int id = 0;
   for (it = this->OrientationMatrices.begin();
        it != this->OrientationMatrices.end();
@@ -462,7 +462,7 @@ bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMat
     return false;
     }
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     if (!it->first.compare(name))
@@ -472,14 +472,14 @@ bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMat
       }
     }
 
-  this->OrientationMatrices.push_back(std::pair<std::string, vtkSmartPointer<vtkMatrix4x4> >(name, sliceToRAS));
+  this->OrientationMatrices.push_back(OrientationPresetType(name, sliceToRAS));
   return true;
 }
 
 //----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::RemoveSliceOrientationPreset(const std::string &name)
 {
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     if (!it->first.compare(name))
@@ -508,7 +508,7 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
     this->SetOrientationString(updatedName.c_str());
     }
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     if (!it->first.compare(name))
@@ -532,7 +532,7 @@ bool vtkMRMLSliceNode::HasSliceOrientationPreset(const std::string &name)
     return false;
     }
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     if (!it->first.compare(name))
@@ -742,7 +742,7 @@ void vtkMRMLSliceNode::UpdateMatrices()
 
     // It updates the Orientation Matrices with the Position coordinates
     // which are set only on the SliceToRAS matrix.
-    std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+    std::vector< OrientationPresetType >::iterator it;
     for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
       {
       it->second->SetElement(0, 3, this->SliceToRAS->GetElement(0, 3));
@@ -826,7 +826,7 @@ void vtkMRMLSliceNode::WriteXML(ostream& of, int nIndent)
     }
   of << indent << " sliceToRAS=\"" << ss.str().c_str() << "\"";
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     std::stringstream ss;
@@ -1382,7 +1382,7 @@ void vtkMRMLSliceNode::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "SliceToRAS: \n";
   this->SliceToRAS->PrintSelf(os, indent.GetNextIndent());
 
-  std::vector< std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > >::iterator it;
+  std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
     os << indent << "OrientationMatrix"<< this->URLEncodeString(it->first.c_str()) <<": \n";
