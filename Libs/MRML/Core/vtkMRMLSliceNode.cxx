@@ -360,14 +360,6 @@ const char* vtkMRMLSliceNode::GetOrientationString()
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLSliceNode::SetOrientationToReformat()
-{
-    // Don't need to do anything.  Leave the matrices where they were
-    // so the reformat starts where you were.
-
-}
-
-//----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::SetOrientationToAxial()
 {
   return this->SetOrientation("Axial");
@@ -2268,8 +2260,6 @@ void vtkMRMLSliceNode::RotateToVolumePlane(vtkMRMLVolumeNode *volumeNode)
     this->SliceToRAS->SetElement(1, nullColumn, C.GetY());
     this->SliceToRAS->SetElement(2, nullColumn, C.GetZ());
     }
-
-  this->SetOrientationToReformat(); // just sets the string - indicates that this is not patient aligned
 
   this->UpdateMatrices();
 }
