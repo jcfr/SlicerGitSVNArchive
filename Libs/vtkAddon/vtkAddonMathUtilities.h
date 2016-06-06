@@ -24,6 +24,7 @@
 #include <vtkObject.h>
 
 class vtkMatrix4x4;
+class vtkMatrix3x3;
 
 class VTK_ADDON_EXPORT vtkAddonMathUtilities : public vtkObject
 {
@@ -36,6 +37,13 @@ public:
                                 const vtkMatrix4x4* m2,
                                 double tolerance = 1e-3);
 
+  static bool OrientationMatrixEqual(const vtkMatrix4x4 *matrix,
+                                     const vtkMatrix3x3 *orientationMatrix,
+                                     double tolerance = 1e-3);
+
+  static bool OrientationMatrixEqual(const vtkMatrix3x3 *orientationMatrix1,
+                                     const vtkMatrix3x3 *orientationMatrix2,
+                                     double tolerance = 1e-3);
 protected:
   vtkAddonMathUtilities();
   ~vtkAddonMathUtilities();
