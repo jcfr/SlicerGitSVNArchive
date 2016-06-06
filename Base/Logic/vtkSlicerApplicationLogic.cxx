@@ -31,7 +31,7 @@
 #include <vtkMRMLRemoteIOLogic.h>
 
 // VTK includes
-#include <vtkMatrix4x4.h>
+#include <vtkMatrix3x3.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkPointData.h>
@@ -300,7 +300,7 @@ void vtkSlicerApplicationLogic::SetMRMLSceneDataIO(vtkMRMLScene* newMRMLScene,
     }
 
   // Setting Orientation Matrices presets
-  vtkNew<vtkMatrix4x4> axialSliceToRAS;
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
   axialSliceToRAS->SetElement(0, 0, -1.0);
   axialSliceToRAS->SetElement(1, 0,  0.0);
   axialSliceToRAS->SetElement(2, 0,  0.0);
@@ -311,7 +311,7 @@ void vtkSlicerApplicationLogic::SetMRMLSceneDataIO(vtkMRMLScene* newMRMLScene,
   axialSliceToRAS->SetElement(1, 2,  0.0);
   axialSliceToRAS->SetElement(2, 2,  1.0);
 
-  vtkNew<vtkMatrix4x4> sagittalSliceToRAS;
+  vtkNew<vtkMatrix3x3> sagittalSliceToRAS;
   sagittalSliceToRAS->SetElement(0, 0,  0.0);
   sagittalSliceToRAS->SetElement(1, 0,  -1.0);
   sagittalSliceToRAS->SetElement(2, 0,  0.0);
@@ -322,7 +322,7 @@ void vtkSlicerApplicationLogic::SetMRMLSceneDataIO(vtkMRMLScene* newMRMLScene,
   sagittalSliceToRAS->SetElement(1, 2,  0.0);
   sagittalSliceToRAS->SetElement(2, 2,  0.0);
 
-  vtkNew<vtkMatrix4x4> coronalSliceToRAS;
+  vtkNew<vtkMatrix3x3> coronalSliceToRAS;
   coronalSliceToRAS->SetElement(0, 0, -1.0);
   coronalSliceToRAS->SetElement(1, 0,  0.0);
   coronalSliceToRAS->SetElement(2, 0,  0.0);

@@ -37,6 +37,7 @@
 #include <vtkMRMLSliceNode.h>
 
 // VTK includes
+#include <vtkMatrix3x3.h>
 #include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 
@@ -84,7 +85,7 @@ void qMRMLSliceControllerWidgetTester::init()
 
   vtkNew<vtkMRMLSliceNode> sliceNode;
   sliceNode->SetLayoutName("Red");
-  vtkNew<vtkMatrix4x4> axialSliceToRAS;
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
   axialSliceToRAS->SetElement(0, 0, -1.0);
   axialSliceToRAS->SetElement(1, 0,  0.0);
   axialSliceToRAS->SetElement(2, 0,  0.0);
