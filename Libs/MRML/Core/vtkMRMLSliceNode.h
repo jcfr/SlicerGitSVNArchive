@@ -126,10 +126,6 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   bool SetOrientationToSagittal();
   bool SetOrientationToCoronal();
 
-  ///
-  /// General 'reformat' view that allows for multiplanar reformat
-  void SetOrientationToReformat();
-
   /// \brief Get orientation.
   ///
   /// It returns a string with a description of the slice orientation
