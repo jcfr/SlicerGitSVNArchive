@@ -156,6 +156,8 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   /// \deprecated Prefer GetOrientation()
   virtual const char* GetOrientationString();
 
+protected:
+
   /// The OrientationReference is a place to store the last orientation
   /// that was explicitly selected.  This way if the RotateToVolumePlane
   /// is called repeatedly it will always return the same plane
@@ -166,6 +168,7 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   vtkGetStringMacro (OrientationReference);
   vtkSetStringMacro (OrientationReference);
 
+public:
 
   /// \brief Return the sliceToRAS matrix associated with \a name.
   vtkMatrix3x3 *GetSliceOrientationPreset(const std::string& name);
