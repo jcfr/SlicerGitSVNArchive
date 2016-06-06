@@ -639,7 +639,6 @@ onSliceOrientationChanged(const QString& orientation)
   d->resetSlider(d->ISSlider);
 
   d->MRMLSliceNode->SetOrientation(orientation.toLatin1());
-  d->MRMLSliceNode->SetOrientationString(orientation.toLatin1());
 }
 
 //------------------------------------------------------------------------------

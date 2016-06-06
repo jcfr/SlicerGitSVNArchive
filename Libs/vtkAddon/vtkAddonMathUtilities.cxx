@@ -15,6 +15,7 @@
 
 #include <vtkAddonMathUtilities.h>
 #include <vtkMath.h>
+#include <vtkMatrix3x3.h>
 #include <vtkMatrix4x4.h>
 #include <vtkObjectFactory.h>
 
@@ -47,6 +48,42 @@ bool vtkAddonMathUtilities::Matrix4x4AreEqual(const vtkMatrix4x4* m1,
     for (int j = 0; j < 4; j++)
       {
       if ( fabs(m1->GetElement(i, j) - m2->GetElement(i, j)) >= tolerance )
+        {
+        return false;
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool vtkAddonMathUtilities::OrientationMatrixEqual(const vtkMatrix4x4 *matrix,
+                                                   const vtkMatrix3x3 *orientationMatrix,
+                                                   double tolerance)
+{
+  for (int i = 0; i < 3; i++)
+    {
+    for (int j = 0; j < 3; j++)
+      {
+      if ( fabs(matrix->GetElement(i, j) - orientationMatrix->GetElement(i, j)) >= tolerance )
+        {
+        return false;
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool vtkAddonMathUtilities::OrientationMatrixEqual(const vtkMatrix3x3 *orientationMatrix1,
+                                                   const vtkMatrix3x3 *orientationMatrix2,
+                                                   double tolerance)
+{
+  for (int i = 0; i < 3; i++)
+    {
+    for (int j = 0; j < 3; j++)
+      {
+      if ( fabs(orientationMatrix1->GetElement(i, j) - orientationMatrix2->GetElement(i, j)) >= tolerance )
         {
         return false;
         }
