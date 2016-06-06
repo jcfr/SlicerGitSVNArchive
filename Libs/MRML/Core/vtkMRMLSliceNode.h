@@ -273,7 +273,7 @@ public:
 
   ///
   /// helper for comparing to matrices
-  bool Matrix4x4AreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2);
+  bool MatrixAreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2);
 
   ///
   /// Recalculate XYToSlice and XYToRAS in terms or fov, dim, SliceToRAS

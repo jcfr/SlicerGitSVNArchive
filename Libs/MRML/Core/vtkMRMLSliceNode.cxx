@@ -372,9 +372,9 @@ bool vtkMRMLSliceNode::SetOrientationToCoronal()
 
 //----------------------------------------------------------------------------
 // Local helper to compare matrices -- TODO: is there a standard version of this?
-bool vtkMRMLSliceNode::Matrix4x4AreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2)
+bool vtkMRMLSliceNode::MatrixAreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2)
 {
-  return vtkAddonMathUtilities::Matrix4x4AreEqual(m1, m2);
+  return vtkAddonMathUtilities::MatrixAreEqual(m1, m2);
 }
 
 //----------------------------------------------------------------------------
@@ -417,7 +417,7 @@ std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix4x4 *sliceT
       {
       continue;
       }
-    if (vtkMRMLSliceNode::Matrix4x4AreEqual(storedSliceToRAS, sliceToRAS))
+    if (vtkMRMLSliceNode::MatrixAreEqual(storedSliceToRAS, sliceToRAS))
       {
       return presetName;
       }
@@ -697,7 +697,7 @@ void vtkMRMLSliceNode::UpdateMatrices()
     bool modified = false;
 
     // check to see if the matrix actually changed
-    if ( !Matrix4x4AreEqual (xyToRAS.GetPointer(), this->XYToRAS) )
+    if ( !MatrixAreEqual (xyToRAS.GetPointer(), this->XYToRAS) )
       {
       this->XYToSlice->DeepCopy(xyToSlice.GetPointer());
       this->XYToRAS->DeepCopy(xyToRAS.GetPointer());
@@ -725,7 +725,7 @@ void vtkMRMLSliceNode::UpdateMatrices()
 
     vtkMatrix4x4::Multiply4x4(this->SliceToRAS, this->UVWToSlice, uvwToRAS.GetPointer());
 
-    if (!Matrix4x4AreEqual(uvwToRAS.GetPointer(), this->UVWToRAS))
+    if (!MatrixAreEqual(uvwToRAS.GetPointer(), this->UVWToRAS))
       {
       this->UVWToRAS->DeepCopy(uvwToRAS.GetPointer());
       modified = true;
