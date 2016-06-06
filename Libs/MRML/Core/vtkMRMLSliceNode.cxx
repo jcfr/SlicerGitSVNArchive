@@ -21,6 +21,7 @@ Version:   $Revision: 1.2 $
 // VTK includes
 #include <vtkAddonMathUtilities.h>
 #include <vtkMath.h>
+#include <vtkMatrix3x3.h>
 #include <vtkMatrix4x4.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
@@ -318,7 +319,7 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
     return false;
     }
 
-  vtkMatrix4x4 *orientationPreset;
+  vtkMatrix3x3 *orientationPreset;
   orientationPreset = this->GetSliceOrientationPreset(orientation);
 
   if (orientationPreset == NULL)
@@ -326,7 +327,13 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
     return false;
     }
 
-  this->SliceToRAS->DeepCopy(orientationPreset);
+  for (int ii = 0; ii < 3; ++ii)
+    {
+    for (int jj = 0; jj < 3; ++jj)
+      {
+      this->SliceToRAS->SetElement(ii, jj, orientationPreset->GetElement(ii, jj));
+      }
+    }
 
   // SetOrientationReference() behaviour will be maintained for backward compatibility
   this->SetOrientationReference(orientation);
@@ -379,14 +386,20 @@ bool vtkMRMLSliceNode::SetOrientationToCoronal()
 }
 
 //----------------------------------------------------------------------------
-// Local helper to compare matrices -- TODO: is there a standard version of this?
 bool vtkMRMLSliceNode::MatrixAreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2)
 {
   return vtkAddonMathUtilities::MatrixAreEqual(m1, m2);
 }
 
 //----------------------------------------------------------------------------
-vtkMatrix4x4 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &name)
+bool vtkMRMLSliceNode::MatrixAreEqual(const vtkMatrix4x4 *matrix,
+                                      const vtkMatrix3x3 *orientationMatrix)
+{
+  return vtkAddonMathUtilities::MatrixAreEqual(matrix, orientationMatrix);
+}
+
+//----------------------------------------------------------------------------
+vtkMatrix3x3 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &name)
 {
   if (name.compare("Reformat") == 0)
     {
@@ -420,12 +433,12 @@ std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix4x4 *sliceT
   for (it = this->OrientationMatrices.rbegin(); it != this->OrientationMatrices.rend(); ++it)
     {
     std::string presetName = it->first;
-    vtkMatrix4x4* storedSliceToRAS = this->GetSliceOrientationPreset(presetName);
+    vtkMatrix3x3* storedSliceToRAS = this->GetSliceOrientationPreset(presetName);
     if (storedSliceToRAS == NULL)
       {
       continue;
       }
-    if (vtkMRMLSliceNode::MatrixAreEqual(storedSliceToRAS, sliceToRAS))
+    if (vtkMRMLSliceNode::MatrixAreEqual(sliceToRAS, storedSliceToRAS))
       {
       return presetName;
       }
@@ -434,8 +447,7 @@ std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix4x4 *sliceT
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLSliceNode::
-GetSliceOrientationPresetNames(vtkStringArray *presetOrientationNames)
+void vtkMRMLSliceNode::GetSliceOrientationPresetNames(vtkStringArray *presetOrientationNames)
 {
   if (presetOrientationNames == NULL)
     {
@@ -457,7 +469,7 @@ GetSliceOrientationPresetNames(vtkStringArray *presetOrientationNames)
 }
 
 //----------------------------------------------------------------------------
-bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMatrix4x4 *sliceToRAS)
+bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMatrix3x3 *orientationMatrix)
 {
   if (!name.compare("Reformat"))
     {
@@ -476,7 +488,7 @@ bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMat
       }
     }
 
-  this->OrientationMatrices.push_back(OrientationPresetType(name, sliceToRAS));
+  this->OrientationMatrices.push_back(OrientationPresetType(name, orientationMatrix));
   return true;
 }
 
@@ -705,7 +717,7 @@ void vtkMRMLSliceNode::UpdateMatrices()
     bool modified = false;
 
     // check to see if the matrix actually changed
-    if ( !MatrixAreEqual (xyToRAS.GetPointer(), this->XYToRAS) )
+    if ( !MatrixAreEqual(xyToRAS.GetPointer(), this->XYToRAS) )
       {
       this->XYToSlice->DeepCopy(xyToSlice.GetPointer());
       this->XYToRAS->DeepCopy(xyToRAS.GetPointer());
@@ -742,16 +754,6 @@ void vtkMRMLSliceNode::UpdateMatrices()
     if (modified)
       {
       this->Modified();
-      }
-
-    // It updates the Orientation Matrices with the Position coordinates
-    // which are set only on the SliceToRAS matrix.
-    std::vector< OrientationPresetType >::iterator it;
-    for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
-      {
-      it->second->SetElement(0, 3, this->SliceToRAS->GetElement(0, 3));
-      it->second->SetElement(1, 3, this->SliceToRAS->GetElement(1, 3));
-      it->second->SetElement(2, 3, this->SliceToRAS->GetElement(2, 3));
       }
 
     // as UpdateMatrices can be called with DisableModifiedEvent
@@ -833,12 +835,12 @@ void vtkMRMLSliceNode::WriteXML(ostream& of, int nIndent)
     {
     std::stringstream ss;
     int j;
-    for (i=0; i<4; i++)
+    for (i=0; i<3; i++)
       {
-      for (j=0; j<4; j++)
+      for (j=0; j<3; j++)
         {
         ss << it->second->GetElement(i,j);
-        if ( !( i==3 && j==3) )
+        if ( !( i==2 && j==2) )
           {
           ss << " ";
           }
@@ -1120,13 +1122,13 @@ void vtkMRMLSliceNode::ReadXMLAttributes(const char** atts)
       std::string name = std::string(this->URLDecodeString(attName));
       std::stringstream ss;
       double val;
-      vtkNew<vtkMatrix4x4> orientationMatrix;
+      vtkNew<vtkMatrix3x3> orientationMatrix;
       orientationMatrix->Identity();
       ss << attValue;
       int i, j;
-      for (i=0; i<4; i++)
+      for (i=0; i<3; i++)
         {
-        for (j=0; j<4; j++)
+        for (j=0; j<3; j++)
           {
           ss >> val;
           orientationMatrix->SetElement(i,j,val);
