@@ -20,6 +20,7 @@
 class vtkMRMLVolumeNode;
 
 // VTK includes
+class vtkMatrix3x3;
 class vtkMatrix4x4;
 
 /// \brief MRML node for storing a slice through RAS space.
@@ -166,7 +167,7 @@ protected:
 public:
 
   /// \brief Return the sliceToRAS matrix associated with \a name.
-  vtkMatrix4x4 *GetSliceOrientationPreset(const std::string& name);
+  vtkMatrix3x3 *GetSliceOrientationPreset(const std::string& name);
 
   /// \brief Return the orientation name associated with \a sliceToRAS.
   std::string GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS);
@@ -178,7 +179,7 @@ public:
   ///
   /// \sa RenameSliceOrientationPreset(const std::string& name, const std::string& updatedName)
   /// \sa RemoveSliceOrientationPreset(const std::string& name)
-  bool AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS);
+  bool AddSliceOrientationPreset(const std::string& name, vtkMatrix3x3* orientationMatrix);
 
   /// \brief Remove an orientation preset.
   ///
@@ -275,6 +276,8 @@ public:
   /// helper for comparing to matrices
   bool MatrixAreEqual(const vtkMatrix4x4 *m1, const vtkMatrix4x4 *m2);
 
+  bool MatrixAreEqual(const vtkMatrix4x4 *matrix,
+                      const vtkMatrix3x3 *orientationMatrix);
   ///
   /// Recalculate XYToSlice and XYToRAS in terms or fov, dim, SliceToRAS
   /// - called when any of the inputs change
@@ -464,7 +467,7 @@ protected:
   vtkSmartPointer<vtkMatrix4x4> UVWToSlice;
   vtkSmartPointer<vtkMatrix4x4> UVWToRAS;
 
-  typedef std::pair <std::string, vtkSmartPointer<vtkMatrix4x4> > OrientationPresetType;
+  typedef std::pair <std::string, vtkSmartPointer<vtkMatrix3x3> > OrientationPresetType;
   std::vector< OrientationPresetType > OrientationMatrices;
 
   int JumpMode;
