@@ -14,9 +14,11 @@
 #include "vtkMRMLCoreTestingMacros.h"
 #include "vtkMRMLNode.h"
 #include "vtkMRMLScene.h"
+#include "vtkMRMLSliceNode.h"
 
 // VTK includes
 #include <vtkCallbackCommand.h>
+#include <vtkMatrix3x3.h>
 #include <vtkXMLDataParser.h>
 
 // STD includes
@@ -193,6 +195,53 @@ int vtkMRMLSceneTest2(int argc, char * argv [] )
   vtkSmartPointer<vtkMRMLScene>  scene = vtkSmartPointer<vtkMRMLScene>::New(); // vtkSmartPointer instead of vtkNew to allow SetPointer
   EXERCISE_BASIC_OBJECT_METHODS(scene.GetPointer());
   CHECK_INT(scene->GetNumberOfNodes(), 0);
+
+  // Setting Orientation Matrices presets
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
+  axialSliceToRAS->SetElement(0, 0, -1.0);
+  axialSliceToRAS->SetElement(1, 0,  0.0);
+  axialSliceToRAS->SetElement(2, 0,  0.0);
+  axialSliceToRAS->SetElement(0, 1,  0.0);
+  axialSliceToRAS->SetElement(1, 1,  1.0);
+  axialSliceToRAS->SetElement(2, 1,  0.0);
+  axialSliceToRAS->SetElement(0, 2,  0.0);
+  axialSliceToRAS->SetElement(1, 2,  0.0);
+  axialSliceToRAS->SetElement(2, 2,  1.0);
+
+  vtkNew<vtkMatrix3x3> sagittalSliceToRAS;
+  sagittalSliceToRAS->SetElement(0, 0,  0.0);
+  sagittalSliceToRAS->SetElement(1, 0,  -1.0);
+  sagittalSliceToRAS->SetElement(2, 0,  0.0);
+  sagittalSliceToRAS->SetElement(0, 1,  0.0);
+  sagittalSliceToRAS->SetElement(1, 1,  0.0);
+  sagittalSliceToRAS->SetElement(2, 1,  1.0);
+  sagittalSliceToRAS->SetElement(0, 2,  1.0);
+  sagittalSliceToRAS->SetElement(1, 2,  0.0);
+  sagittalSliceToRAS->SetElement(2, 2,  0.0);
+
+  vtkNew<vtkMatrix3x3> coronalSliceToRAS;
+  coronalSliceToRAS->SetElement(0, 0, -1.0);
+  coronalSliceToRAS->SetElement(1, 0,  0.0);
+  coronalSliceToRAS->SetElement(2, 0,  0.0);
+  coronalSliceToRAS->SetElement(0, 1,  0.0);
+  coronalSliceToRAS->SetElement(1, 1,  0.0);
+  coronalSliceToRAS->SetElement(2, 1,  1.0);
+  coronalSliceToRAS->SetElement(0, 2,  0.0);
+  coronalSliceToRAS->SetElement(1, 2,  1.0);
+  coronalSliceToRAS->SetElement(2, 2,  0.0);
+
+  // Setting a Slice Default Node
+  vtkSmartPointer<vtkMRMLNode> defaultNode = scene->GetDefaultNodeByClass("vtkMRMLSliceNode");
+  if (!defaultNode)
+    {
+    vtkMRMLNode * foo = scene->CreateNodeByClass("vtkMRMLSliceNode");
+    defaultNode.TakeReference(foo);
+    scene->AddDefaultNode(defaultNode);
+    }
+  vtkMRMLSliceNode * defaultSliceNode = vtkMRMLSliceNode::SafeDownCast(defaultNode);
+  defaultSliceNode->AddSliceOrientationPreset("Axial", axialSliceToRAS.GetPointer());
+  defaultSliceNode->AddSliceOrientationPreset("Sagittal", sagittalSliceToRAS.GetPointer());
+  defaultSliceNode->AddSliceOrientationPreset("Coronal", coronalSliceToRAS.GetPointer());
 
   // Configure mrml event observer
   vtkNew<vtkMRMLSceneCallback> callback;
