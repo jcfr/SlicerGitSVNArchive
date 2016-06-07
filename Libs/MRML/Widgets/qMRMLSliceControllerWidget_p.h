@@ -107,6 +107,8 @@ public:
   void setForegroundInterpolation(vtkMRMLSliceLogic* logic, bool interpolate);
   void setBackgroundInterpolation(vtkMRMLSliceLogic* logic, bool interpolate);
 
+  /// Create a list of orientation containing the regular presets and also
+  /// the "Reformat" string if sliceToRAS is different one of the preset.
   static void updateSliceOrientationSelector(
       vtkMRMLSliceNode* sliceNode, QComboBox *sliceOrientationSelector);
 
