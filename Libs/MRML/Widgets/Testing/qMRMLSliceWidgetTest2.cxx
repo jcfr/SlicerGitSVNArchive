@@ -78,6 +78,46 @@ vtkMRMLScalarVolumeNode* loadVolume(const char* volume, vtkMRMLScene* scene)
   return scalarNode.GetPointer();
 }
 
+int checkDefaultNodes(int line,
+                      vtkMRMLApplicationLogic* applicationLogic,
+                      vtkMRMLScene* scene)
+{
+  vtkMRMLSliceNode * defaultSliceNode =
+      vtkMRMLSliceNode::SafeDownCast(scene->GetDefaultNodeByClass("vtkMRMLSliceNode"));
+  if (!defaultSliceNode)
+    {
+    std::cerr << "Line " << line << " - "
+              << "Failed to retrieve default vtkMRMLSliceNode" << std::endl;
+    return EXIT_FAILURE;
+    }
+  if (defaultSliceNode->GetNumberOfSliceOrientationPresets() != 3)
+    {
+    std::cerr << "Line " << line << " - "
+              << "Problem with MRMLApplicationLogic. Missing presets ... actual:"
+              << defaultSliceNode->GetNumberOfSliceOrientationPresets() << std::endl;
+    return EXIT_FAILURE;
+    }
+
+  if (!applicationLogic)
+    {
+    std::cerr << "Line " << line << " - "
+              << "Application logic is NULL" << std::endl;
+    return EXIT_FAILURE;
+    }
+
+  vtkCollection* logics = applicationLogic->GetSliceLogics();
+  if (!logics)
+    {
+    std::cerr << "Line " << line << " - "
+              << "No slice logics" << std::endl;
+    return EXIT_FAILURE;
+    }
+  std::cout << "logics count:" << logics->GetNumberOfItems() << std::endl;
+
+
+  return EXIT_SUCCESS;
+}
+
 int qMRMLSliceWidgetTest2(int argc, char * argv [] )
 {
   QApplication app(argc, argv);
@@ -93,6 +133,12 @@ int qMRMLSliceWidgetTest2(int argc, char * argv [] )
   vtkNew<vtkMRMLApplicationLogic> applicationLogic;
   applicationLogic->SetMRMLScene(scene.GetPointer());
 
+  if (checkDefaultNodes(__LINE__, applicationLogic.GetPointer(),
+                        scene.GetPointer()) != EXIT_SUCCESS)
+    {
+    return EXIT_FAILURE;
+    }
+
   vtkMRMLScalarVolumeNode* scalarNode = loadVolume(argv[1], scene.GetPointer());
   if (scalarNode == 0)
     {
@@ -100,10 +146,15 @@ int qMRMLSliceWidgetTest2(int argc, char * argv [] )
     return EXIT_FAILURE;
     }
 
+  if (checkDefaultNodes(__LINE__, applicationLogic.GetPointer(),
+                        scene.GetPointer()) != EXIT_SUCCESS)
+    {
+    return EXIT_FAILURE;
+    }
+
   QSize viewSize(256, 256);
   qMRMLSliceWidget sliceWidget;
   sliceWidget.setMRMLScene(scene.GetPointer());
-
   sliceWidget.resize(viewSize.width(), sliceWidget.sliceController()->height() + viewSize.height() );
 
   vtkMRMLSliceCompositeNode* sliceCompositeNode = sliceWidget.sliceLogic()->GetSliceCompositeNode();

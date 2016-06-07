@@ -31,11 +31,13 @@
 
 //-----------------------------------------------------------------------------
 int TemporaryPathTest();
+int MRMLSceneTest();
 
 //-----------------------------------------------------------------------------
 int vtkMRMLApplicationLogicTest1(int , char * [])
 {
   CHECK_INT(TemporaryPathTest(), EXIT_SUCCESS);
+  CHECK_INT(MRMLSceneTest(), EXIT_SUCCESS);
   return EXIT_SUCCESS;
 }
 
@@ -79,4 +81,19 @@ int TemporaryPathTest()
     }
 
   return EXIT_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+int MRMLSceneTest()
+{
+  {
+  vtkNew<vtkMRMLScene> scene;
+  // Import without logic -> expect error
+  }
+
+  {
+  // Import with logic -> no error
+  // + check that default slice node has the presets
+  // + check that slice node created vtkNew<vtkMRMLSliceNode> does not have preset
+  }
 }

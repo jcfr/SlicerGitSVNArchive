@@ -92,6 +92,7 @@ public:
 vtkMRMLApplicationLogic::vtkInternal::vtkInternal(vtkMRMLApplicationLogic * external)
 {
   this->External = external;
+  this->SliceLogics = vtkSmartPointer<vtkCollection>::New();
   this->SliceLinkLogic = vtkSmartPointer<vtkMRMLSliceLinkLogic>::New();
   this->ModelHierarchyLogic = vtkSmartPointer<vtkMRMLModelHierarchyLogic>::New();
   this->ColorLogic = vtkSmartPointer<vtkMRMLColorLogic>::New();

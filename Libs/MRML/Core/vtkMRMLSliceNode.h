@@ -32,6 +32,8 @@ class vtkMatrix4x4;
 class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
 {
   public:
+  /// \brief Instantiate a new Slice node.
+  /// \note @Davide: Explain that CreateDefaultNodeByClass is required ...
   static vtkMRMLSliceNode *New();
   vtkTypeMacro(vtkMRMLSliceNode,vtkMRMLAbstractViewNode);
   void PrintSelf(ostream& os, vtkIndent indent);
