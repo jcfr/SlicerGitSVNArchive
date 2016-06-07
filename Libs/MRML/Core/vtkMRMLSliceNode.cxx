@@ -316,6 +316,7 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
 {
   if (!orientation)
     {
+    vtkErrorMacro("SetOrientation: invalid input orientation");
     return false;
     }
 
@@ -525,8 +526,6 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
 {
   if (name == updatedName)
     {
-    vtkErrorMacro("RenameSliceOrientationPreset: the orientation name " << name <<
-                  "and the update orientation name " << updatedName << "coincide.");
     return false;
     }
 
@@ -545,7 +544,8 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
       }
     }
 
-  vtkErrorMacro("RenameSliceOrientationPreset: the orientation preset " << name << " is not stored.");
+  vtkErrorMacro("RenameSliceOrientationPreset: The orientation preset "
+                "'" << name << "' does NOT exist.");
   return false;
 }
 
@@ -554,8 +554,8 @@ bool vtkMRMLSliceNode::HasSliceOrientationPreset(const std::string &name)
 {
   if (name == "Reformat")
     {
-    vtkWarningMacro("HasSliceOrientationPreset: Reformat refer to any arbitrary orientation. "
-                    "Therefore, it does not have a preset.");
+    vtkWarningMacro("HasSliceOrientationPreset: 'Reformat' refers to any "
+                    "arbitrary orientation. It can NOT be used as a preset name.");
     return false;
     }
 
