@@ -393,11 +393,6 @@ bool vtkMRMLSliceNode::MatrixAreEqual(const vtkMatrix4x4 *matrix,
 //----------------------------------------------------------------------------
 vtkMatrix3x3 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &name)
 {
-  if (name.compare("Reformat") == 0)
-    {
-    return NULL;
-    }
-
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
@@ -524,6 +519,12 @@ bool vtkMRMLSliceNode::RemoveSliceOrientationPreset(const std::string &name)
 //----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, const std::string &updatedName)
 {
+  if (name == "Reformat" || updatedName == "Reformat")
+    {
+    vtkErrorMacro("RenameSliceOrientationPreset: 'Reformat' refers to any "
+                  "arbitrary orientation. It can NOT be used as a preset name.");
+    return false;
+    }
   if (name == updatedName)
     {
     return false;
