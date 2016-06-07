@@ -172,6 +172,12 @@ public:
   /// \brief Return the sliceToRAS matrix associated with \a name.
   vtkMatrix3x3 *GetSliceOrientationPreset(const std::string& name);
 
+  /// \brief Return the preset name corresponding to \a orientationMatrix.
+  ///
+  /// Returns an empty string if \a orientationMatrix is not an existing
+  /// preset.
+  std::string GetSliceOrientationPresetName(vtkMatrix3x3* orientationMatrix);
+
   /// \brief Return all the orientation preset names.
   void GetSliceOrientationPresetNames(vtkStringArray* presetOrientationNames);
 
