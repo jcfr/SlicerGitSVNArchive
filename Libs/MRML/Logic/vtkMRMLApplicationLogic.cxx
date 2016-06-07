@@ -42,6 +42,7 @@
 // VTK includes
 #include <vtkCollection.h>
 #include <vtkImageData.h>
+#include <vtkMatrix3x3.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkSmartPointer.h>
@@ -294,6 +295,32 @@ void vtkMRMLApplicationLogic::SetMRMLSceneInternal(vtkMRMLScene *newScene)
     assert(vtkMRMLInteractionNode::SafeDownCast(interactionNode));
     }
   this->SetInteractionNode(vtkMRMLInteractionNode::SafeDownCast(interactionNode));
+
+  // Setting Orientation Matrices presets
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
+  axialSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultAxialMatrix());
+
+  vtkNew<vtkMatrix3x3> sagittalSliceToRAS;
+  sagittalSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultSagittalMatrix());
+
+  vtkNew<vtkMatrix3x3> coronalSliceToRAS;
+  coronalSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultCoronalMatrix());
+
+  if (newScene)
+    {
+    // Setting a Slice Default Node
+    vtkSmartPointer<vtkMRMLNode> defaultNode = newScene->GetDefaultNodeByClass("vtkMRMLSliceNode");
+    if (!defaultNode)
+      {
+      vtkMRMLNode * foo = newScene->CreateNodeByClass("vtkMRMLSliceNode");
+      defaultNode.TakeReference(foo);
+      newScene->AddDefaultNode(defaultNode);
+      }
+    vtkMRMLSliceNode * defaultSliceNode = vtkMRMLSliceNode::SafeDownCast(defaultNode);
+    defaultSliceNode->AddSliceOrientationPreset("Axial", axialSliceToRAS.GetPointer());
+    defaultSliceNode->AddSliceOrientationPreset("Sagittal", sagittalSliceToRAS.GetPointer());
+    defaultSliceNode->AddSliceOrientationPreset("Coronal", coronalSliceToRAS.GetPointer());
+    }
 
   this->Superclass::SetMRMLSceneInternal(newScene);
 

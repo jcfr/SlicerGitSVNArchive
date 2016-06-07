@@ -573,6 +573,54 @@ bool vtkMRMLSliceNode::HasSliceOrientationPreset(const std::string &name)
 }
 
 //----------------------------------------------------------------------------
+vtkMatrix3x3 *vtkMRMLSliceNode::CreateDefaultAxialMatrix()
+{
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
+  axialSliceToRAS->SetElement(0, 0, -1.0);
+  axialSliceToRAS->SetElement(1, 0,  0.0);
+  axialSliceToRAS->SetElement(2, 0,  0.0);
+  axialSliceToRAS->SetElement(0, 1,  0.0);
+  axialSliceToRAS->SetElement(1, 1,  1.0);
+  axialSliceToRAS->SetElement(2, 1,  0.0);
+  axialSliceToRAS->SetElement(0, 2,  0.0);
+  axialSliceToRAS->SetElement(1, 2,  0.0);
+  axialSliceToRAS->SetElement(2, 2,  1.0);
+  return axialSliceToRAS.GetPointer();
+}
+
+//----------------------------------------------------------------------------
+vtkMatrix3x3 *vtkMRMLSliceNode::CreateDefaultSagittalMatrix()
+{
+  vtkNew<vtkMatrix3x3> sagittalSliceToRAS;
+  sagittalSliceToRAS->SetElement(0, 0,  0.0);
+  sagittalSliceToRAS->SetElement(1, 0,  -1.0);
+  sagittalSliceToRAS->SetElement(2, 0,  0.0);
+  sagittalSliceToRAS->SetElement(0, 1,  0.0);
+  sagittalSliceToRAS->SetElement(1, 1,  0.0);
+  sagittalSliceToRAS->SetElement(2, 1,  1.0);
+  sagittalSliceToRAS->SetElement(0, 2,  1.0);
+  sagittalSliceToRAS->SetElement(1, 2,  0.0);
+  sagittalSliceToRAS->SetElement(2, 2,  0.0);
+  return sagittalSliceToRAS.GetPointer();
+}
+
+//----------------------------------------------------------------------------
+vtkMatrix3x3 *vtkMRMLSliceNode::CreateDefaultCoronalMatrix()
+{
+  vtkNew<vtkMatrix3x3> coronalSliceToRAS;
+  coronalSliceToRAS->SetElement(0, 0, -1.0);
+  coronalSliceToRAS->SetElement(1, 0,  0.0);
+  coronalSliceToRAS->SetElement(2, 0,  0.0);
+  coronalSliceToRAS->SetElement(0, 1,  0.0);
+  coronalSliceToRAS->SetElement(1, 1,  0.0);
+  coronalSliceToRAS->SetElement(2, 1,  1.0);
+  coronalSliceToRAS->SetElement(0, 2,  0.0);
+  coronalSliceToRAS->SetElement(1, 2,  1.0);
+  coronalSliceToRAS->SetElement(2, 2,  0.0);
+  return coronalSliceToRAS.GetPointer();
+}
+
+//----------------------------------------------------------------------------
 //  Set the SliceToRAS matrix by the postion and orientation of the locator
 //
 void vtkMRMLSliceNode::SetSliceToRASByNTP (double Nx, double Ny, double Nz,
