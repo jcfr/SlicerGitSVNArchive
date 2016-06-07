@@ -51,7 +51,6 @@ vtkMRMLSliceNode::vtkMRMLSliceNode()
 
   this->JumpMode = OffsetJumpSlice;
 
-  this->OrientationString = NULL;
   this->OrientationReference = NULL;
 
   // calculated by UpdateMatrices()
@@ -116,7 +115,6 @@ vtkMRMLSliceNode::vtkMRMLSliceNode()
   this->LayoutColor[1] = vtkMRMLSliceNode::grayColor()[1];
   this->LayoutColor[2] = vtkMRMLSliceNode::grayColor()[2];
 
-  this->SetOrientationString("Reformat");
   this->SetOrientationReference("Reformat");
   this->SetLayoutLabel("");
 
@@ -127,10 +125,6 @@ vtkMRMLSliceNode::vtkMRMLSliceNode()
 //----------------------------------------------------------------------------
 vtkMRMLSliceNode::~vtkMRMLSliceNode()
 {
-  if ( this->OrientationString )
-    {
-    delete [] this->OrientationString;
-    }
   if ( this->OrientationReference )
     {
     delete [] this->OrientationReference;
@@ -327,18 +321,12 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
   vtkMatrix4x4 *orientationPreset;
   orientationPreset = this->GetSliceOrientationPreset(orientation);
 
-  if (!strcmp(orientation, "Reformat"))
-    {
-    this->SetOrientationString(orientation);
-    }
-
   if (orientationPreset == NULL)
     {
     return false;
     }
 
   this->SliceToRAS->DeepCopy(orientationPreset);
-  this->SetOrientationString(orientation);
 
   // SetOrientationReference() behaviour will be maintained for backward compatibility
   this->SetOrientationReference(orientation);
@@ -354,12 +342,22 @@ std::string vtkMRMLSliceNode::GetOrientation()
 }
 
 //----------------------------------------------------------------------------
+const char* vtkMRMLSliceNode::GetOrientationString()
+{
+  std::string current = this->GetOrientation();
+  if (current != this->OrientationString)
+    {
+    this->OrientationString = current;
+    }
+  return this->OrientationString.c_str();
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLSliceNode::SetOrientationToReformat()
 {
     // Don't need to do anything.  Leave the matrices where they were
     // so the reformat starts where you were.
 
-    this->SetOrientationString( "Reformat" );
 }
 
 //----------------------------------------------------------------------------
@@ -509,9 +507,9 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
     return false;
     }
 
-  if (!name.compare(this->GetOrientation()))
+  if (!name.compare(this->GetOrientationReference()))
     {
-    this->SetOrientationString(updatedName.c_str());
+    this->SetOrientationReference(updatedName.c_str());
     }
 
   std::vector< OrientationPresetType >::iterator it;
@@ -756,8 +754,6 @@ void vtkMRMLSliceNode::UpdateMatrices()
       it->second->SetElement(2, 3, this->SliceToRAS->GetElement(2, 3));
       }
 
-    this->SetOrientationString(this->GetOrientation().c_str());
-
     // as UpdateMatrices can be called with DisableModifiedEvent
     // (typically when the scene is closed, slice nodes are reset but shouldn't
     // fire events. We should respect the modifiedWasDisabled flag.
@@ -853,10 +849,7 @@ void vtkMRMLSliceNode::WriteXML(ostream& of, int nIndent)
 
   of << indent << " layoutColor=\"" << this->LayoutColor[0] << " "
      << this->LayoutColor[1] << " " << this->LayoutColor[2] << "\"";
-  if (this->OrientationString)
-    {
-    of << indent << " orientation=\"" << this->OrientationString << "\"";
-    }
+  of << indent << " orientation=\"" << this->GetOrientation() << "\"";
   if (this->OrientationReference)
     {
     of << indent << " orientationReference=\"" << this->OrientationReference << "\"";
@@ -1073,7 +1066,7 @@ void vtkMRMLSliceNode::ReadXMLAttributes(const char** atts)
       }
    else if (!strcmp(attName, "orientation"))
       {
-      this->SetOrientationString( attValue );
+      this->SetOrientation( attValue );
       }
    else if (!strcmp(attName, "orientationReference"))
       {
@@ -1252,8 +1245,6 @@ void vtkMRMLSliceNode::Copy(vtkMRMLNode *anode)
 
   this->SetSliceVisible(node->GetSliceVisible());
   this->SliceToRAS->DeepCopy(node->GetSliceToRAS());
-  this->SetOrientationString(node->GetOrientation().c_str());
-  this->SetOrientationReference(node->GetOrientationReference());
 
   vtkNew<vtkStringArray> namedOrientations;
   node->GetSliceOrientationPresetNames(namedOrientations.GetPointer());
@@ -1263,6 +1254,9 @@ void vtkMRMLSliceNode::Copy(vtkMRMLNode *anode)
     this->AddSliceOrientationPreset(namedOrientations->GetValue(i),
         node->GetSliceOrientationPreset(namedOrientations->GetValue(i)));
     }
+
+  this->SetOrientation(node->GetOrientation().c_str());
+  this->SetOrientationReference(node->GetOrientationReference());
 
   this->JumpMode = node->JumpMode;
   this->ActiveSlice = node->ActiveSlice;

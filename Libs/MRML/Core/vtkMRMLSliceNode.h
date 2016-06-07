@@ -150,13 +150,10 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   /// \sa UpdateMatrices()
   bool SetOrientation(const char* orientation);
 
-  /// \brief A description of the current orientation.
+  /// \brief Get orientation.
   ///
-  /// \warning SetOrientationString does *NOT* change the matrices, use
-  /// SetOrientation() instead.
-  /// \sa SetOrientation(const char*)
-  vtkGetStringMacro (OrientationString);
-  vtkSetStringMacro (OrientationString);
+  /// \deprecated Prefer GetOrientation()
+  virtual const char* GetOrientationString();
 
   /// The OrientationReference is a place to store the last orientation
   /// that was explicitly selected.  This way if the RotateToVolumePlane
@@ -488,7 +485,9 @@ protected:
   int UVWDimensions[3];
   int UVWMaximumDimensions[3];
 
-  char *OrientationString;
+  // Hold the string returned by GetOrientationString
+  std::string OrientationString;
+
   char *OrientationReference;
 
   double LayoutColor[3];
