@@ -55,45 +55,21 @@ void AddSliceOrientationPresets(vtkMRMLSliceNode* sliceNode)
 {
   {
     vtkNew<vtkMatrix3x3> preset;
-    preset->SetElement(0, 0, -1.0);
-    preset->SetElement(1, 0,  0.0);
-    preset->SetElement(2, 0,  0.0);
-    preset->SetElement(0, 1,  0.0);
-    preset->SetElement(1, 1,  1.0);
-    preset->SetElement(2, 1,  0.0);
-    preset->SetElement(0, 2,  0.0);
-    preset->SetElement(1, 2,  0.0);
-    preset->SetElement(2, 2,  1.0);
+    preset->DeepCopy(vtkMRMLSliceNode::CreateDefaultAxialMatrix());
 
     sliceNode->AddSliceOrientationPreset("Axial", preset.GetPointer());
   }
 
   {
     vtkNew<vtkMatrix3x3> preset;
-    preset->SetElement(0, 0,  0.0);
-    preset->SetElement(1, 0,  -1.0);
-    preset->SetElement(2, 0,  0.0);
-    preset->SetElement(0, 1,  0.0);
-    preset->SetElement(1, 1,  0.0);
-    preset->SetElement(2, 1,  1.0);
-    preset->SetElement(0, 2,  1.0);
-    preset->SetElement(1, 2,  0.0);
-    preset->SetElement(2, 2,  0.0);
+    preset->DeepCopy(vtkMRMLSliceNode::CreateDefaultSagittalMatrix());
 
     sliceNode->AddSliceOrientationPreset("Sagittal", preset.GetPointer());
   }
 
   {
     vtkNew<vtkMatrix3x3> preset;
-    preset->SetElement(0, 0, -1.0);
-    preset->SetElement(1, 0,  0.0);
-    preset->SetElement(2, 0,  0.0);
-    preset->SetElement(0, 1,  0.0);
-    preset->SetElement(1, 1,  0.0);
-    preset->SetElement(2, 1,  1.0);
-    preset->SetElement(0, 2,  0.0);
-    preset->SetElement(1, 2,  1.0);
-    preset->SetElement(2, 2,  0.0);
+    preset->DeepCopy(vtkMRMLSliceNode::CreateDefaultCoronalMatrix());
 
     sliceNode->AddSliceOrientationPreset("Coronal", preset.GetPointer());
   }
@@ -322,15 +298,7 @@ int GetSliceOrientationPresetNameTest()
   vtkNew<vtkMRMLSliceNode> sliceNode;
 
   vtkNew<vtkMatrix3x3> originalPreset;
-  originalPreset->SetElement(0, 0, -1.0);
-  originalPreset->SetElement(1, 0,  0.0);
-  originalPreset->SetElement(2, 0,  0.0);
-  originalPreset->SetElement(0, 1,  0.0);
-  originalPreset->SetElement(1, 1,  1.0);
-  originalPreset->SetElement(2, 1,  0.0);
-  originalPreset->SetElement(0, 2,  0.0);
-  originalPreset->SetElement(1, 2,  0.0);
-  originalPreset->SetElement(2, 2,  1.0);
+  originalPreset->DeepCopy(vtkMRMLSliceNode::CreateDefaultAxialMatrix());
 
   vtkNew<vtkMatrix3x3> preset;
   preset->DeepCopy(originalPreset.GetPointer());
