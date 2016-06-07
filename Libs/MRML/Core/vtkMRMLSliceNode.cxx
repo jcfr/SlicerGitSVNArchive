@@ -412,27 +412,41 @@ vtkMatrix3x3 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &nam
 }
 
 //----------------------------------------------------------------------------
-std::string vtkMRMLSliceNode::GetOrientation(vtkMatrix4x4 *sliceToRAS)
+std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix3x3* orientationMatrix)
 {
-  if (sliceToRAS == NULL)
+  if (!orientationMatrix)
     {
-    vtkErrorMacro("GetSliceOrientationPresetName: invalid input Matrix. ");
-    return "";
+    vtkErrorMacro("GetSliceOrientationPresetName: invalid input Matrix.");
+    return std::string();
     }
 
   std::vector< OrientationPresetType >::reverse_iterator it;
-  for (it = this->OrientationMatrices.rbegin(); it != this->OrientationMatrices.rend(); ++it)
+  for (it = this->OrientationMatrices.rbegin();
+       it != this->OrientationMatrices.rend();
+       ++it)
     {
     std::string presetName = it->first;
-    vtkMatrix3x3* storedSliceToRAS = this->GetSliceOrientationPreset(presetName);
-    if (storedSliceToRAS == NULL)
-      {
-      continue;
-      }
-    if (vtkMRMLSliceNode::MatrixAreEqual(sliceToRAS, storedSliceToRAS))
+    vtkMatrix3x3* presetOrientationMatrix = this->GetSliceOrientationPreset(presetName);
+    if (vtkAddonMathUtilities::MatrixAreEqual(orientationMatrix, presetOrientationMatrix))
       {
       return presetName;
       }
+    }
+  return std::string();
+}
+
+//----------------------------------------------------------------------------
+std::string vtkMRMLSliceNode::GetOrientation(vtkMatrix4x4 *sliceToRAS)
+{
+  vtkNew<vtkMatrix3x3> orientationMatrix;
+  vtkAddonMathUtilities::GetOrientationMatrix(
+        sliceToRAS, orientationMatrix.GetPointer());
+
+  std::string orientation =
+      this->GetSliceOrientationPresetName(orientationMatrix.GetPointer());
+  if (orientation != "")
+    {
+    return orientation;
     }
   return "Reformat";
 }
