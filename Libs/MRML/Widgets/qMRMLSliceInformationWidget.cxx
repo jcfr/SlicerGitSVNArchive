@@ -210,7 +210,7 @@ void qMRMLSliceInformationWidget::setSliceOrientation(const QString& orientation
     return;
     }
 
-  d->MRMLSliceNode->SetOrientationString(orientation.toLatin1());
+  d->MRMLSliceNode->SetOrientation(orientation.toLatin1());
 }
 
 //---------------------------------------------------------------------------

@@ -348,6 +348,12 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
 }
 
 //----------------------------------------------------------------------------
+std::string vtkMRMLSliceNode::GetOrientation()
+{
+  return this->GetSliceOrientationPresetName(this->SliceToRAS);
+}
+
+//----------------------------------------------------------------------------
 void vtkMRMLSliceNode::SetOrientationToReformat()
 {
     // Don't need to do anything.  Leave the matrices where they were
@@ -503,7 +509,7 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
     return false;
     }
 
-  if (!name.compare(this->GetOrientationString()))
+  if (!name.compare(this->GetOrientation()))
     {
     this->SetOrientationString(updatedName.c_str());
     }
@@ -750,7 +756,7 @@ void vtkMRMLSliceNode::UpdateMatrices()
       it->second->SetElement(2, 3, this->SliceToRAS->GetElement(2, 3));
       }
 
-    this->SetOrientationString((this->GetSliceOrientationPresetName(this->SliceToRAS)).c_str());
+    this->SetOrientationString(this->GetOrientation().c_str());
 
     // as UpdateMatrices can be called with DisableModifiedEvent
     // (typically when the scene is closed, slice nodes are reset but shouldn't
@@ -1246,7 +1252,7 @@ void vtkMRMLSliceNode::Copy(vtkMRMLNode *anode)
 
   this->SetSliceVisible(node->GetSliceVisible());
   this->SliceToRAS->DeepCopy(node->GetSliceToRAS());
-  this->SetOrientationString(node->GetOrientationString());
+  this->SetOrientationString(node->GetOrientation().c_str());
   this->SetOrientationReference(node->GetOrientationReference());
 
   vtkNew<vtkStringArray> namedOrientations;
@@ -1296,7 +1302,7 @@ void vtkMRMLSliceNode::Reset(vtkMRMLNode* defaultNode)
   // and the layout color (typically associated with the layoutName) are not
   // preserved automatically.
   // This require a custom behavior implemented here.
-  std::string orientation = this->GetOrientationString();
+  std::string orientation = this->GetOrientation();
   double layoutColor[3] = {0.0, 0.0, 0.0};
   this->GetLayoutColor(layoutColor);
   this->Superclass::Reset(defaultNode);
