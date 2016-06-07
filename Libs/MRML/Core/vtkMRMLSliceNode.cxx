@@ -1080,7 +1080,10 @@ void vtkMRMLSliceNode::ReadXMLAttributes(const char** atts)
       }
    else if (!strcmp(attName, "orientation"))
       {
-      this->SetOrientation( attValue );
+      if (strcmp( attValue, "Reformat" ))
+        {
+        this->SetOrientation( attValue );
+        }
       }
    else if (!strcmp(attName, "orientationReference"))
       {
@@ -1269,7 +1272,11 @@ void vtkMRMLSliceNode::Copy(vtkMRMLNode *anode)
         node->GetSliceOrientationPreset(namedOrientations->GetValue(i)));
     }
 
-  this->SetOrientation(node->GetOrientation().c_str());
+  std::string orientation = node->GetOrientation();
+  if (orientation != "Reformat")
+    {
+    this->SetOrientation(orientation.c_str());
+    }
   this->SetOrientationReference(node->GetOrientationReference());
 
   this->JumpMode = node->JumpMode;
@@ -1315,7 +1322,10 @@ void vtkMRMLSliceNode::Reset(vtkMRMLNode* defaultNode)
   this->GetLayoutColor(layoutColor);
   this->Superclass::Reset(defaultNode);
   int wasModified = this->StartModify();
-  this->SetOrientation(orientation.c_str());
+  if (orientation != "Reformat")
+    {
+    this->SetOrientation(orientation.c_str());
+    }
   this->SetLayoutColor(layoutColor);
   this->EndModify(wasModified);
 }
