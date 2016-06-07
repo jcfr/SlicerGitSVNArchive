@@ -130,6 +130,14 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   /// General 'reformat' view that allows for multiplanar reformat
   void SetOrientationToReformat();
 
+  /// \brief Get orientation.
+  ///
+  /// It returns a string with a description of the slice orientation
+  ///
+  /// \sa GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS)
+  /// \sa SetOrientation(const char* orientation)
+  std::string GetOrientation();
+
   /// \brief Set orientation.
   ///
   /// It adjusts the SliceToRAS matrix to position the slice
