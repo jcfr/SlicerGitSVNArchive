@@ -319,9 +319,8 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
     return false;
     }
 
-  vtkMatrix3x3 *orientationPreset;
-  orientationPreset = this->GetSliceOrientationPreset(orientation);
-
+  vtkMatrix3x3 *orientationPreset =
+      this->GetSliceOrientationPreset(orientation);
   if (orientationPreset == NULL)
     {
     return false;
@@ -401,7 +400,7 @@ vtkMatrix3x3 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &nam
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
-    if (!it->first.compare(name))
+    if (it->first == name)
       {
       return it->second;
       }
@@ -463,17 +462,17 @@ void vtkMRMLSliceNode::GetSliceOrientationPresetNames(vtkStringArray *presetOrie
 //----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMatrix3x3 *orientationMatrix)
 {
-  if (!name.compare("Reformat"))
+  if (name == "Reformat")
     {
     vtkWarningMacro("AddSliceOrientationPreset: Reformat refer to any arbitrary orientation. "
-                    "Therefore, it can not have a preset.");
+                    "Therefore, it can not be used a preset name.");
     return false;
     }
 
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
-    if (!it->first.compare(name))
+    if (it->first == name)
       {
       vtkDebugMacro("AddSliceOrientationPreset: the orientation preset " << name << " is already stored.");
       return false;
@@ -490,7 +489,7 @@ bool vtkMRMLSliceNode::RemoveSliceOrientationPreset(const std::string &name)
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
-    if (!it->first.compare(name))
+    if (it->first == name)
       {
       this->OrientationMatrices.erase(it);
       return true;
@@ -504,7 +503,7 @@ bool vtkMRMLSliceNode::RemoveSliceOrientationPreset(const std::string &name)
 //----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, const std::string &updatedName)
 {
-  if (!name.compare(updatedName))
+  if (name == updatedName)
     {
     vtkErrorMacro("RenameSliceOrientationPreset: the orientation name " << name <<
                   "and the update orientation name " << updatedName << "coincide.");
@@ -519,7 +518,7 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
-    if (!it->first.compare(name))
+    if (it->first == name)
       {
       it->first = updatedName;
       return true;
@@ -533,7 +532,7 @@ bool vtkMRMLSliceNode::RenameSliceOrientationPreset(const std::string &name, con
 //----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::HasSliceOrientationPreset(const std::string &name)
 {
-  if (!name.compare("Reformat"))
+  if (name == "Reformat")
     {
     vtkWarningMacro("HasSliceOrientationPreset: Reformat refer to any arbitrary orientation. "
                     "Therefore, it does not have a preset.");
@@ -543,7 +542,7 @@ bool vtkMRMLSliceNode::HasSliceOrientationPreset(const std::string &name)
   std::vector< OrientationPresetType >::iterator it;
   for (it = this->OrientationMatrices.begin(); it != this->OrientationMatrices.end(); ++it)
     {
-    if (!it->first.compare(name))
+    if (it->first == name)
       {
       return true;
       }
