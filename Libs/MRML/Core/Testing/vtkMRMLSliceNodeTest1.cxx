@@ -19,13 +19,6 @@
 #include <vtkMatrix4x4.h>
 #include <vtkStringArray.h>
 
-//SetOrientationToAxial
-//SetOrientationToSagittal
-//SetOrientationToCoronal
-
-//OrientationReference
-
-
 
 //----------------------------------------------------------------------------
 void AddSliceOrientationPresets(vtkMRMLSliceNode *sliceNode);
