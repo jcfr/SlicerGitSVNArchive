@@ -87,15 +87,8 @@ void qMRMLSliceControllerWidgetTester::init()
   vtkNew<vtkMRMLSliceNode> sliceNode;
   sliceNode->SetLayoutName("Red");
   vtkNew<vtkMatrix3x3> axialSliceToRAS;
-  axialSliceToRAS->SetElement(0, 0, -1.0);
-  axialSliceToRAS->SetElement(1, 0,  0.0);
-  axialSliceToRAS->SetElement(2, 0,  0.0);
-  axialSliceToRAS->SetElement(0, 1,  0.0);
-  axialSliceToRAS->SetElement(1, 1,  1.0);
-  axialSliceToRAS->SetElement(2, 1,  0.0);
-  axialSliceToRAS->SetElement(0, 2,  0.0);
-  axialSliceToRAS->SetElement(1, 2,  0.0);
-  axialSliceToRAS->SetElement(2, 2,  1.0);
+  axialSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultAxialMatrix());
+
   sliceNode->AddSliceOrientationPreset("Axial", axialSliceToRAS.GetPointer());
   sliceNode->SetOrientation("Axial");
   this->MRMLScene->AddNode(sliceNode.GetPointer());
