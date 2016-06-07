@@ -181,6 +181,10 @@ public:
   /// \brief Return all the orientation preset names.
   void GetSliceOrientationPresetNames(vtkStringArray* presetOrientationNames);
 
+  /// \brief Return number of orientation presets.
+  /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix3x3* orientationMatrix)
+  int GetNumberOfSliceOrientationPresets() const;
+
   /// \brief Add an orientation preset.
   ///
   /// \sa RenameSliceOrientationPreset(const std::string& name, const std::string& updatedName)

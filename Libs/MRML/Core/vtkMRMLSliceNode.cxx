@@ -460,6 +460,12 @@ void vtkMRMLSliceNode::GetSliceOrientationPresetNames(vtkStringArray *presetOrie
 }
 
 //----------------------------------------------------------------------------
+int vtkMRMLSliceNode::GetNumberOfSliceOrientationPresets() const
+{
+  return static_cast<int>(this->OrientationMatrices.size());
+}
+
+//----------------------------------------------------------------------------
 bool vtkMRMLSliceNode::AddSliceOrientationPreset(const std::string &name, vtkMatrix3x3 *orientationMatrix)
 {
   if (name == "Reformat")
