@@ -131,9 +131,12 @@ class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
   ///
   /// It returns a string with a description of the slice orientation
   ///
-  /// \sa GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS)
+  /// \sa GetOrientation(vtkMatrix4x4* sliceToRAS)
   /// \sa SetOrientation(const char* orientation)
   std::string GetOrientation();
+
+  /// \brief Return the orientation name associated with \a sliceToRAS.
+  std::string GetOrientation(vtkMatrix4x4* sliceToRAS);
 
   /// \brief Set orientation.
   ///
@@ -168,9 +171,6 @@ public:
 
   /// \brief Return the sliceToRAS matrix associated with \a name.
   vtkMatrix3x3 *GetSliceOrientationPreset(const std::string& name);
-
-  /// \brief Return the orientation name associated with \a sliceToRAS.
-  std::string GetSliceOrientationPresetName(vtkMatrix4x4* sliceToRAS);
 
   /// \brief Return all the orientation preset names.
   void GetSliceOrientationPresetNames(vtkStringArray* presetOrientationNames);

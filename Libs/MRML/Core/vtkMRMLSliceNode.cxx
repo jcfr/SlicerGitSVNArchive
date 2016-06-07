@@ -345,7 +345,7 @@ bool vtkMRMLSliceNode::SetOrientation(const char* orientation)
 //----------------------------------------------------------------------------
 std::string vtkMRMLSliceNode::GetOrientation()
 {
-  return this->GetSliceOrientationPresetName(this->SliceToRAS);
+  return this->GetOrientation(this->SliceToRAS);
 }
 
 //----------------------------------------------------------------------------
@@ -413,7 +413,7 @@ vtkMatrix3x3 *vtkMRMLSliceNode::GetSliceOrientationPreset(const std::string &nam
 }
 
 //----------------------------------------------------------------------------
-std::string vtkMRMLSliceNode::GetSliceOrientationPresetName(vtkMatrix4x4 *sliceToRAS)
+std::string vtkMRMLSliceNode::GetOrientation(vtkMatrix4x4 *sliceToRAS)
 {
   if (sliceToRAS == NULL)
     {
