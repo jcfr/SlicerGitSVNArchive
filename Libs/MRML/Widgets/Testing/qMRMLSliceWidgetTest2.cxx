@@ -93,7 +93,7 @@ int checkDefaultNodes(int line,
   if (defaultSliceNode->GetNumberOfSliceOrientationPresets() != 3)
     {
     std::cerr << "Line " << line << " - "
-              << "Problem with MRMLApplicationLogic. Missing presets ... actual:"
+              << "Problem with MRMLApplicationLogic. Missing orientation presets. Presets found: "
               << defaultSliceNode->GetNumberOfSliceOrientationPresets() << std::endl;
     return EXIT_FAILURE;
     }

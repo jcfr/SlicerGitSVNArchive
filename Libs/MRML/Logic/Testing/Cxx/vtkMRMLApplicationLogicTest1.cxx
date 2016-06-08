@@ -21,6 +21,8 @@
 // MRML includes
 #include "vtkMRMLApplicationLogic.h"
 #include "vtkMRMLCoreTestingMacros.h"
+#include <vtkMRMLScene.h>
+#include <vtkMRMLSliceNode.h>
 
 // VTK includes
 #include <vtkNew.h>
@@ -31,13 +33,14 @@
 
 //-----------------------------------------------------------------------------
 int TemporaryPathTest();
-int MRMLSceneTest();
+int MRMLSliceNodeTest();
+int checkSliceNode(int line, vtkMRMLSliceNode* sliceNode);
 
 //-----------------------------------------------------------------------------
 int vtkMRMLApplicationLogicTest1(int , char * [])
 {
   CHECK_INT(TemporaryPathTest(), EXIT_SUCCESS);
-  CHECK_INT(MRMLSceneTest(), EXIT_SUCCESS);
+  CHECK_INT(MRMLSliceNodeTest(), EXIT_SUCCESS);
   return EXIT_SUCCESS;
 }
 
@@ -84,16 +87,47 @@ int TemporaryPathTest()
 }
 
 //-----------------------------------------------------------------------------
-int MRMLSceneTest()
+int MRMLSliceNodeTest()
 {
   {
-  vtkNew<vtkMRMLScene> scene;
-  // Import without logic -> expect error
+    vtkNew<vtkMRMLSliceNode> sliceNode;
+    CHECK_INT(checkSliceNode(__LINE__, sliceNode.GetPointer()), EXIT_FAILURE);
   }
 
   {
-  // Import with logic -> no error
-  // + check that default slice node has the presets
-  // + check that slice node created vtkNew<vtkMRMLSliceNode> does not have preset
+    vtkNew<vtkMRMLScene> scene;
+    vtkMRMLSliceNode * defaultSliceNode =
+        vtkMRMLSliceNode::SafeDownCast(scene->GetDefaultNodeByClass("vtkMRMLSliceNode"));
+    CHECK_INT(checkSliceNode(__LINE__, defaultSliceNode), EXIT_FAILURE);
   }
+
+  {
+    vtkNew<vtkMRMLScene> scene;
+    vtkNew<vtkMRMLApplicationLogic> appLogic;
+    appLogic->SetMRMLScene(scene.GetPointer());
+    vtkMRMLSliceNode * defaultSliceNode =
+        vtkMRMLSliceNode::SafeDownCast(scene->GetDefaultNodeByClass("vtkMRMLSliceNode"));
+    CHECK_INT(checkSliceNode(__LINE__, defaultSliceNode), EXIT_SUCCESS);
+  }
+
+  return EXIT_SUCCESS;
+}
+
+int checkSliceNode(int line, vtkMRMLSliceNode* sliceNode)
+{
+  if (!sliceNode)
+    {
+    std::cerr << "Line " << line << " - "
+              << "Failed to retrieve the vtkMRMLSliceNode " << std::endl;
+    return EXIT_FAILURE;
+    }
+  if (sliceNode->GetNumberOfSliceOrientationPresets() != 3)
+    {
+    std::cerr << "Line " << line << " - "
+              << "Problem with vtkMRMLSliceNode. Missing orientation presets. Presets found: "
+              << sliceNode->GetNumberOfSliceOrientationPresets() << std::endl;
+    return EXIT_FAILURE;
+    }
+
+  return EXIT_SUCCESS;
 }
