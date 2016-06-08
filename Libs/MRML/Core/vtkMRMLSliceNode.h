@@ -206,6 +206,15 @@ public:
   /// \sa AddSliceOrientationPreset(const std::string& name, vtkMatrix4x4* sliceToRAS)
   bool HasSliceOrientationPreset(const std::string& name);
 
+  /// \brief Return an 'Axial' orientation matrix
+  static vtkMatrix3x3 *CreateDefaultAxialMatrix();
+
+  /// \brief Return an 'Sagittal' orientation matrix
+  static vtkMatrix3x3 *CreateDefaultSagittalMatrix();
+
+  /// \brief Return an 'Coronal' orientation matrix
+  static vtkMatrix3x3 *CreateDefaultCoronalMatrix();
+
   ///
   /// Size of the slice plane in millimeters
   vtkGetVector3Macro (FieldOfView, double);

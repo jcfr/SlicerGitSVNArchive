@@ -22,6 +22,7 @@
 
 // VTK includes
 #include <vtkCallbackCommand.h>
+#include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkSmartPointer.h>
 
