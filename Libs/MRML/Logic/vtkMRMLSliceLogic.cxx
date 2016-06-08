@@ -229,7 +229,8 @@ void vtkMRMLSliceLogic::UpdateSliceNode()
     {
     if ( node == 0 )
       {
-      node = vtkMRMLSliceNode::New();
+      node = vtkMRMLSliceNode::SafeDownCast(
+            this->GetMRMLScene()->CreateNodeByClass("vtkMRMLSliceNode"));
       node->SetName(this->GetName());
       node->SetLayoutName(this->GetName());
       this->SetSliceNode (node);

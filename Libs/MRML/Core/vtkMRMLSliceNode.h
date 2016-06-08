@@ -32,6 +32,13 @@ class vtkMatrix4x4;
 class VTK_MRML_EXPORT vtkMRMLSliceNode : public vtkMRMLAbstractViewNode
 {
   public:
+  /// \brief Instantiate a new Slice node.
+  /// \note it is necessary to use CreateDefaultNodeByClass
+  /// for instantiating a SliceNode with preconfigured
+  /// orientation preset matrices (the default presets are: Axial,
+  /// Sagittal and Coronal in default).
+  /// Using the New macro will results in
+  /// instantiating a clean SliceNode without any orientation presets.
   static vtkMRMLSliceNode *New();
   vtkTypeMacro(vtkMRMLSliceNode,vtkMRMLAbstractViewNode);
   void PrintSelf(ostream& os, vtkIndent indent);

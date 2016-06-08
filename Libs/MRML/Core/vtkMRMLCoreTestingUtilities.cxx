@@ -25,6 +25,7 @@
 #include "vtkMRMLDisplayNode.h"
 #include "vtkMRMLNode.h"
 #include "vtkMRMLScene.h"
+#include "vtkMRMLSliceNode.h"
 #include "vtkMRMLStorableNode.h"
 #include "vtkMRMLStorageNode.h"
 #include "vtkMRMLTransformableNode.h"
@@ -36,6 +37,7 @@
 // VTK includes
 #include <vtkCallbackCommand.h>
 #include <vtkGeneralTransform.h>
+#include <vtkMatrix3x3.h>
 #include <vtkStringArray.h>
 #include <vtkTestErrorObserver.h>
 #include <vtkURIHandler.h>
@@ -579,6 +581,31 @@ int ExerciseSceneLoadingMethods(const char * sceneFilePath, vtkMRMLScene* inputS
     {
       scene = vtkSmartPointer<vtkMRMLScene>::New();
     }
+
+  // Setting Orientation Matrices presets
+  vtkNew<vtkMatrix3x3> axialSliceToRAS;
+  axialSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultAxialMatrix());
+
+  vtkNew<vtkMatrix3x3> sagittalSliceToRAS;
+  sagittalSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultSagittalMatrix());
+
+  vtkNew<vtkMatrix3x3> coronalSliceToRAS;
+  coronalSliceToRAS->DeepCopy(vtkMRMLSliceNode::CreateDefaultCoronalMatrix());
+
+  // Setting a Slice Default Node
+  vtkSmartPointer<vtkMRMLNode> defaultNode = scene->GetDefaultNodeByClass("vtkMRMLSliceNode");
+  if (!defaultNode)
+    {
+    vtkMRMLNode * foo = scene->CreateNodeByClass("vtkMRMLSliceNode");
+    defaultNode.TakeReference(foo);
+    scene->AddDefaultNode(defaultNode);
+    }
+  vtkMRMLSliceNode * defaultSliceNode = vtkMRMLSliceNode::SafeDownCast(defaultNode);
+  defaultSliceNode->AddSliceOrientationPreset("Axial", axialSliceToRAS.GetPointer());
+  defaultSliceNode->AddSliceOrientationPreset("Sagittal", sagittalSliceToRAS.GetPointer());
+  defaultSliceNode->AddSliceOrientationPreset("Coronal", coronalSliceToRAS.GetPointer());
+
+
   scene->SetURL(sceneFilePath);
   scene->Connect();
   int numberOfNodes = scene->GetNumberOfNodes();
