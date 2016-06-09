@@ -80,6 +80,8 @@ public:
   bool AutoDefaultText;
 
   QList<QAction*> UserMenuActions;
+
+  static qMRMLSceneModel* GlobalSceneModel;
 };
 
 #endif

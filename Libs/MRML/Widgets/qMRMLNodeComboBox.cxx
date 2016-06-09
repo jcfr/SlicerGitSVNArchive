@@ -358,7 +358,16 @@ qMRMLNodeComboBox::qMRMLNodeComboBox(QWidget* parentWidget)
   , d_ptr(new qMRMLNodeComboBoxPrivate(*this))
 {
   Q_D(qMRMLNodeComboBox);
-  d->init(new qMRMLSceneModel(this));
+  if (!qMRMLNodeComboBoxPrivate::GlobalSceneModel)
+    {
+    qDebug() << "NEW SCENE MODEL";
+    qMRMLNodeComboBoxPrivate::GlobalSceneModel = new qMRMLSceneModel(this);
+    }
+  else
+    {
+    qDebug() << "REUSE SCENE MODEL";
+    }
+  d->init(qMRMLNodeComboBoxPrivate::GlobalSceneModel);
 }
 
 // --------------------------------------------------------------------------
@@ -370,13 +379,25 @@ qMRMLNodeComboBox::qMRMLNodeComboBox(QAbstractItemModel* sceneModel, QWidget* pa
   d->init(sceneModel);
 }
 
+qMRMLSceneModel* qMRMLNodeComboBoxPrivate::GlobalSceneModel;
+
 // --------------------------------------------------------------------------
 qMRMLNodeComboBox::qMRMLNodeComboBox(qMRMLNodeComboBoxPrivate* pimpl, QWidget* parentWidget)
   : Superclass(parentWidget)
   , d_ptr(pimpl)
 {
   Q_D(qMRMLNodeComboBox);
-  d->init(new qMRMLSceneModel(this));
+
+  if (!qMRMLNodeComboBoxPrivate::GlobalSceneModel)
+    {
+    qDebug() << "NEW SCENE MODEL";
+    qMRMLNodeComboBoxPrivate::GlobalSceneModel = new qMRMLSceneModel(this);
+    }
+  else
+    {
+    qDebug() << "REUSE SCENE MODEL";
+    }
+  d->init(qMRMLNodeComboBoxPrivate::GlobalSceneModel);
 }
 
 // --------------------------------------------------------------------------
