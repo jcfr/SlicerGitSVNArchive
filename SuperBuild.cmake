@@ -157,6 +157,10 @@ if(Slicer_USE_PYTHONQT_WITH_TCL AND UNIX)
   list(APPEND Slicer_DEPENDENCIES incrTcl)
 endif()
 
+if(NOT "${Slicer_EXTENSION_PACKAGE_NAMES}" STREQUAL "")
+  list(APPEND Slicer_DEPENDENCIES SlicerExtensionPackages)
+endif()
+
 if(DEFINED Slicer_ADDITIONAL_DEPENDENCIES)
   list(APPEND Slicer_DEPENDENCIES ${Slicer_ADDITIONAL_DEPENDENCIES})
 endif()
