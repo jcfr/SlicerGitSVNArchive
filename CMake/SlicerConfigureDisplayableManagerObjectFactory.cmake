@@ -117,6 +117,4 @@ ${_export_header}
     ${CMAKE_CURRENT_BINARY_DIR}/${vtk-module}ObjectFactory.cxx
     PARENT_SCOPE
     )
-
-  set(${DM_OBJECT_FACTORY_TARGET_NAME}_AUTOINIT 1 PARENT_SCOPE)
 endfunction()
