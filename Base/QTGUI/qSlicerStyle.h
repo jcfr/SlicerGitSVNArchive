@@ -47,6 +47,8 @@ public:
   virtual QRect subControlRect(ComplexControl control, const QStyleOptionComplex *option,
                                SubControl subControl, const QWidget *widget) const;
   virtual QPalette standardPalette()const;
+  virtual QSize sizeFromContents(ContentsType type, const QStyleOption *option,
+                                 const QSize &size, const QWidget *widget) const;
   virtual int styleHint(StyleHint hint, const QStyleOption *opt, const QWidget *widget,
                         QStyleHintReturn *returnData) const;
 

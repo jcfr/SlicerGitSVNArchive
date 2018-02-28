@@ -30,6 +30,7 @@
 #include <QGroupBox>
 #include <QScrollBar>
 #include <QStyleOptionGroupBox>
+#include <QToolBar>
 
 // qMRML includes
 #include "qSlicerStyle.h"
@@ -276,6 +277,29 @@ QPalette qSlicerStyle::standardPalette()const
   palette.setColor(QPalette::Shadow, "#5a5a5a");
   palette.setColor(QPalette::AlternateBase, QColor("#e4e4fe"));
   return palette;
+}
+
+//------------------------------------------------------------------------------
+QSize qSlicerStyle::sizeFromContents(ContentsType type, const QStyleOption *option,
+                                     const QSize &size, const QWidget *widget) const
+{
+  QSize newSize = QCommonStyle::sizeFromContents(type, option, size, widget);
+  switch (type) {
+    case CT_ToolButton:
+#ifndef QT_NO_TOOLBAR
+        qDebug() << "------------";
+        qDebug() << "0: sizeFromContents" << newSize << widget->objectName() << (widget->parent() ? widget->parent()->objectName() : "no parent");
+        //if (widget && qobject_cast<QToolBar *>(widget->parentWidget()))
+          {
+          newSize += QSize(4, 6);
+          qDebug() << "1: sizeFromContents" << newSize;
+          }
+#endif // QT_NO_TOOLBAR
+        break;
+    default:
+      newSize = this->Superclass::sizeFromContents(type, option, size, widget);
+    }
+  return newSize;
 }
 
 //------------------------------------------------------------------------------
