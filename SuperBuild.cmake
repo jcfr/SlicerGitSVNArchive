@@ -366,9 +366,6 @@ foreach(extension_dir ${Slicer_EXTENSION_SOURCE_DIRS})
       string(REGEX MATCH "External_(.+)\.cmake" _match ${_external_project_cmake_file})
       set(_additional_project_name "${CMAKE_MATCH_1}")
       list(APPEND _extension_depends ${_additional_project_name})
-
-      ExternalProject_Add_Dependencies(${_additional_project_name} DEPENDS ${Slicer_DEPENDENCIES})
-
     endforeach()
     message(STATUS "SuperBuild - ${extension_name} extension => ${_extension_depends}")
 
