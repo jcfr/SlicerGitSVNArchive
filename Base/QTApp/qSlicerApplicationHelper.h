@@ -52,7 +52,15 @@ public:
       QScopedPointer<QSplashScreen>& splashScreen,
       QScopedPointer<SlicerMainWindowType>& window);
 
+  static void postInitializeApplication(
+      qSlicerApplication& app,
+      QScopedPointer<QSplashScreen>& splashScreen);
+
   static void setupModuleFactoryManager(qSlicerModuleFactoryManager * moduleFactoryManager);
+
+  static void splashMessage(QScopedPointer<QSplashScreen>& splashScreen, const QString& message);
+
+  static void initializeModules(qSlicerApplication& app, QScopedPointer<QSplashScreen>& splashScreen);
 
   static void showMRMLEventLoggerWidget();
 

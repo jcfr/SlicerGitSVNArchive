@@ -60,16 +60,6 @@ void setEnableQtTesting()
 }
 #endif
 
-//----------------------------------------------------------------------------
-void splashMessage(QScopedPointer<QSplashScreen>& splashScreen, const QString& message)
-{
-  if (splashScreen.isNull())
-    {
-    return;
-    }
-  splashScreen->showMessage(message, Qt::AlignBottom | Qt::AlignHCenter);
-}
-
 } // end of anonymous namespace
 
 //----------------------------------------------------------------------------
@@ -101,45 +91,8 @@ void qSlicerApplicationHelper::postInitializeApplication(
     splashScreen->show();
     }
 
-  qSlicerModuleManager * moduleManager = app.moduleManager();
-  qSlicerModuleFactoryManager * moduleFactoryManager = moduleManager->factoryManager();
-  QStringList additionalModulePaths;
-  foreach(const QString& extensionOrModulePath, app.commandOptions()->additionalModulePaths())
-    {
-    QStringList modulePaths = moduleFactoryManager->modulePaths(extensionOrModulePath);
-    if (!modulePaths.empty())
-      {
-      additionalModulePaths << modulePaths;
-      }
-    else
-      {
-      additionalModulePaths << extensionOrModulePath;
-      }
-    }
-  moduleFactoryManager->addSearchPaths(additionalModulePaths);
-  qSlicerApplicationHelper::setupModuleFactoryManager(moduleFactoryManager);
+  Self::initializeModules(app, splashScreen);
 
-  // Set list of modules to ignore
-  foreach(const QString& moduleToIgnore, app.commandOptions()->modulesToIgnore())
-    {
-    moduleFactoryManager->addModuleToIgnore(moduleToIgnore);
-    }
-
-  // Register and instantiate modules
-  splashMessage(splashScreen, "Registering modules...");
-  moduleFactoryManager->registerModules();
-  if (app.commandOptions()->verboseModuleDiscovery())
-    {
-    qDebug() << "Number of registered modules:"
-             << moduleFactoryManager->registeredModuleNames().count();
-    }
-  splashMessage(splashScreen, "Instantiating modules...");
-  moduleFactoryManager->instantiateModules();
-  if (app.commandOptions()->verboseModuleDiscovery())
-    {
-    qDebug() << "Number of instantiated modules:"
-             << moduleFactoryManager->instantiatedModuleNames().count();
-    }
   // Create main window
   splashMessage(splashScreen, "Initializing user interface...");
   if (enableMainWindow)
@@ -158,18 +111,6 @@ void qSlicerApplicationHelper::postInitializeApplication(
     pythonConsole->activateWindow();
     pythonConsole->raise();
 #endif
-    }
-
-  // Load all available modules
-  foreach(const QString& name, moduleFactoryManager->instantiatedModuleNames())
-    {
-    Q_ASSERT(!name.isNull());
-    splashMessage(splashScreen, "Loading module \"" + name + "\"...");
-    moduleFactoryManager->loadModule(name);
-    }
-  if (app.commandOptions()->verboseModuleDiscovery())
-    {
-    qDebug() << "Number of loaded modules:" << moduleManager->modulesNames().count();
     }
 
   splashMessage(splashScreen, QString());
