@@ -259,6 +259,7 @@ signals:
 
 protected:
   QScopedPointer<qMRMLLayoutManagerPrivate> d_ptr;
+  qMRMLLayoutManager(qMRMLLayoutManagerPrivate* obj, QObject* parent);
   qMRMLLayoutManager(qMRMLLayoutManagerPrivate* obj, QWidget* viewport, QObject* parent);
 
   virtual void onViewportChanged();

@@ -901,6 +901,16 @@ qMRMLLayoutManager::qMRMLLayoutManager(QWidget* viewport, QObject* parentObject)
 
 // --------------------------------------------------------------------------
 qMRMLLayoutManager::qMRMLLayoutManager(qMRMLLayoutManagerPrivate* pimpl,
+                                       QObject* parentObject)
+  : Superclass(parentObject)
+  , d_ptr(pimpl)
+{
+  Q_D(qMRMLLayoutManager);
+  d->init();
+}
+
+// --------------------------------------------------------------------------
+qMRMLLayoutManager::qMRMLLayoutManager(qMRMLLayoutManagerPrivate* pimpl,
                                        QWidget* viewport, QObject* parentObject)
   : Superclass(viewport, parentObject)
   , d_ptr(pimpl)

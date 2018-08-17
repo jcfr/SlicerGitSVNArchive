@@ -70,8 +70,14 @@ qSlicerLayoutManagerPrivate::qSlicerLayoutManagerPrivate(qSlicerLayoutManager& o
 // qSlicerLayoutManager methods
 
 // -----------------------------------------------------------------------------
-qSlicerLayoutManager::qSlicerLayoutManager(QWidget* widget)
-  : qMRMLLayoutManager(new qSlicerLayoutManagerPrivate(*this), widget, widget)
+qSlicerLayoutManager::qSlicerLayoutManager(QObject* parent)
+  : qMRMLLayoutManager(new qSlicerLayoutManagerPrivate(*this), parent)
+{
+}
+
+// -----------------------------------------------------------------------------
+qSlicerLayoutManager::qSlicerLayoutManager(QWidget* viewport, QObject* parent)
+  : qMRMLLayoutManager(new qSlicerLayoutManagerPrivate(*this), viewport, parent)
 {
 }
 
