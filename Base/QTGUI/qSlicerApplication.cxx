@@ -95,9 +95,14 @@
 #include <vtkSlicerApplicationLogic.h>
 #include <vtkSystemInformation.h>
 
+// MRMLLogic includes
+#include <vtkMRMLSliceLogic.h>
+#include <vtkMRMLSliceLayerLogic.h>
+
 // MRML includes
 #include <vtkMRMLNode.h>
 #include <vtkMRMLScene.h>
+#include <vtkMRMLSliceCompositeNode.h>
 
 // VTK includes
 #include <vtkNew.h>
@@ -326,6 +331,26 @@ void qSlicerApplicationPrivate::init()
 
   // Player for the CLI Module || cannot be added for the moment ...
 #endif
+
+  //----------------------------------------------------------------------------
+  // Layout Manager
+//  //----------------------------------------------------------------------------
+//  q->setLayoutManager(new qSlicerLayoutManager(q));
+//  this->LayoutManager->setScriptedDisplayableManagerDirectory(q->slicerHome() + "/bin/Python/mrmlDisplayableManager");
+//#ifdef Slicer_USE_QtTesting
+//  // we store this layout manager to the Object state property for QtTesting
+//  q->testingUtility()->addObjectStateProperty(this->LayoutManager, QString("layout"));
+//#endif
+//  // Layout manager should also listen the MRML scene
+//  // Note: This creates the OpenGL context for each view, so things like
+//  // multisampling should probably be configured before this line is executed.
+//  this->LayoutManager->setMRMLScene(q->mrmlScene());
+//  QObject::connect(q,
+//                   SIGNAL(mrmlSceneChanged(vtkMRMLScene*)),
+//                   this->LayoutManager,
+//                   SLOT(setMRMLScene(vtkMRMLScene*)));
+//  QObject::connect(this->LayoutManager, SIGNAL(nodeAboutToBeEdited(vtkMRMLNode*)),
+//                   q, SLOT(openNodeModule(vtkMRMLNode*)));
 }
 /*
 #if !defined (QT_NO_LIBRARY) && !defined(QT_NO_SETTINGS)
@@ -366,6 +391,26 @@ qSlicerApplication::qSlicerApplication(int &_argc, char **_argv)
 //-----------------------------------------------------------------------------
 qSlicerApplication::~qSlicerApplication()
 {
+//  Q_D(qSlicerApplication);
+//  // When quitting the application, the modules are unloaded (~qSlicerCoreApplication)
+//  // in particular the Colors module which deletes vtkMRMLColorLogic and removes
+//  // all the color nodes from the scene. If a volume was loaded in the views,
+//  // it would then try to render it with no color node and generate warnings.
+//  // There is no need to render anything so remove the volumes from the views.
+//  // It is maybe not the best place to do that but I couldn't think of anywhere
+//  // else.
+//  vtkCollection* sliceLogics = d->LayoutManager ? d->LayoutManager->mrmlSliceLogics() : 0;
+//  for (int i = 0; i < sliceLogics->GetNumberOfItems(); ++i)
+//    {
+//    vtkMRMLSliceLogic* sliceLogic = vtkMRMLSliceLogic::SafeDownCast(sliceLogics->GetItemAsObject(i));
+//    if (!sliceLogic)
+//      {
+//      continue;
+//      }
+//    sliceLogic->GetSliceCompositeNode()->SetReferenceBackgroundVolumeID(0);
+//    sliceLogic->GetSliceCompositeNode()->SetReferenceForegroundVolumeID(0);
+//    sliceLogic->GetSliceCompositeNode()->SetReferenceLabelVolumeID(0);
+//    }
 #ifdef Slicer_USE_PYTHONQT
   // We have to delete PythonConsole if it is not deleted already
   // and not owned by a widget (it is owned and deleted by a widget if it is added

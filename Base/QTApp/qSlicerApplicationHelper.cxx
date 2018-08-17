@@ -162,13 +162,11 @@ void qSlicerApplicationHelper::postInitializeApplication(
 
   Self::initializeModules(app, splashScreen);
 
+  qDebug() << "app.commandOptions()->showPythonInteractor()" << app.commandOptions()->showPythonInteractor();
+
   // Create main window
   splashMessage(splashScreen, "Initializing user interface...");
-  if (enableMainWindow)
-    {
-    // no-op
-    }
-  else if (app.commandOptions()->showPythonInteractor()
+  if (app.commandOptions()->showPythonInteractor()
     && !app.commandOptions()->runPythonAndExit())
     {
     // there is no main window but we need to show Python interactor

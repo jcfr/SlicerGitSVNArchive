@@ -99,7 +99,7 @@ void qSlicerApplicationHelper::postInitializeApplication(
     {
     window.reset(new SlicerMainWindowType);
     }
-  else if (app.commandOptions()->showPythonInteractor()
+  if (app.commandOptions()->showPythonInteractor()
     && !app.commandOptions()->runPythonAndExit())
     {
     // there is no main window but we need to show Python interactor
