@@ -437,6 +437,10 @@ def openAddFiducialDialog():
   from slicer import app
   return app.coreIOManager().openAddFiducialDialog()
 
+def openAddMarkupsDialog():
+  from slicer import app
+  return app.coreIOManager().openAddMarkupsDialog()
+
 def openAddFiberBundleDialog():
   from slicer import app
   return app.coreIOManager().openAddFiberBundleDialog()
