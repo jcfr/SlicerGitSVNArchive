@@ -1,0 +1,99 @@
+
+#
+# Identifying the type of build
+#
+# Project using the SlicerExecutionModel can depend on Slicer or not, and can be
+# bundled into Slicer or not:
+#
+#  +--------------------+---------------------------------------------------------+---------------------------------------------+
+#  |                    | find_package(Slicer REQUIRED)                           |                                             |
+#  |                    | find_package(SlicerExecutionModel REQUIRED)             | find_package(SlicerExecutionModel REQUIRED) |
+#  +--------------------+---------------------------------------------------------+---------------------------------------------+
+#  | Packaged Extension | Case 1                                                  | Case 2 (invalid, not supported)             |
+#  +--------------------+---------------------------------------------------------+---------------------------------------------+
+#  | Bundled Extension  | Case 3                                                  | Case 4                                      |
+#  |                    |   a) directly with "add_subdirectory"                   |   a) directly with "add_subdirectory"       |
+#  |                    |   b) indirectly with "external project" (not supported) |   b) indirectly with "external project"     |
+#  +--------------------+---------------------------------------------------------+---------------------------------------------+
+#
+# For case 3 and 4, directly with "add_subdirectory" means that the project is
+# included into the Slicer source tree (e.g with -DSlicer_EXTENSION_SOURCE_DIRS=/path/of/extension),
+# in that case checking if "Slicer_SOURCE_DIR" is defined is valid.
+#
+# For case 4, indirectly with "external project" means that the project is
+# included using an "External_<projectname>.cmake" file. In that case the
+# external project is responsible to:
+#
+# * check if Slicer_SOURCE_DIR is defined or not and configure the project
+#   with Slicer_BUNDLED_EXTENSION option.
+#
+# * configure the project with the option EXTENSION_NAME
+#
+
+set(_built_in 0)
+if(DEFINED Slicer_SOURCE_DIR OR Slicer_BUNDLED_EXTENSION)
+  set(_built_in 1)
+endif()
+
+# Common settings
+set(Slicer_CLIMODULES_BIN_DIR "@Slicer_CLIMODULES_BIN_DIR@")
+set(Slicer_CLIMODULES_LIB_DIR "@Slicer_CLIMODULES_LIB_DIR@")
+set(Slicer_INSTALL_ROOT "@Slicer_INSTALL_ROOT@")
+
+if(_built_in)
+
+  #
+  # Setting for built-in/bundled modules
+  #
+
+  if(APPLE)
+    set(SlicerExecutionModel_DEFAULT_CLI_EXECUTABLE_LINK_FLAGS
+      "${SlicerExecutionModel_DEFAULT_CLI_EXECUTABLE_LINK_FLAGS} -Wl,-rpath,@loader_path/../../../")
+    set(SlicerExecutionModel_DEFAULT_CLI_LIBRARY_LINK_FLAGS
+      "${SlicerExecutionModel_DEFAULT_CLI_LIBRARY_LINK_FLAGS} -Wl,-rpath,@loader_path/../../../")
+  endif()
+
+  # for build tree
+  set(_slicer_binary_dir "@CMAKE_BINARY_DIR@/@Slicer_BINARY_INNER_SUBDIR@")
+  set(SlicerExecutionModel_DEFAULT_CLI_RUNTIME_OUTPUT_DIRECTORY "${_slicer_binary_dir}/${Slicer_CLIMODULES_BIN_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_LIBRARY_OUTPUT_DIRECTORY "${_slicer_binary_dir}/${Slicer_CLIMODULES_LIB_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_ARCHIVE_OUTPUT_DIRECTORY "${_slicer_binary_dir}/${Slicer_CLIMODULES_LIB_DIR}")
+
+  # for install tree
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_CLIMODULES_BIN_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_LIBRARY_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_CLIMODULES_LIB_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_ARCHIVE_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_CLIMODULES_LIB_DIR}")
+
+else()
+
+  #
+  #  Setting for externally built modules
+  #
+
+  if(NOT DEFINED EXTENSION_NAME)
+    message(WARNING "To package this module in a Slicer extension, EXTENSION_NAME must be defined")
+  endif()
+
+  set(Slicer_EXTENSIONS_DIRNAME "@Slicer_EXTENSIONS_DIRNAME@")
+
+  if(APPLE)
+    set(SlicerExecutionModel_DEFAULT_CLI_EXECUTABLE_LINK_FLAGS
+      "${SlicerExecutionModel_DEFAULT_CLI_EXECUTABLE_LINK_FLAGS} -Wl,-rpath,@loader_path/../../../../../")
+    set(SlicerExecutionModel_DEFAULT_CLI_LIBRARY_LINK_FLAGS
+      "${SlicerExecutionModel_DEFAULT_CLI_LIBRARY_LINK_FLAGS} -Wl,-rpath,@loader_path/../../../../../")
+  endif()
+
+  # for build tree
+  set(SlicerExecutionModel_DEFAULT_CLI_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_CLIMODULES_BIN_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_CLIMODULES_LIB_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${Slicer_CLIMODULES_LIB_DIR}")
+
+  # for install tree
+  set(Slicer_BUNDLE_EXTENSIONS_LOCATION "")
+  if(APPLE)
+    set(Slicer_BUNDLE_EXTENSIONS_LOCATION "${Slicer_EXTENSIONS_DIRNAME}/${EXTENSION_NAME}/")
+  endif()
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_CLIMODULES_BIN_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_LIBRARY_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_CLIMODULES_LIB_DIR}")
+  set(SlicerExecutionModel_DEFAULT_CLI_INSTALL_ARCHIVE_DESTINATION "${Slicer_INSTALL_ROOT}${Slicer_BUNDLE_EXTENSIONS_LOCATION}${Slicer_CLIMODULES_LIB_DIR}")
+endif()

@@ -325,6 +325,17 @@ Slicer_Remote_Add(LandmarkRegistration
   )
 list_conditional_append(Slicer_BUILD_LandmarkRegistration Slicer_REMOTE_DEPENDENCIES LandmarkRegistration)
 
+#------------------------------------------------------------------------------
+# SlicerExecutionModel extra config file
+#------------------------------------------------------------------------------
+
+# Extra config file
+set(SlicerExecutionModel_EXTRA_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/SlicerExecutionModelExtraConfig.cmake")
+configure_file(
+  ${Slicer_SOURCE_DIR}/CMake/SlicerExecutionModelExtraConfig.cmake.in
+  ${SlicerExecutionModel_EXTRA_CONFIG_FILE}
+  @ONLY
+  )
 
 #------------------------------------------------------------------------------
 # Superbuild-type bundled extensions
