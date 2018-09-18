@@ -167,26 +167,7 @@ else()
       endforeach()
     endif()
   endforeach()
-
-  #------------------------------------------------------------------------------
-  # Configure "fix-up" script
-  #------------------------------------------------------------------------------
-  set(fixup_path @rpath)
-  set(slicer_cpack_bundle_fixup_directory ${Slicer_BINARY_DIR}/CMake/SlicerCPackBundleFixup)
-  configure_file(
-    "${Slicer_SOURCE_DIR}/CMake/SlicerCPackBundleFixup.cmake.in"
-    "${slicer_cpack_bundle_fixup_directory}/SlicerCPackBundleFixup.cmake"
-    @ONLY)
-  # HACK - For a given directory, "install(SCRIPT ...)" rule will be evaluated first,
-  #        let's make sure the following install rule is evaluated within its own directory.
-  #        Otherwise, the associated script will be executed before any other relevant install rules.
-  file(WRITE ${slicer_cpack_bundle_fixup_directory}/CMakeLists.txt
-    "install(SCRIPT \"${slicer_cpack_bundle_fixup_directory}/SlicerCPackBundleFixup.cmake\" COMPONENT Runtime)")
-  add_subdirectory(${slicer_cpack_bundle_fixup_directory} ${slicer_cpack_bundle_fixup_directory}-binary)
-
 endif()
-
-include(${Slicer_CMAKE_DIR}/SlicerBlockInstallExtensionPackages.cmake)
 
 # -------------------------------------------------------------------------
 # Update CPACK_INSTALL_CMAKE_PROJECTS
@@ -221,6 +202,35 @@ endif()
 
 # Installation of 'Runtime' should be last to ensure the 'SlicerCPackBundleFixup.cmake' is executed last.
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${Slicer_BINARY_DIR};Slicer;Runtime;/")
+
+
+if(APPLE)
+  #------------------------------------------------------------------------------
+  # Configure "fix-up" script
+  #------------------------------------------------------------------------------
+  set(fixup_path @rpath)
+  set(slicer_cpack_bundle_fixup_directory ${Slicer_BINARY_DIR}/CMake/SlicerCPackBundleFixup)
+  configure_file(
+    "${Slicer_SOURCE_DIR}/CMake/SlicerCPackBundleFixup.cmake.in"
+    "${slicer_cpack_bundle_fixup_directory}/SlicerCPackBundleFixup.cmake"
+    @ONLY)
+  # HACK - For a given directory, "install(SCRIPT ...)" rule will be evaluated first,
+  #        let's make sure the following install rule is evaluated within its own directory.
+  #        Otherwise, the associated script will be executed before any other relevant install rules.
+  file(WRITE ${slicer_cpack_bundle_fixup_directory}/CMakeLists.txt
+    "install(SCRIPT \"${slicer_cpack_bundle_fixup_directory}/SlicerCPackBundleFixup.cmake\" COMPONENT Runtime)")
+  add_subdirectory(${slicer_cpack_bundle_fixup_directory} ${slicer_cpack_bundle_fixup_directory}-binary)
+endif()
+
+# HACK - To ensure the install rules associated with "SlicerBlockInstallExtensionPackages" are
+#        evaluated after the "fixup" script, they are added in their own directory afterward.
+set(slicer_cpack_install_extension_packages_directory ${Slicer_BINARY_DIR}/CMake/SlicerCPackInstallExtensionPackages)
+file(MAKE_DIRECTORY ${slicer_cpack_install_extension_packages_directory})
+file(WRITE ${slicer_cpack_install_extension_packages_directory}/CMakeLists.txt "
+include(\"${Slicer_CMAKE_DIR}/SlicerBlockInstallExtensionPackages.cmake\")
+")
+add_subdirectory(${slicer_cpack_install_extension_packages_directory} ${slicer_cpack_install_extension_packages_directory}-binary)
+
 
 # -------------------------------------------------------------------------
 # Define helper macros and functions
