@@ -230,6 +230,8 @@ void qSlicerExtensionsRestoreWidgetPrivate
 
   bool checkOnStartup = !settings.value(this->checkOnStartupSettingsKey).toBool();
 
+  qDebug() << "checkOnStartup" << checkOnStartup;
+
   if (checkOnStartup)
     {
     const QStringList& candidateIds = extractInstallationCandidates(extensionHistoryInformation);
@@ -447,6 +449,8 @@ void qSlicerExtensionsRestoreWidget
 ::setExtensionsManagerModel(qSlicerExtensionsManagerModel* model)
 {
   Q_D(qSlicerExtensionsRestoreWidget);
+
+  qDebug() << "setExtensionsManagerModel";
 
   if (this->extensionsManagerModel() == model)
     {

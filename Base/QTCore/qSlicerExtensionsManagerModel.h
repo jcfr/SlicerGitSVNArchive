@@ -340,6 +340,8 @@ public slots:
 
   void updateModel();
 
+  void runTest();
+
 signals:
 
   void downloadStarted(QNetworkReply * reply);

@@ -928,6 +928,7 @@ QVariantMap qSlicerExtensionsManagerModelPrivate::getExtensionsInfoFromPreviousI
         parameters["slicer_revision"] = q->slicerRevision();
         parameters["os"] = q->slicerOs();
         parameters["arch"] = q->slicerArch();
+        qDebug() << "retrieveExtensionMetadata" << parameters;
         const ExtensionMetadataType& metaData = retrieveExtensionMetadata(parameters);
         extensionId = metaData.value("extension_id").toString();     //retrieve updated extension id for not installed extensions
         isCompatible = (this->isExtensionCompatible(metaData, this->SlicerRevision, this->SlicerOs, this->SlicerArch).length() == 0);
@@ -947,10 +948,28 @@ QVariantMap qSlicerExtensionsManagerModelPrivate::getExtensionsInfoFromPreviousI
 }
 
 // --------------------------------------------------------------------------
+void qSlicerExtensionsManagerModel::runTest()
+{
+  Q_D(qSlicerExtensionsManagerModel);
+  for(int i=0; i < 100; ++i)
+    {
+    qMidasAPI::ParametersType parameters;
+    parameters["productname"] = "iGyne";
+    parameters["slicer_revision"] = "27444";
+    parameters["os"] = "macosx";
+    parameters["arch"] = "amd64";
+    const ExtensionMetadataType& metaData = d->retrieveExtensionMetadata(parameters);
+    qDebug() << i;
+    }
+}
+
+// --------------------------------------------------------------------------
 void qSlicerExtensionsManagerModelPrivate::gatherExtensionsHistoryInformationOnStartup()
 {
   Q_Q(qSlicerExtensionsManagerModel);
-  emit q->extensionHistoryGatheredOnStartup(q->getExtensionHistoryInformation());
+  QVariantMap info = q->getExtensionHistoryInformation();
+  qDebug() << "EMIT extensionHistoryGatheredOnStartup" << info;
+  emit q->extensionHistoryGatheredOnStartup(info);
 }
 
 // --------------------------------------------------------------------------
