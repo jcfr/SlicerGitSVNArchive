@@ -150,6 +150,9 @@ set(KIT_TEST_GENERATE_MOC_SRCS
   qMRMLSliceControllerWidgetTest.cxx
   )
   set(_moc_options OPTIONS -DMRML_WIDGETS_HAVE_QT5)
+  if(MRML_WIDGETS_HAVE_WEBGINE_SUPPORT)
+    list(APPEND _moc_options -DMRML_WIDGETS_HAVE_WEBGINE_SUPPORT)
+  endif()
   QT5_WRAP_CPP(Tests_MOC_CXX ${Tests_MOC_SRCS} ${_moc_options})
   QT5_GENERATE_MOCS(${KIT_TEST_GENERATE_MOC_SRCS})
 
